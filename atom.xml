@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>blog</title>
+  
+  <subtitle>silenceboychen&#39;s blog</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://www.silenceboy.com/"/>
+  <updated>2021-10-22T09:25:13.767Z</updated>
+  <id>https://www.silenceboy.com/</id>
+  
+  <author>
+    <name>chenhao</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>mac电脑M1芯片如何安装低版本node环境</title>
+    <link href="https://www.silenceboy.com/2021/10/22/mac%E7%94%B5%E8%84%91M1%E8%8A%AF%E7%89%87%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85%E4%BD%8E%E7%89%88%E6%9C%ACnode%E7%8E%AF%E5%A2%83/"/>
+    <id>https://www.silenceboy.com/2021/10/22/mac电脑M1芯片如何安装低版本node环境/</id>
+    <published>2021-10-22T09:15:17.000Z</published>
+    <updated>2021-10-22T09:25:13.767Z</updated>
+    
+    <content type="html"><![CDATA[<p>在mac M1上安装v14 及以下的老版本 Node会出现闪退问题，究其原因还是因为低版本的 node 并不是基于 arm64 架构的，所以不适配 M1 芯片。在这里教大家两个方法，就能成功安装上低版本 Node。</p><h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>在终端中，输入：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arch -x86_64 zsh</span><br></pre></td></tr></table></figure><p>通过这个命令可以让 shell 运行在Rosetta2下。<br>之后你可以通过 <code>nvm install v14</code> 来安装低版本 Node。<br>在此之后，您可以不用在 Rosetta2 中就可以使用安装的可执行文件，也就是说，您可以将 Node v15与其他节点版本互换使用。</p><h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>方法二就是通过 Rosetta2 来启动终端，这样通过 Rosetta2 转译到 x86 架构中执行安装，也一样可以安装成功。</p><ol><li>在 finder 中，点击应用程序，并在实用工具中找到终端 (Terminal)</li><li>右键终端，点击获取信息</li><li>勾选 Open using Rosetta</li><li>重启终端，并执行 <code>nvm install v14</code> 命令</li></ol>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;在mac M1上安装v14 及以下的老版本 Node会出现闪退问题，究其原因还是因为低版本的 node 并不是基于 arm64 架构的，所以不适配 M1 芯片。在这里教大家两个方法，就能成功安装上低版本 Node。&lt;/p&gt;
+&lt;h3 id=&quot;方法一&quot;&gt;&lt;a href=&quot;#方法
+      
+    
+    </summary>
+    
+      <category term="nodejs" scheme="https://www.silenceboy.com/categories/nodejs/"/>
+    
+    
+      <category term="nodejs" scheme="https://www.silenceboy.com/tags/nodejs/"/>
+    
+      <category term="mac" scheme="https://www.silenceboy.com/tags/mac/"/>
+    
+      <category term="M1" scheme="https://www.silenceboy.com/tags/M1/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Arch linux i3wm运行企业微信和微信</title>
+    <link href="https://www.silenceboy.com/2021/05/26/Arch-linux-i3wm%E8%BF%90%E8%A1%8C%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E5%92%8C%E5%BE%AE%E4%BF%A1/"/>
+    <id>https://www.silenceboy.com/2021/05/26/Arch-linux-i3wm运行企业微信和微信/</id>
+    <published>2021-05-26T14:05:02.000Z</published>
+    <updated>2021-09-27T07:27:40.435Z</updated>
+    
+    <content type="html"><![CDATA[<p>当你运行在i3wm环境下时，运行通过deepin-wine安装的企业微信和微信时，打开软件时会出现闪退的现象，启动不了软件。或直接在命令行里执行命令也启动不了程序，会出现以下提示：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">X Error of failed request:  BadWindow (invalid Window parameter)</span><br><span class="line">  Major opcode of failed request:  20 (X_GetProperty)</span><br><span class="line">  Resource id in failed request:  0x0</span><br><span class="line">  Serial number of failed request:  10</span><br><span class="line">  Current serial number in output stream:  10</span><br></pre></td></tr></table></figure><p><strong>解决方案</strong></p><p>这个问题其实和 KDE 无关, 应该是 deepin 在打包 deepin-wine 的过程中有意或者无意加入了 GNOME 依赖。</p><p>执行 <code>/usr/lib/gnome-settings-daemon/gsd-xsettings</code> 即可.<br>或者后台运行：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup /usr/lib/gnome-settings-daemon/gsd-xsettings &gt; /dev/null 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure><p>如果 GNOME 的版本较低(比如Debian 9), 没有单独的 <code>gsd-xsettings</code> 可执行文件, 则执行 <code>gnome-settings-daemon</code>.</p><p>然后切换到对应目录 <code>cd /opt/deepinwine/apps/Deepin-WXWork</code> 或者 <code>/opt/deepinwine/apps/Deepin-WeChat</code><br>运行 <code>./run.sh</code>即可启动软件。</p><p>由于每次都执行上边的命令很繁琐，可以将其加入i3的启动项，每次开机制动设置即可。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;当你运行在i3wm环境下时，运行通过deepin-wine安装的企业微信和微信时，打开软件时会出现闪退的现象，启动不了软件。或直接在命令行里执行命令也启动不了程序，会出现以下提示：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr
+      
+    
+    </summary>
+    
+      <category term="linux" scheme="https://www.silenceboy.com/categories/linux/"/>
+    
+    
+      <category term="linux" scheme="https://www.silenceboy.com/tags/linux/"/>
+    
+      <category term="i3wm" scheme="https://www.silenceboy.com/tags/i3wm/"/>
+    
+      <category term="i3" scheme="https://www.silenceboy.com/tags/i3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL TEXT数据类型的最大长度</title>
+    <link href="https://www.silenceboy.com/2020/12/22/MySQL-TEXT%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%9C%80%E5%A4%A7%E9%95%BF%E5%BA%A6/"/>
+    <id>https://www.silenceboy.com/2020/12/22/MySQL-TEXT数据类型的最大长度/</id>
+    <published>2020-12-22T04:33:17.000Z</published>
+    <updated>2021-09-27T07:27:40.437Z</updated>
+    
+    <content type="html"><![CDATA[<table><thead><tr><th style="text-align:left">类型</th><th style="text-align:left">长度</th><th></th></tr></thead><tbody><tr><td style="text-align:left">TINYTEXT</td><td style="text-align:left">256 bytes</td><td></td></tr><tr><td style="text-align:left">TEXT</td><td style="text-align:left">65,535 bytes</td><td>~64kb</td></tr><tr><td style="text-align:left">MEDIUMTEXT</td><td style="text-align:left">16,777,215 bytes</td><td>~16MB</td></tr><tr><td style="text-align:left">LONGTEXT</td><td style="text-align:left">4,294,967,295 bytes</td><td>~4GB</td></tr></tbody></table>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&quot;text-align:left&quot;&gt;类型&lt;/th&gt;
+&lt;th style=&quot;text-align:left&quot;&gt;长度&lt;/th&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style
+      
+    
+    </summary>
+    
+      <category term="mysql" scheme="https://www.silenceboy.com/categories/mysql/"/>
+    
+    
+      <category term="mysql" scheme="https://www.silenceboy.com/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ubuntu18.04安装jdk1.8</title>
+    <link href="https://www.silenceboy.com/2020/11/28/ubuntu18-04%E5%AE%89%E8%A3%85jdk1-8/"/>
+    <id>https://www.silenceboy.com/2020/11/28/ubuntu18-04安装jdk1-8/</id>
+    <published>2020-11-28T06:30:31.000Z</published>
+    <updated>2021-09-27T07:27:40.445Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="下载jdk安装包"><a href="#下载jdk安装包" class="headerlink" title="下载jdk安装包"></a>下载jdk安装包</h3><pre><code>https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html</code></pre><h3 id="解压"><a href="#解压" class="headerlink" title="解压"></a>解压</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf jdk-8u171-linux-x64.tar.gz</span><br></pre></td></tr></table></figure><h3 id="移动到自己想放的位置"><a href="#移动到自己想放的位置" class="headerlink" title="移动到自己想放的位置"></a>移动到自己想放的位置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">##将文件从下载目录 挪到/usr/local下</span><br><span class="line">sudo mv jdk1.8.0_171  /usr/local/jdk1.8</span><br></pre></td></tr></table></figure><h3 id="设置环境变量"><a href="#设置环境变量" class="headerlink" title="设置环境变量"></a>设置环境变量</h3><ul><li><p>设置全局生效</p><p>  修改全局配置文件，作用与所有用户： <code>vim /etc/profile</code></p>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   export JAVA_HOME=/usr/local/jdk1.8</span><br><span class="line">export JRE_HOME=$&#123;JAVA_HOME&#125;/jre</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/lib</span><br><span class="line">export PATH=.:$&#123;JAVA_HOME&#125;/bin:$PATH</span><br></pre></td></tr></table></figure></li></ul><ul><li><p>设置当前用户生效</p><p>  修改当前用户配置文件，只作用于当前用户：<code>vim ~/.bashrc</code></p>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   export JAVA_HOME=/usr/local/jdk1.8</span><br><span class="line">export JRE_HOME=$&#123;JAVA_HOME&#125;/jre</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/lib</span><br><span class="line">export PATH=.:$&#123;JAVA_HOME&#125;/bin:$PATH</span><br></pre></td></tr></table></figure></li></ul><h3 id="使修改的配置立刻生效"><a href="#使修改的配置立刻生效" class="headerlink" title="使修改的配置立刻生效"></a>使修改的配置立刻生效</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">##对应方法一：</span><br><span class="line">source /etc/profile </span><br><span class="line">##对应方法二：</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure><h3 id="检查是否安装成功"><a href="#检查是否安装成功" class="headerlink" title="检查是否安装成功"></a>检查是否安装成功</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -version</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;下载jdk安装包&quot;&gt;&lt;a href=&quot;#下载jdk安装包&quot; class=&quot;headerlink&quot; title=&quot;下载jdk安装包&quot;&gt;&lt;/a&gt;下载jdk安装包&lt;/h3&gt;&lt;pre&gt;&lt;code&gt;https://www.oracle.com/java/technologi
+      
+    
+    </summary>
+    
+      <category term="linux" scheme="https://www.silenceboy.com/categories/linux/"/>
+    
+    
+      <category term="ubuntu" scheme="https://www.silenceboy.com/tags/ubuntu/"/>
+    
+      <category term="java" scheme="https://www.silenceboy.com/tags/java/"/>
+    
+      <category term="jdk" scheme="https://www.silenceboy.com/tags/jdk/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>alsamixer控制音量</title>
+    <link href="https://www.silenceboy.com/2020/11/28/alsamixer%E6%8E%A7%E5%88%B6%E9%9F%B3%E9%87%8F/"/>
+    <id>https://www.silenceboy.com/2020/11/28/alsamixer控制音量/</id>
+    <published>2020-11-28T05:51:40.000Z</published>
+    <updated>2021-09-27T07:27:40.438Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="解除各声道的静音"><a href="#解除各声道的静音" class="headerlink" title="解除各声道的静音"></a>解除各声道的静音</h2><p>目前版本的 ALSA 安装后，所有声道默认是静音的，必须手动解除。</p><p>使用 <code>alsamixer</code> 的 <code>ncurses</code> 界面，配置十分简单：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ alsamixer</span><br></pre></td></tr></table></figure><p>此外，还可以在命令行下使用 <code>amixer</code>：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ amixer sset Master unmute</span><br></pre></td></tr></table></figure><p>在<code>alsamixer</code> 中，下方标有 <code>MM</code> 的声道是静音的，而标有 <code>00</code> 的通道已经启用。</p><p>使用 <code>←</code> 和 <code>→</code> 方向键，选中 <code>Master</code> 和 <code>PCM</code> 声道。按下 <code>m</code> 键解除静音。使用 <code>↑</code> 方向键增加音量，直到增益值为<code>0</code>。该值显示在左上方<code>Item:</code> 字段后。过高的增益值会导致声音失真。</p><p>要启用麦克风，切换至 Capture 选项卡，按下 <code>F4</code>，按下 <code>空格</code> 启用其中一个声道即可。</p><p>按下 <code>Esc</code> 键退出 <code>alsamixer</code>。</p><h2 id="alsamixer-终端交互式设置音量"><a href="#alsamixer-终端交互式设置音量" class="headerlink" title="alsamixer 终端交互式设置音量"></a>alsamixer 终端交互式设置音量</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">F6 选择网卡</span><br><span class="line">F2 显示系统信息，可以看到系统中已有网卡信息</span><br><span class="line">Esc 后退</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">M 静音状态切换</span><br><span class="line">Q,W,E 增大 左,右,通道 的音量</span><br><span class="line">Z,X,C 减小 左,右,通道 的音量</span><br></pre></td></tr></table></figure><h2 id="amixer-命令行控制系统声音"><a href="#amixer-命令行控制系统声音" class="headerlink" title="amixer 命令行控制系统声音"></a>amixer 命令行控制系统声音</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/asound/cards  # 查看系统声卡</span><br></pre></td></tr></table></figure><p>输出如下：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0 [PCH            ]: HDA-Intel - HDA Intel PCH</span><br><span class="line">                      HDA Intel PCH at 0xe1340000 irq 130</span><br></pre></td></tr></table></figure><p>设置声音</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">amixer -c 1 -q set Master 2dB+ unmute</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-c 制定声卡id, 默认为0</span><br><span class="line">-q 安静模式，不输出结果</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;解除各声道的静音&quot;&gt;&lt;a href=&quot;#解除各声道的静音&quot; class=&quot;headerlink&quot; title=&quot;解除各声道的静音&quot;&gt;&lt;/a&gt;解除各声道的静音&lt;/h2&gt;&lt;p&gt;目前版本的 ALSA 安装后，所有声道默认是静音的，必须手动解除。&lt;/p&gt;
+&lt;p&gt;使用 &lt;c
+      
+    
+    </summary>
+    
+      <category term="linux" scheme="https://www.silenceboy.com/categories/linux/"/>
+    
+    
+      <category term="linux" scheme="https://www.silenceboy.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用npm安装依赖时报错：gyp: No Xcode or CLT version detected!</title>
+    <link href="https://www.silenceboy.com/2020/05/05/%E4%BD%BF%E7%94%A8npm%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E6%97%B6%E6%8A%A5%E9%94%99%EF%BC%9Agyp-No-Xcode-or-CLT-version-detected/"/>
+    <id>https://www.silenceboy.com/2020/05/05/使用npm安装依赖时报错：gyp-No-Xcode-or-CLT-version-detected/</id>
+    <published>2020-05-05T08:47:52.000Z</published>
+    <updated>2021-09-27T07:27:40.446Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近在macOS中使用npm安装模块，出现如下错误：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">npm WARN deprecated fsevents@1.2.12: fsevents 1 will break on node v14+. Upgrade to fsevents 2 with massive improvements.</span><br><span class="line"></span><br><span class="line">&gt; fsevents@1.2.12 install /Users/chenhao/outsourcing/egg-car/node_modules/fsevents</span><br><span class="line">&gt; node-gyp rebuild</span><br><span class="line"></span><br><span class="line">No receipt for &apos;com.apple.pkg.CLTools_Executables&apos; found at &apos;/&apos;.</span><br><span class="line"></span><br><span class="line">No receipt for &apos;com.apple.pkg.DeveloperToolsCLILeo&apos; found at &apos;/&apos;.</span><br><span class="line"></span><br><span class="line">No receipt for &apos;com.apple.pkg.DeveloperToolsCLI&apos; found at &apos;/&apos;.</span><br><span class="line"></span><br><span class="line">gyp: No Xcode or CLT version detected!</span><br><span class="line">gyp ERR! configure error</span><br><span class="line">gyp ERR! stack Error: `gyp` failed with exit code: 1</span><br><span class="line">gyp ERR! stack     at ChildProcess.onCpExit (/Users/chenhao/.nvm/versions/node/v10.16.0/lib/node_modules/npm/node_modules/node-gyp/lib/configure.js:351:16)</span><br><span class="line">gyp ERR! stack     at ChildProcess.emit (events.js:198:13)</span><br><span class="line">gyp ERR! stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:248:12)</span><br><span class="line">gyp ERR! System Darwin 19.4.0</span><br><span class="line">gyp ERR! command &quot;/Users/chenhao/.nvm/versions/node/v10.16.0/bin/node&quot; &quot;/Users/chenhao/.nvm/versions/node/v10.16.0/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js&quot; &quot;rebuild&quot;</span><br><span class="line">gyp ERR! cwd /Users/chenhao/outsourcing/egg-car/node_modules/fsevents</span><br><span class="line">gyp ERR! node -v v10.16.0</span><br><span class="line">gyp ERR! node-gyp -v v5.0.5</span><br><span class="line">gyp ERR! not ok</span><br></pre></td></tr></table></figure><p>网上查找解决方案，都是通过执行<code>xcode-select --install</code>命令修复，但是执行该命令时会出现如下提示：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xcode-select: error: command line tools are already installed, use &quot;Software Update&quot; to install updates</span><br></pre></td></tr></table></figure><p>最终的解决办法是先卸载之前安装的<code>xcode-select</code>，并重新安装：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo rm -rf $(xcode-select -print-path)</span><br><span class="line">$ xcode-select --install</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;最近在macOS中使用npm安装模块，出现如下错误：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span cl
+      
+    
+    </summary>
+    
+      <category term="npm" scheme="https://www.silenceboy.com/categories/npm/"/>
+    
+    
+      <category term="npm" scheme="https://www.silenceboy.com/tags/npm/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>zsh在scp时不能使用通配符的原因和解决方案</title>
+    <link href="https://www.silenceboy.com/2020/03/06/zsh%E5%9C%A8scp%E6%97%B6%E4%B8%8D%E8%83%BD%E4%BD%BF%E7%94%A8%E9%80%9A%E9%85%8D%E7%AC%A6%E7%9A%84%E5%8E%9F%E5%9B%A0%E5%92%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"/>
+    <id>https://www.silenceboy.com/2020/03/06/zsh在scp时不能使用通配符的原因和解决方案/</id>
+    <published>2020-03-06T07:14:33.000Z</published>
+    <updated>2021-09-27T07:27:40.446Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p><code>scp</code>是经常使用的一个本地与远程服务器相互拷贝数据的命令，<code>zsh</code>是我最喜欢的<code>shell</code>，但是在<code>zsh</code>下使用<code>scp</code>来拷贝远程服务器的文件时，却出现这样的错误。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ scp -r test-server:/etc/nginx/conf.d/* .</span><br><span class="line">zsh: no matches found: test-server:/etc/nginx/conf.d/*</span><br></pre></td></tr></table></figure><p>同样地命令，在<code>bash</code>下确实可以执行的，这个原因是什么呢？</p><p>由于<code>zsh</code>不会按照远程地址上的文件去扩展参数，当你使用<code>test-server:/etc/nginx/conf.d/*</code>，因为本地当前目录中，是不存在<code>test-server:/etc/nginx/conf.d/*</code>，所以匹配失败。默认情况下，<code>bash</code> 在匹配失败时就使用原来的内容，<code>zsh</code> 则报告一个<code>no matches</code>的错误。</p><h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><p>在<code>zsh</code>中执行<code>setopt nonomatch</code>，告诉它不要报告<code>no matches</code>的错误，而是当匹配失败时直接使用原来的内容。</p><p>实际上，不管是 <code>bash</code> 还是 <code>zsh</code>，不管设置了什么选项，只要把<code>test-server:/etc/nginx/conf.d/*</code>加上引号，如<code>&quot;test-server:/etc/nginx/conf.d/*&quot;</code>，就可解决问题。</p><p>当然根本的解决办法还是告诉<code>zsh</code>不要报告<code>no matches</code>错误。</p><p>执行下面的命令可以一劳永逸：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ echo &quot;setopt nonomatch&quot; &gt;&gt; ~/.zshrc</span><br><span class="line">或</span><br><span class="line">$ echo &quot;set -o nonomatch&quot; &gt;&gt; ~/.zshrc</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;headerlink&quot; title=&quot;问题&quot;&gt;&lt;/a&gt;问题&lt;/h2&gt;&lt;p&gt;&lt;code&gt;scp&lt;/code&gt;是经常使用的一个本地与远程服务器相互拷贝数据的命令，&lt;code&gt;zsh&lt;/code&gt;是我最喜欢的&lt;code&gt;
+      
+    
+    </summary>
+    
+      <category term="shell" scheme="https://www.silenceboy.com/categories/shell/"/>
+    
+    
+      <category term="scp" scheme="https://www.silenceboy.com/tags/scp/"/>
+    
+      <category term="zsh" scheme="https://www.silenceboy.com/tags/zsh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>git clone 出现ssh: connect to host github.com port 22: Connection timed out解决方案</title>
+    <link href="https://www.silenceboy.com/2020/03/04/git-clone-%E5%87%BA%E7%8E%B0ssh-connect-to-host-github-com-port-22-Connection-timed-out%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"/>
+    <id>https://www.silenceboy.com/2020/03/04/git-clone-出现ssh-connect-to-host-github-com-port-22-Connection-timed-out解决方案/</id>
+    <published>2020-03-04T05:07:40.000Z</published>
+    <updated>2021-09-27T07:27:40.440Z</updated>
+    
+    <content type="html"><![CDATA[<p>物理机服务器，安装<code>git</code>之后，想从<code>github</code>上<code>clone</code>自己的项目运行，<code>ssh key</code>已经配置过, 但在执行<code>git clone</code>命令时出现了如下报错：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure><h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>在系统<code>~/.ssh</code>目录下执行<code>touch config</code>命令新建<code>config</code>文件，并修改文件权限：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod 600 config</span><br></pre></td></tr></table></figure><p>然后在<code>config</code>文件中添加如下内容：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">User email@qq.com  // 替换成自己的github登录邮箱</span><br><span class="line">Hostname ssh.github.com</span><br><span class="line">PreferredAuthentications publickey</span><br><span class="line">IdentityFile ~/.ssh/id_rsa</span><br><span class="line">Port 443</span><br></pre></td></tr></table></figure><p>然后设置：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global user.name &quot;XXX&quot;</span><br><span class="line">git config --global user.email XXX@xx.com</span><br></pre></td></tr></table></figure><p>此时再去执行<code>git clone</code>命令，一切正常。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;物理机服务器，安装&lt;code&gt;git&lt;/code&gt;之后，想从&lt;code&gt;github&lt;/code&gt;上&lt;code&gt;clone&lt;/code&gt;自己的项目运行，&lt;code&gt;ssh key&lt;/code&gt;已经配置过, 但在执行&lt;code&gt;git clone&lt;/code&gt;命令时出现了如下
+      
+    
+    </summary>
+    
+      <category term="git" scheme="https://www.silenceboy.com/categories/git/"/>
+    
+    
+      <category term="git" scheme="https://www.silenceboy.com/tags/git/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>mysql5.7 ibtmp1文件过大</title>
+    <link href="https://www.silenceboy.com/2019/12/26/mysql5-7-ibtmp1%E6%96%87%E4%BB%B6%E8%BF%87%E5%A4%A7/"/>
+    <id>https://www.silenceboy.com/2019/12/26/mysql5-7-ibtmp1文件过大/</id>
+    <published>2019-12-26T08:29:14.000Z</published>
+    <updated>2021-09-27T07:27:40.442Z</updated>
+    
+    <content type="html"><![CDATA[<p>服务器上的磁盘被占满，通过一下命令查找服务器上的大文件：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo find / -type f -size +800M  -print0 | xargs -0 du -h | sort -nr</span><br></pre></td></tr></table></figure><p>经过排查后发现，<code>/var/lib/mysql</code>目录下面有一个<code>ibtmp1</code>的文件特别大，有64G 。</p><p>ibtmp1是个什么东西呢？查看官方文档后发现这是非压缩的innodb临时表的独立表空间。通过<code>innodb_temp_data_file_path</code>参数指定文件的路径，文件名和大小，默认配置为<code>ibtmp1:12M:autoextend</code>，也就是说在支持大文件的系统这个文件大小是可以无限增长的。</p><p><strong>解决办法：</strong></p><ul><li>修改my.cnf配置文件：</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">innodb_temp_data_file_path = ibtmp1:12M:autoextend:max:5G</span><br></pre></td></tr></table></figure><ul><li>设置innodb_fast_shutdown参数</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET GLOBAL innodb_fast_shutdown = 0;  #InnoDB does a slow shutdown, a full purge and a change buffer merge before shutting down</span><br></pre></td></tr></table></figure><ul><li>关闭mysql服务</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop mysqld.service</span><br></pre></td></tr></table></figure><ul><li><p>删除ibtmp1文件</p></li><li><p>启动mysql服务</p></li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start mysqld.service</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;服务器上的磁盘被占满，通过一下命令查找服务器上的大文件：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;
+      
+    
+    </summary>
+    
+      <category term="mysql" scheme="https://www.silenceboy.com/categories/mysql/"/>
+    
+    
+      <category term="mysql" scheme="https://www.silenceboy.com/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>pm2日志拆分</title>
+    <link href="https://www.silenceboy.com/2019/12/20/pm2%E6%97%A5%E5%BF%97%E6%8B%86%E5%88%86/"/>
+    <id>https://www.silenceboy.com/2019/12/20/pm2日志拆分/</id>
+    <published>2019-12-20T03:41:48.000Z</published>
+    <updated>2021-09-27T07:27:40.444Z</updated>
+    
+    <content type="html"><![CDATA[<p>pm2默认会将日志文件写入家目录下的 <code>.pm2/logs</code> 目录中，但是pm2的日志文件不能自动分割，这会导致一个文件不断变大，不但影响性能，查看这些日志也会带来麻烦。</p><h3 id="pm2的日志切割模块pm2-logrotate"><a href="#pm2的日志切割模块pm2-logrotate" class="headerlink" title="pm2的日志切割模块pm2-logrotate"></a>pm2的日志切割模块pm2-logrotate</h3><ul><li>安装<code>pm2-logrotate</code>：</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pm2 install pm2-logrotate</span><br></pre></td></tr></table></figure><ul><li>设置切割规则</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">1. 设置文件大小为100M，大于等于开始切割</span><br><span class="line">pm2 set pm2-logrotate:max_size 100M</span><br><span class="line"></span><br><span class="line">2.设置文件切割的监控间，监控间隔比较大，可能会使切割出的文件大小和max_size有出入</span><br><span class="line">pm2 set pm2-logrotate:workerInterval 1</span><br><span class="line"></span><br><span class="line">3. 设置文件最多多少个，超过则删除</span><br><span class="line">pm2 set pm2-logrotate:retain 10</span><br><span class="line"></span><br><span class="line">4. 设置文件是否压缩</span><br><span class="line">$ pm2 set pm2-logrotate:compress false</span><br><span class="line"></span><br><span class="line">5. 设置文件命名格式</span><br><span class="line">$ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD_HH-mm-ss</span><br></pre></td></tr></table></figure><ul><li>更新pm2</li></ul><p>执行一下命令使pm2配置生效</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pm2 update</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;pm2默认会将日志文件写入家目录下的 &lt;code&gt;.pm2/logs&lt;/code&gt; 目录中，但是pm2的日志文件不能自动分割，这会导致一个文件不断变大，不但影响性能，查看这些日志也会带来麻烦。&lt;/p&gt;
+&lt;h3 id=&quot;pm2的日志切割模块pm2-logrotate&quot;&gt;&lt;a 
+      
+    
+    </summary>
+    
+      <category term="nodejs" scheme="https://www.silenceboy.com/categories/nodejs/"/>
+    
+    
+      <category term="nodejs" scheme="https://www.silenceboy.com/tags/nodejs/"/>
+    
+      <category term="pm2" scheme="https://www.silenceboy.com/tags/pm2/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ssh使用ProxyCommand连接阿里云内网服务器</title>
+    <link href="https://www.silenceboy.com/2019/10/21/ssh%E4%BD%BF%E7%94%A8ProxyCommand%E8%BF%9E%E6%8E%A5%E9%98%BF%E9%87%8C%E4%BA%91%E5%86%85%E7%BD%91%E6%9C%8D%E5%8A%A1%E5%99%A8/"/>
+    <id>https://www.silenceboy.com/2019/10/21/ssh使用ProxyCommand连接阿里云内网服务器/</id>
+    <published>2019-10-21T05:44:57.000Z</published>
+    <updated>2021-09-27T07:27:40.445Z</updated>
+    
+    <content type="html"><![CDATA[<p>在没有发现proxyCommand命令的好处之前，本地连接想要访问内网服务器，需要先ssh连接开放外网ip并且与我们要访问的目标主机在同一个内网环境的esc服务器，然后将该服务器作为跳板机，在该服务器上ssh连接内网服务器。该操作非常麻烦。使用proxyCommand能够很方便的解决该问题。</p><h3 id="proxyCommand配置"><a href="#proxyCommand配置" class="headerlink" title="proxyCommand配置"></a>proxyCommand配置</h3><p>修改<code>~/.ssh/config</code>：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Host tiaoban</span><br><span class="line">Hostname 跳板机的ip</span><br><span class="line">Port 跳板机的端口(如果是非22的需要填写)</span><br><span class="line">User root(如果非root,换成跳板机的用户)</span><br><span class="line">Host target</span><br><span class="line">Hostname 目标机的IP</span><br><span class="line">Port 跳板机的端口(如果是非22的需要填写)</span><br><span class="line">User root(如果非root,换成跳板机的用户)</span><br><span class="line">ProxyCommand ssh -q -x -W %h:%p tiaoban</span><br></pre></td></tr></table></figure><p>这儿的<code>%h</code>表示要连接的目标机,也就是<code>Hostname</code>指定的ip或者主机名,<code>%p</code>表示要连接到目标机的端口.这儿可以直接写死固定值,但是使用<code>%h</code>和<code>%p</code>可以保证在<code>Hostname</code>和<code>Port</code>变化的情况下<code>ProxyCommand</code>这行不用跟着变化.</p><p>然后我们直接ssh target,可以看到直接就连接上了.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;在没有发现proxyCommand命令的好处之前，本地连接想要访问内网服务器，需要先ssh连接开放外网ip并且与我们要访问的目标主机在同一个内网环境的esc服务器，然后将该服务器作为跳板机，在该服务器上ssh连接内网服务器。该操作非常麻烦。使用proxyCommand能够很
+      
+    
+    </summary>
+    
+      <category term="ssh" scheme="https://www.silenceboy.com/categories/ssh/"/>
+    
+    
+      <category term="ssh" scheme="https://www.silenceboy.com/tags/ssh/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>linux 添加只读用户</title>
+    <link href="https://www.silenceboy.com/2019/10/16/linux-%E6%B7%BB%E5%8A%A0%E5%8F%AA%E8%AF%BB%E7%94%A8%E6%88%B7/"/>
+    <id>https://www.silenceboy.com/2019/10/16/linux-添加只读用户/</id>
+    <published>2019-10-16T08:31:43.000Z</published>
+    <updated>2021-09-27T07:27:40.442Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>这里未使用rbash新建用户，使用rbash新建只读用户不能使用cd等内置命令。</p></blockquote><ul><li>添加用户</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># useradd -m test</span><br></pre></td></tr></table></figure><ul><li>设置密码</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># passwd test</span><br></pre></td></tr></table></figure><ul><li>修改用户的<code>shell</code>配置文件</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># chown root. /home/test/.bash_profile</span><br><span class="line"># chmod 755 /home/test/.bash_profile</span><br></pre></td></tr></table></figure><ul><li>修改<code>/home/test/.bash_profile</code>配置文件</li></ul><blockquote><p>将<code>PATH</code>改为<code>$HOME/.bin</code></p></blockquote><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># .bash_profile</span><br><span class="line"></span><br><span class="line"># Get the aliases and functions</span><br><span class="line">if [ -f ~/.bashrc ]; then</span><br><span class="line">. ~/.bashrc</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line"># User specific environment and startup programs</span><br><span class="line"></span><br><span class="line"># PATH=$PATH:$HOME/.local/bin:$HOME/bin</span><br><span class="line">PATH=$HOME/.bin</span><br><span class="line">export PATH</span><br></pre></td></tr></table></figure><ul><li>创建用户<code>.bin</code>目录</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># mkdir /home/test/.bin</span><br></pre></td></tr></table></figure><ul><li>将允许执行的命令链接到<code>/home/test/.bin</code>目录</li></ul><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ln -s /usr/bin/wc /home/test/.bin/wc</span><br><span class="line">ln -s /usr/bin/tail /home/test/.bin/tail</span><br><span class="line">ln -s  /usr/bin/more /home/test/.bin/more</span><br><span class="line">ln -s  /usr/bin/cat /home/test/.bin/cat</span><br><span class="line">ln -s  /usr/bin/grep /home/test/.bin/grep</span><br><span class="line">ln -s  /usr/bin/find /home/test/.bin/find</span><br><span class="line">ln -s  /usr/bin/pwd /home/test/.bin/pwd</span><br><span class="line">ln -s  /usr/bin/ls /home/test/.bin/ls</span><br><span class="line">ln -s  /usr/bin/less /home/test/.bin/less</span><br></pre></td></tr></table></figure><p>之后使用创建的用户登录系统，用户只拥有只读权限，只能使用软连接的命令。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;blockquote&gt;
+&lt;p&gt;这里未使用rbash新建用户，使用rbash新建只读用户不能使用cd等内置命令。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;添加用户&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;
+      
+    
+    </summary>
+    
+      <category term="linux" scheme="https://www.silenceboy.com/categories/linux/"/>
+    
+    
+      <category term="linux" scheme="https://www.silenceboy.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Docker启用TLS进行安全配置</title>
+    <link href="https://www.silenceboy.com/2019/09/29/Docker%E5%90%AF%E7%94%A8TLS%E8%BF%9B%E8%A1%8C%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE/"/>
+    <id>https://www.silenceboy.com/2019/09/29/Docker启用TLS进行安全配置/</id>
+    <published>2019-09-29T01:56:59.000Z</published>
+    <updated>2021-09-27T07:27:40.435Z</updated>
+    
+    <content type="html"><![CDATA[<p>之前开启了docker的2375 Remote API，由于没有启用TLS，导致服务器被入侵，安装了挖矿程序。所以如果想开通docker远程访问，就必须做好安全验证。</p><blockquote><p><strong>文中出现的$HOST指的是主机ip， 实际执行时用主机ip替换即可。</strong></p></blockquote><h3 id="在Docker守护程序的主机上，生成CA私钥和公钥："><a href="#在Docker守护程序的主机上，生成CA私钥和公钥：" class="headerlink" title="在Docker守护程序的主机上，生成CA私钥和公钥："></a>在Docker守护程序的主机上，生成CA私钥和公钥：</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">//  生成 CA 私钥</span><br><span class="line">root@docker-manager:~# openssl genrsa -aes256 -out ca-key.pem 4096</span><br><span class="line">Generating RSA private key, 4096 bit long modulus (2 primes)</span><br><span class="line">.........................................................................++++</span><br><span class="line">.............................................++++</span><br><span class="line">e is 65537 (0x010001)</span><br><span class="line">// 需要输入两次自定义密码</span><br><span class="line">Enter pass phrase for ca-key.pem:</span><br><span class="line">Verifying - Enter pass phrase for ca-key.pem:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// 生成 CA 公钥</span><br><span class="line">root@docker-manager:~# openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem</span><br><span class="line">// 这里需要输入第一步设置的密码</span><br><span class="line">Enter pass phrase for ca-key.pem:</span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter &apos;.&apos;, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [AU]:CN</span><br><span class="line">State or Province Name (full name) [Some-State]:zhejiang</span><br><span class="line">Locality Name (eg, city) []:hangzhou</span><br><span class="line">Organization Name (eg, company) [Internet Widgits Pty Ltd]:Docker Inc</span><br><span class="line">Organizational Unit Name (eg, section) []:</span><br><span class="line">Common Name (e.g. server FQDN or YOUR name) []: $HOST</span><br><span class="line">Email Address []:</span><br></pre></td></tr></table></figure><h3 id="创建服务器密钥和证书签名请求-CSR"><a href="#创建服务器密钥和证书签名请求-CSR" class="headerlink" title="创建服务器密钥和证书签名请求(CSR)"></a>创建服务器密钥和证书签名请求(CSR)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# openssl genrsa -out server-key.pem 4096</span><br><span class="line">Generating RSA private key, 4096 bit long modulus (2 primes)</span><br><span class="line">......................................................................................................++++</span><br><span class="line">................++++</span><br><span class="line">e is 65537 (0x010001)</span><br><span class="line"></span><br><span class="line">root@docker-manager:~# openssl req -subj &quot;/CN=$HOST&quot; -sha256 -new -key server-key.pem -out server.csr</span><br></pre></td></tr></table></figure><h3 id="用CA签署公钥"><a href="#用CA签署公钥" class="headerlink" title="用CA签署公钥"></a>用CA签署公钥</h3><p>由于可以通过IP地址和DNS名称建立TLS连接，因此在创建证书时需要指定IP地址。例如，允许使用172.16.132.200和127.0.0.1进行连接：</p><p><strong>这里遇到一个坑，如果IP后不指定本机ip，远程无法连接，不知道是不是配置哪里有问题，目前我会在下面的命令中添加<code>IP:$HOST</code>去解决问题</strong></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# echo subjectAltName = DNS:$HOST,IP:172.16.132.200,IP:127.0.0.1 &gt;&gt; extfile.cnf</span><br></pre></td></tr></table></figure><p>将Docker守护程序密钥的扩展用法属性设置为仅用于服务器身份验证：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# echo extendedKeyUsage = serverAuth &gt;&gt; extfile.cnf</span><br></pre></td></tr></table></figure><h3 id="生成服务端签名证书"><a href="#生成服务端签名证书" class="headerlink" title="生成服务端签名证书"></a>生成服务端签名证书</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# openssl x509 -req -days 365 -sha256 -in server.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -extfile extfile.cnf</span><br><span class="line">Signature ok</span><br><span class="line">subject=CN = 172.16.132.200</span><br><span class="line">Getting CA Private Key</span><br><span class="line">// 输入最开始设置的密码</span><br><span class="line">Enter pass phrase for ca-key.pem:</span><br></pre></td></tr></table></figure><h3 id="创建客户端密钥和证书签名请求"><a href="#创建客户端密钥和证书签名请求" class="headerlink" title="创建客户端密钥和证书签名请求"></a>创建客户端密钥和证书签名请求</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# openssl genrsa -out key.pem 4096</span><br><span class="line">Generating RSA private key, 4096 bit long modulus (2 primes)</span><br><span class="line">..++++</span><br><span class="line">...............................................................................................................................................................................................................++++</span><br><span class="line">e is 65537 (0x010001)</span><br><span class="line"></span><br><span class="line">root@docker-manager:~# openssl req -subj &apos;/CN=client&apos; -new -key key.pem -out client.csr</span><br></pre></td></tr></table></figure><p>为了使密钥适合客户端身份验证，请创建一个新的扩展配置文件：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~#  echo extendedKeyUsage = clientAuth &gt; extfile-client.cnf</span><br></pre></td></tr></table></figure><h3 id="生成客户端签名证书"><a href="#生成客户端签名证书" class="headerlink" title="生成客户端签名证书"></a>生成客户端签名证书</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -extfile extfile-client.cnf</span><br><span class="line">Signature ok</span><br><span class="line">subject=CN = client</span><br><span class="line">Getting CA Private Key</span><br><span class="line">// 输入最开始设置的密码</span><br><span class="line">Enter pass phrase for ca-key.pem:</span><br></pre></td></tr></table></figure><h3 id="删除和修改文件权限"><a href="#删除和修改文件权限" class="headerlink" title="删除和修改文件权限"></a>删除和修改文件权限</h3><p>生成后cert.pem，server-cert.pem您可以安全地删除两个证书签名请求和扩展配置文件：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# rm -v client.csr server.csr extfile.cnf extfile-client.cnf</span><br><span class="line">removed &apos;client.csr&apos;</span><br><span class="line">removed &apos;server.csr&apos;</span><br><span class="line">removed &apos;extfile.cnf&apos;</span><br><span class="line">removed &apos;extfile-client.cnf&apos;</span><br></pre></td></tr></table></figure><p>为了保护您的钥匙免遭意外损坏，请删除其写权限。要使它们仅供您阅读，请按以下方式更改文件模式：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# chmod -v 0400 ca-key.pem key.pem server-key.pem</span><br><span class="line">mode of &apos;ca-key.pem&apos; changed from 0600 (rw-------) to 0400 (r--------)</span><br><span class="line">mode of &apos;key.pem&apos; changed from 0600 (rw-------) to 0400 (r--------)</span><br><span class="line">mode of &apos;server-key.pem&apos; changed from 0600 (rw-------) to 0400 (r--------)</span><br></pre></td></tr></table></figure><p>证书可以在世界范围内读取，但您可能希望删除写访问权限以防止意外损坏：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# chmod -v 0444 ca.pem server-cert.pem cert.pem</span><br><span class="line">mode of &apos;ca.pem&apos; changed from 0644 (rw-r--r--) to 0444 (r--r--r--)</span><br><span class="line">mode of &apos;server-cert.pem&apos; changed from 0644 (rw-r--r--) to 0444 (r--r--r--)</span><br><span class="line">mode of &apos;cert.pem&apos; changed from 0644 (rw-r--r--) to 0444 (r--r--r--)</span><br></pre></td></tr></table></figure><h3 id="修改docker配置并重启docker"><a href="#修改docker配置并重启docker" class="headerlink" title="修改docker配置并重启docker"></a>修改docker配置并重启docker</h3><p>编辑docker配置文件（我的是ubuntu机器）：<br><code>vim /lib/systemd/system/docker.service</code></p><p>添加如下行：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ExecStart=/usr/bin/dockerd  --tlsverify --tlscacert=/root/docker/ca.pem --tlscert=/root/docker/server-cert.pem --tlskey=/root/docker/server-key.pem -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375</span><br></pre></td></tr></table></figure><p>重启docker服务：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure><p>查看端口号：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# netstat -plnt</span><br><span class="line">Active Internet connections (only servers)</span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    </span><br><span class="line">tcp6       0      0 :::80                   :::*                    LISTEN      858/nginx: master p </span><br><span class="line">tcp6       0      0 :::25                   :::*                    LISTEN      1662/master         </span><br><span class="line">tcp6       0      0 :::2375                 :::*                    LISTEN      25582/dockerd       </span><br><span class="line">tcp6       0      0 :::2377                 :::*                    LISTEN      25582/dockerd</span><br></pre></td></tr></table></figure><h3 id="客户端远程安全连接"><a href="#客户端远程安全连接" class="headerlink" title="客户端远程安全连接"></a>客户端远程安全连接</h3><p>将 <code>ca.pem cert.pem key.pem</code>三个文件通过 scp 下载到 客户端机器。</p><p>远程连接命令，路径根据实际情况填写：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker --tlsverify \</span><br><span class="line">  --tlscacert=/home/docker/ca.pem \ </span><br><span class="line">  --tlscert=/home/docker/cert.pem \</span><br><span class="line">  --tlskey=/home/docker/key.pem \</span><br><span class="line">  -H=172.16.132.200:2375 \</span><br><span class="line">  info</span><br></pre></td></tr></table></figure><p>把密钥放入 ~/.docker 文件夹中：</p><p>每次操作需要跟那么多参数，太麻烦了。我们可以把<code>ca.pem cert.pem key.pem</code>三个文件放入客户端<code>~/.docker</code>中，然后配置环境变量就可以简化命令了。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ export DOCKER_HOST=tcp://172.16.132.200:2375 DOCKER_TLS_VERIFY=1</span><br><span class="line"></span><br><span class="line">$ docker info</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;之前开启了docker的2375 Remote API，由于没有启用TLS，导致服务器被入侵，安装了挖矿程序。所以如果想开通docker远程访问，就必须做好安全验证。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;文中出现的$HOST指的是主机ip， 实际执行时用
+      
+    
+    </summary>
+    
+      <category term="docker" scheme="https://www.silenceboy.com/categories/docker/"/>
+    
+    
+      <category term="docker" scheme="https://www.silenceboy.com/tags/docker/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>docker安装jira并破解</title>
+    <link href="https://www.silenceboy.com/2019/09/03/docker%E5%AE%89%E8%A3%85jira%E5%B9%B6%E7%A0%B4%E8%A7%A3/"/>
+    <id>https://www.silenceboy.com/2019/09/03/docker安装jira并破解/</id>
+    <published>2019-09-03T12:15:22.000Z</published>
+    <updated>2021-09-27T07:27:40.438Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="下载镜像"><a href="#下载镜像" class="headerlink" title="下载镜像"></a>下载镜像</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull cptactionhank/atlassian-jira</span><br></pre></td></tr></table></figure><h3 id="运行容器"><a href="#运行容器" class="headerlink" title="运行容器"></a>运行容器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker volume create jira_home</span><br><span class="line">$ docker run -d -p 8080:8080 --name jira --restart always -v jira_home:/var/atlassian/jira cptactionhank/atlassian-jira:latest</span><br></pre></td></tr></table></figure><h3 id="下载破解文件"><a href="#下载破解文件" class="headerlink" title="下载破解文件"></a>下载破解文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ wget https://github.com/silenceboychen/some-software/raw/master/Jira/mysql-connector-java-5.1.25-bin.jar</span><br><span class="line">$ wget https://github.com/silenceboychen/some-software/raw/master/Jira/atlassian-universal-plugin-manager-plugin-2.22.4.jar</span><br><span class="line">$ wget https://github.com/silenceboychen/some-software/raw/master/Jira/atlassian-extras-3.2.jar</span><br></pre></td></tr></table></figure><h3 id="添加mysql驱动程序"><a href="#添加mysql驱动程序" class="headerlink" title="添加mysql驱动程序"></a>添加mysql驱动程序</h3><p><a href="https://confluence.atlassian.com/adminjiraserver/connecting-jira-applications-to-mysql-5-7-966063305.html" target="_blank" rel="noopener">mysql配置</a></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker cp mysql-connector-java-5.1.25-bin.jar jira:/opt/atlassian/jira/atlassian-jira/WEB-INF/lib/</span><br><span class="line">$ docker restart jira</span><br></pre></td></tr></table></figure><h3 id="nginx配置"><a href="#nginx配置" class="headerlink" title="nginx配置"></a>nginx配置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">upstream jira&#123;</span><br><span class="line">    server 127.0.0.1:8080;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># http配置</span><br><span class="line">#server &#123;</span><br><span class="line">#    listen 80;</span><br><span class="line">#    server_name  jira.domain.com;</span><br><span class="line">#    access_log /var/log/nginx/jira.domain.com-access.log;</span><br><span class="line">#    error_log /var/log/nginx/jira.domain.com-error.log;</span><br><span class="line">#    location / &#123;</span><br><span class="line">#        proxy_pass_header Server;</span><br><span class="line">#        proxy_set_header Host $http_host;</span><br><span class="line">#        proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">#        proxy_set_header X-Scheme $scheme;</span><br><span class="line">#        proxy_pass http://jira;</span><br><span class="line">#    &#125;</span><br><span class="line">#&#125;</span><br><span class="line"></span><br><span class="line"># https配置</span><br><span class="line">server &#123;</span><br><span class="line">  #侦听443端口，这个是ssl访问端口</span><br><span class="line">  listen    443;</span><br><span class="line">  #定义使用 访问域名</span><br><span class="line">  server_name  jira.iblackvip.com;</span><br><span class="line"></span><br><span class="line">  access_log /var/log/nginx/jira.domain.com.access.log;</span><br><span class="line">  error_log /var/log/nginx/jira.domain.com.error.log;</span><br><span class="line"></span><br><span class="line">  ssl on;</span><br><span class="line">  ssl_certificate /etc/nginx/cert/jira.domain.com.pem;</span><br><span class="line">  ssl_certificate_key /etc/nginx/cert/jira.domain.com.key;</span><br><span class="line">  ssl_session_timeout 5m;</span><br><span class="line">  ssl_protocols TLSv1 TLSv1.1 TLSv1.2; #按照这个协议配置</span><br><span class="line">  ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;#按照这个套件配置</span><br><span class="line">  ssl_prefer_server_ciphers on;</span><br><span class="line">  location / &#123;</span><br><span class="line">    proxy_pass_header Server;</span><br><span class="line">    proxy_set_header Host $http_host;</span><br><span class="line">    proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">    proxy_set_header X-Scheme $scheme;</span><br><span class="line">    proxy_pass http://jira;</span><br><span class="line">  &#125;</span><br><span class="line">  gzip on;</span><br><span class="line">  gzip_min_length 1k;</span><br><span class="line">  gzip_buffers 4 16k;</span><br><span class="line">  gzip_comp_level 5;</span><br><span class="line">  gzip_types text/plain application/x-javascript text/css application/xml text/javascript application/x-httpd-php;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">  # 80端口是http正常访问的接口</span><br><span class="line">  listen 80;</span><br><span class="line">  server_name jira.domain.com;</span><br><span class="line">  # 在这里，我做了https全加密处理，在访问http的时候自动跳转到https</span><br><span class="line">  rewrite ^(.*) https://$host$1 permanent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h3 id="Web设置"><a href="#Web设置" class="headerlink" title="Web设置"></a>Web设置</h3><ul><li><p>浏览器访问JiraWeb，语言可以设为中文，选择「我将设置它自己」——「下一步」</p></li><li><p>数据库设置，数据库类型选择「MySQL」，接着填入你的MySQL连接信息（需要你在你的MySQL数据库中创建数据库，数据库的字符类型必须是utf8），测试可以连接之后点击「下一步」</p></li><li><p>设置应用程序的属性——「下一步」</p></li><li><p>申请许可证关键字，点击「生成Jira试用许可证」</p></li><li><p>需要注册账号，注册完之后重新回到这个页面，选择相关信息，点击「Generate License」</p></li><li><p>点击「Yes」</p></li><li><p>页面就会带着你的许可证关键字回到Jira的设置页面，接着点击「下一步」</p></li><li><p>等待一会就进入设置管理员页面，填入一些信息即可，接着「下一步」</p></li><li><p>点击「完成」即完成设置</p></li></ul><h3 id="破解jira"><a href="#破解jira" class="headerlink" title="破解jira"></a>破解jira</h3><p>拷贝文件到容器内：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker cp atlassian-extras-3.2.jar jira:/opt/atlassian/jira/atlassian-jira/WEB-INF/lib/</span><br><span class="line">$ docker cp atlassian-universal-plugin-manager-plugin-2.22.4.jar jira:/opt/atlassian/jira/atlassian-jira/WEB-INF/atlassian-bundled-plugins/</span><br></pre></td></tr></table></figure><p>重启容器，破解结束：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker restart jira</span><br></pre></td></tr></table></figure><p>查看jira页面设置-》应用程序，我们可以很明显的看到jira我们可以使用到2033年。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;下载镜像&quot;&gt;&lt;a href=&quot;#下载镜像&quot; class=&quot;headerlink&quot; title=&quot;下载镜像&quot;&gt;&lt;/a&gt;下载镜像&lt;/h3&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pr
+      
+    
+    </summary>
+    
+      <category term="docker" scheme="https://www.silenceboy.com/categories/docker/"/>
+    
+    
+      <category term="docker" scheme="https://www.silenceboy.com/tags/docker/"/>
+    
+      <category term="jira" scheme="https://www.silenceboy.com/tags/jira/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>linux系统中root用户被提示：Operation not permitted</title>
+    <link href="https://www.silenceboy.com/2019/08/27/linux%E7%B3%BB%E7%BB%9F%E4%B8%ADroot%E7%94%A8%E6%88%B7%E8%A2%AB%E6%8F%90%E7%A4%BA%EF%BC%9AOperation-not-permitted/"/>
+    <id>https://www.silenceboy.com/2019/08/27/linux系统中root用户被提示：Operation-not-permitted/</id>
+    <published>2019-08-27T08:01:26.000Z</published>
+    <updated>2021-09-27T07:27:40.442Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>在修改文件权限时遇到如下报错：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~/.ssh# chmod 600 authorized_keys </span><br><span class="line">chmod: changing permissions of &apos;authorized_keys&apos;: Operation not permitted</span><br></pre></td></tr></table></figure><h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><p>这里涉及到<code>chattr</code>和<code>lsattr</code>的知识：</p><p><code>chattr</code>是用来更改文件属性，<code>lsattr</code>可用来查看文件的属性，执行命令<code>lsattr authorized_keys</code>便可以看到当前文件的属性；</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~/.ssh# lsattr authorized_keys </span><br><span class="line">----ia--------e--- authorized_keys</span><br></pre></td></tr></table></figure><p>可以发现当前文件有个i属性，查阅命令帮助文档可以看到有i属性的文件是不能修改的，更不可被删除，即使是root用户也不可。</p><p>这里只需要去除i属性就可以修改文件权限。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~/.ssh# chattr -i authorized_keys </span><br><span class="line">root@docker-manager:~/.ssh# lsattr authorized_keys </span><br><span class="line">-----a--------e--- authorized_keys</span><br></pre></td></tr></table></figure><h3 id="chattr命令"><a href="#chattr命令" class="headerlink" title="chattr命令"></a>chattr命令</h3><p>Linux chattr命令用于改变文件属性。</p><p>这项指令可改变存放在ext2文件系统上的文件或目录属性，这些属性共有以下8种模式：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">a：让文件或目录仅供附加用途。</span><br><span class="line">b：不更新文件或目录的最后存取时间。</span><br><span class="line">c：将文件或目录压缩后存放。</span><br><span class="line">d：将文件或目录排除在倾倒操作之外。</span><br><span class="line">i：不得任意更动文件或目录。</span><br><span class="line">s：保密性删除文件或目录。</span><br><span class="line">S：即时更新文件或目录。</span><br><span class="line">u：预防意外删除。</span><br></pre></td></tr></table></figure><p><strong>参数</strong></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">-R 递归处理，将指定目录下的所有文件及子目录一并处理。</span><br><span class="line"></span><br><span class="line">-v&lt;版本编号&gt; 设置文件或目录版本。</span><br><span class="line"></span><br><span class="line">-V 显示指令执行过程。</span><br><span class="line"></span><br><span class="line">+&lt;属性&gt; 开启文件或目录的该项属性。</span><br><span class="line"></span><br><span class="line">-&lt;属性&gt; 关闭文件或目录的该项属性。</span><br><span class="line"></span><br><span class="line">=&lt;属性&gt; 指定文件或目录的该项属性。</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;headerlink&quot; title=&quot;问题&quot;&gt;&lt;/a&gt;问题&lt;/h3&gt;&lt;p&gt;在修改文件权限时遇到如下报错：&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td cla
+      
+    
+    </summary>
+    
+      <category term="linux" scheme="https://www.silenceboy.com/categories/linux/"/>
+    
+    
+      <category term="linux" scheme="https://www.silenceboy.com/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>部署Docker集群并使用Portainer管理</title>
+    <link href="https://www.silenceboy.com/2019/08/14/%E9%83%A8%E7%BD%B2Docker%E9%9B%86%E7%BE%A4%E5%B9%B6%E4%BD%BF%E7%94%A8Portainer%E7%AE%A1%E7%90%86/"/>
+    <id>https://www.silenceboy.com/2019/08/14/部署Docker集群并使用Portainer管理/</id>
+    <published>2019-08-14T04:34:06.000Z</published>
+    <updated>2021-09-27T07:27:40.449Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>在有多台Docker的情况下，进行集群管理就十分重要了，Portainer也支持集群管理，Portainer可以和Swarm一起来进行集群管理操作。</p></blockquote><h3 id="环境要求"><a href="#环境要求" class="headerlink" title="环境要求"></a>环境要求</h3><ul><li>需要提前安装docker环境，<a href="https://docs.docker.com/install/linux/docker-ce/ubuntu/" target="_blank" rel="noopener">docker安装教程</a>。</li><li>使用docker安装portainer， <a href="https://www.portainer.io/installation/" target="_blank" rel="noopener">安装教程</a></li></ul><h3 id="搭建Swarm集群环境"><a href="#搭建Swarm集群环境" class="headerlink" title="搭建Swarm集群环境"></a>搭建Swarm集群环境</h3><p><strong>基本环境</strong></p><p>用两台机器来搭建(都是ubuntu18.04系统)</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">172.16.132.200    docker-manager</span><br><span class="line">172.16.132.201    dcoker-worker01</span><br></pre></td></tr></table></figure><p><strong>修改两台机器的主机名并做hosts</strong></p><ul><li><p><code>172.16.132.200</code>机器</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># hostnamectl set-hostname docker-manager</span><br><span class="line"># echo &quot;docker-manager&quot; &gt; /etc/hostname</span><br><span class="line"># vim /etc/hosts</span><br><span class="line">172.16.132.200    docker-manager</span><br><span class="line">172.16.132.201    dcoker-worker01</span><br></pre></td></tr></table></figure></li><li><p><code>172.16.132.201</code>机器</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># hostnamectl set-hostname docker-worker01</span><br><span class="line"># echo &quot;docker-worker01&quot; &gt; /etc/hostname</span><br><span class="line"># vim /etc/hosts</span><br><span class="line">172.16.132.200    docker-manager</span><br><span class="line">172.16.132.201    dcoker-worker01</span><br></pre></td></tr></table></figure></li></ul><h3 id="开通对外2375端口（方便portainer管理）"><a href="#开通对外2375端口（方便portainer管理）" class="headerlink" title="开通对外2375端口（方便portainer管理）"></a>开通对外2375端口（方便portainer管理）</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 先做备份</span><br><span class="line"># cp  /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak </span><br><span class="line"># vim /lib/systemd/system/docker.service     </span><br><span class="line">    找到ExecStart行改成这样的：  ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375</span><br><span class="line"># systemctl daemon-reload</span><br><span class="line"># systemctl restart docker     重启docker服务，使用service docker restart也可以</span><br><span class="line"># netstat -plnt   查看端口号使用</span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    </span><br><span class="line">tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      20917/nginx: master </span><br><span class="line">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      742/sshd            </span><br><span class="line">tcp6       0      0 :::2375                 :::*                    LISTEN      5836/dockerd        </span><br><span class="line">tcp6       0      0 :::7946                 :::*                    LISTEN      5836/dockerd        </span><br><span class="line">tcp6       0      0 :::80                   :::*                    LISTEN      20917/nginx: master</span><br></pre></td></tr></table></figure><h3 id="Swarm集群创建"><a href="#Swarm集群创建" class="headerlink" title="Swarm集群创建"></a>Swarm集群创建</h3><p><strong>初始化Swarm</strong></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># docker swarm init --advertise-addr 172.16.132.200</span><br><span class="line">Swarm initialized: current node (7ggeai3dlqn0j8gkxjs46y250) is now a manager.</span><br><span class="line"></span><br><span class="line">To add a worker to this swarm, run the following command:</span><br><span class="line"></span><br><span class="line">    docker swarm join --token SWMTKN-1-0n04bao3bkte48prmcf1xfmlfrk9zh19b9u16ysb63yhvgjiyi-3w0rd58keboh52zul8xcjfrof 172.16.132.200:2377</span><br><span class="line"></span><br><span class="line">To add a manager to this swarm, run &apos;docker swarm join-token manager&apos; and follow the instructions.</span><br></pre></td></tr></table></figure><p>上面命令执行后，该机器自动加入到swarm集群。这个会创建一个集群token，获取全球唯一的 token，作为集群唯一标识。<br>后续将其他节点加入集群都会用到这个token值。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">--advertise-addr 指定与其他 node 通信的地址。</span><br><span class="line"></span><br><span class="line">docker swarm init 输出告诉我们：</span><br><span class="line"></span><br><span class="line">① swarm 创建成功，swarm-manager 成为 manager node。</span><br><span class="line"></span><br><span class="line">② 添加 worker node 需要执行的命令。</span><br><span class="line"></span><br><span class="line">③ 添加 manager node 需要执行的命令。</span><br></pre></td></tr></table></figure><p><strong>添加集群节点</strong></p><p>在<code>docker-worker01</code>机器上执行以下添加集群节点的操作命令:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># docker swarm join --token SWMTKN-1-0n04bao3bkte48prmcf1xfmlfrk9zh19b9u16ysb63yhvgjiyi-3w0rd58keboh52zul8xcjfrof 172.16.132.200:2377</span><br></pre></td></tr></table></figure><p>如后续要加入其他更多的节点,添加操作也是执行这个命令.</p><p><strong>查看集群节点</strong></p><p>在<code>docker-manager</code>机器上执行查看,因为此时它是<code>swarm</code>集群的<code>leader</code>节点:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@docker-manager:~# docker node ls</span><br><span class="line">ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION</span><br><span class="line">7ggeai3dlqn0j8gkxjs46y250 *   docker-manager      Ready               Active              Leader              18.09.7</span><br><span class="line">1v09483w8dczd36bmtruzm2ix     docker-node01       Ready               Active                                  19.03.1</span><br></pre></td></tr></table></figure><p><strong>最后查看下两个机器上的2375端口是否都已经开启了</strong></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@docker-manager ~]# lsof -i:2375</span><br><span class="line">COMMAND   PID USER   FD   TYPE  DEVICE SIZE/OFF NODE NAME</span><br><span class="line">dockerd 13785 root    5u  IPv6 4518841      0t0  TCP *:2375 (LISTEN)</span><br><span class="line"></span><br><span class="line">[root@docker-woeker01 ~]# lsof -i:2375</span><br><span class="line">COMMAND    PID USER   FD   TYPE  DEVICE SIZE/OFF NODE NAME</span><br><span class="line">dockerd-c 2966 root    5u  IPv6 3602947      0t0  TCP *:2375 (LISTEN)</span><br></pre></td></tr></table></figure><h3 id="部署Portainer"><a href="#部署Portainer" class="headerlink" title="部署Portainer"></a>部署Portainer</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ docker volume create portainer_data</span><br><span class="line">$ docker run -d -p 8000:8000 -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer</span><br><span class="line">$ docker ps</span><br><span class="line">CONTAINER ID        IMAGE                     COMMAND             CREATED             STATUS                  PORTS                                                               NAMES</span><br><span class="line">9b051147a4c2        portainer/portainer       &quot;/portainer&quot;        20 hours ago        Up 18 hours             0.0.0.0:9000-&gt;9000/tcp                                              portainer</span><br></pre></td></tr></table></figure><p>访问<a href="http://172.16.132.200:9000" target="_blank" rel="noopener">http://172.16.132.200:9000</a>,   同样首次登陆需要注册用户，给admin用户设置密码：<br><img src="/../images/portainer-login.png" alt></p><p>集群模式, 这样一定要选择Remote, 输入docker-worker01的ip，然后点击Connect。<br><img src="/../images/portainer-remote.png" alt></p><p>同样点击左边栏的”Endpoints” - “+add endpoint”, 添加集群节点:<br><img src="/../images/portainer-endpoints.png" alt></p><p>添加之后,点击左边栏的”Home”, 右边就可以看到节点信息了,可以进行切换操作.<br><img src="/../images/portainer-home.png" alt></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;blockquote&gt;
+&lt;p&gt;在有多台Docker的情况下，进行集群管理就十分重要了，Portainer也支持集群管理，Portainer可以和Swarm一起来进行集群管理操作。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;环境要求&quot;&gt;&lt;a href=&quot;#环境要求&quot; c
+      
+    
+    </summary>
+    
+      <category term="docker" scheme="https://www.silenceboy.com/categories/docker/"/>
+    
+    
+      <category term="docker" scheme="https://www.silenceboy.com/tags/docker/"/>
+    
+      <category term="portainer" scheme="https://www.silenceboy.com/tags/portainer/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ubuntu18.04安装mysql并允许远程访问</title>
+    <link href="https://www.silenceboy.com/2019/07/23/ubuntu18-04%E5%AE%89%E8%A3%85mysql%E5%B9%B6%E5%85%81%E8%AE%B8%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE/"/>
+    <id>https://www.silenceboy.com/2019/07/23/ubuntu18-04安装mysql并允许远程访问/</id>
+    <published>2019-07-23T10:29:37.000Z</published>
+    <updated>2021-09-27T07:27:40.445Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ apt-get install mysql-server mysql-client</span><br></pre></td></tr></table></figure><h3 id="字符集修改utf8"><a href="#字符集修改utf8" class="headerlink" title="字符集修改utf8"></a>字符集修改utf8</h3><p>进入mysql命令终端：（默认root密码为空）:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mysql -u root -p</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &apos;char%&apos;;</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| Variable_name            | Value                      |</span><br><span class="line">+--------------------------+----------------------------+</span><br><span class="line">| character_set_client     | utf8                       |</span><br><span class="line">| character_set_connection | utf8                       |</span><br><span class="line">| character_set_database   | latin1                     |</span><br><span class="line">| character_set_filesystem | binary                     |</span><br><span class="line">| character_set_results    | utf8                       |</span><br><span class="line">| character_set_server     | latin1                     |</span><br><span class="line">| character_set_system     | utf8                       |</span><br><span class="line">| character_sets_dir       | /usr/share/mysql/charsets/ |</span><br><span class="line">+--------------------------+----------------------------+</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &apos;collation%&apos;;</span><br><span class="line">+----------------------+-------------------+</span><br><span class="line">| Variable_name        | Value             |</span><br><span class="line">+----------------------+-------------------+</span><br><span class="line">| collation_connection | utf8_general_ci   |</span><br><span class="line">| collation_database   | latin1_swedish_ci |</span><br><span class="line">| collation_server     | latin1_swedish_ci |</span><br><span class="line">+----------------------+-------------------+</span><br></pre></td></tr></table></figure><p>修改字符集：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line"></span><br><span class="line">// 在文件末尾添加以下内容：</span><br><span class="line">collation-server = utf8_unicode_ci</span><br><span class="line">init-connect=&apos;SET NAMES utf8&apos;</span><br><span class="line">character-set-server = utf8</span><br></pre></td></tr></table></figure><p>重启后字符集修改为utf8： </p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ service mysql restart</span><br></pre></td></tr></table></figure><h3 id="修改端口号"><a href="#修改端口号" class="headerlink" title="修改端口号"></a>修改端口号</h3><p>修改mysql配置文件，然后重启即可生效：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line"></span><br><span class="line">// 修改以下内容：</span><br><span class="line">port = 6033</span><br></pre></td></tr></table></figure><h3 id="登录权限问题"><a href="#登录权限问题" class="headerlink" title="登录权限问题"></a>登录权限问题</h3><p>查看当前用户：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT User,Host FROM mysql.user;</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| User             | Host      |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| debian-sys-maint | localhost |</span><br><span class="line">| mysql.session    | localhost |</span><br><span class="line">| mysql.sys        | localhost |</span><br><span class="line">| root             | localhost |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure><p>删除root账号：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; DROP USER &apos;root&apos;@&apos;localhost&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT User,Host FROM mysql.user;</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| User             | Host      |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| debian-sys-maint | localhost |</span><br><span class="line">| mysql.session    | localhost |</span><br><span class="line">| mysql.sys        | localhost |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure><p>重新创建root：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CREATE USER &apos;root&apos;@&apos;%&apos; IDENTIFIED BY &apos;123456&apos;;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; SELECT User,Host FROM mysql.user;</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| User             | Host      |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| root             | %         |</span><br><span class="line">| debian-sys-maint | localhost |</span><br><span class="line">| mysql.session    | localhost |</span><br><span class="line">| mysql.sys        | localhost |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">4 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure><p>授权：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; GRANT ALL PRIVILEGES ON *.* TO &apos;root&apos;@&apos;%&apos; WITH GRANT OPTION;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; FLUSH PRIVILEGES;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure><p>退出mysql，修改配置文件：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line">注释这一行：bind-address:127.0.0.1</span><br></pre></td></tr></table></figure><p>重新启动mysql:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ service mysql restart</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;安装&quot;&gt;&lt;a href=&quot;#安装&quot; class=&quot;headerlink&quot; title=&quot;安装&quot;&gt;&lt;/a&gt;安装&lt;/h3&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span 
+      
+    
+    </summary>
+    
+      <category term="mysql" scheme="https://www.silenceboy.com/categories/mysql/"/>
+    
+    
+      <category term="mysql" scheme="https://www.silenceboy.com/tags/mysql/"/>
+    
+      <category term="ubuntu" scheme="https://www.silenceboy.com/tags/ubuntu/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>docker安装gitlab</title>
+    <link href="https://www.silenceboy.com/2019/07/15/docker%E5%AE%89%E8%A3%85gitlab/"/>
+    <id>https://www.silenceboy.com/2019/07/15/docker安装gitlab/</id>
+    <published>2019-07-15T02:49:01.000Z</published>
+    <updated>2021-09-27T07:27:40.438Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="docker安装gitlab"><a href="#docker安装gitlab" class="headerlink" title="docker安装gitlab"></a>docker安装gitlab</h2><p>GitLab 分为 社区版（Community Edition，缩写为 CE）和 企业版（Enterprise Edition，缩写为 EE）。社区版是免费的，而企业版包含一些收费服务，一般来说个人开发者用社区版就足够了。</p><h3 id="下载镜像"><a href="#下载镜像" class="headerlink" title="下载镜像"></a>下载镜像</h3><blockquote><p>首先需要先下载 GitLab CE 的镜像，使用下面的命令进行下载，因为文件较大，所以可能需要一点时间，耐心等待即可。</p></blockquote><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 不加 tag 则默认为最新版本 latest</span><br><span class="line">$ docker pull gitlab/gitlab-ce</span><br></pre></td></tr></table></figure><h3 id="启动运行"><a href="#启动运行" class="headerlink" title="启动运行"></a>启动运行</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ docker run --detach \</span><br><span class="line">  --hostname gitlab.example.com \</span><br><span class="line">  --publish 8443:443 --publish 8880:80 --publish 8222:22 \</span><br><span class="line">  --name gitlab \</span><br><span class="line">  --restart always \</span><br><span class="line">  --volume /srv/gitlab/config:/etc/gitlab \</span><br><span class="line">  --volume /srv/gitlab/logs:/var/log/gitlab \</span><br><span class="line">  --volume /srv/gitlab/data:/var/opt/gitlab \</span><br><span class="line">  gitlab/gitlab-ce:latest</span><br></pre></td></tr></table></figure><p><strong>说明:</strong></p><ul><li>–hostname gitlab.example.com: 设置主机名或域名</li><li>–publish 8443:443：将http：443映射到外部端口8443</li><li>–publish 8880:80：将web：80映射到外部端口8880</li><li>–publish 8222:22：将ssh：22映射到外部端口8222</li><li>–name gitlab: 运行容器名</li><li>–restart always: 自动重启</li><li>–volume /srv/gitlab/config:/etc/gitlab: 挂载目录</li><li>–volume /srv/gitlab/logs:/var/log/gitlab: 挂载目录</li><li>–volume /srv/gitlab/data:/var/opt/gitlab: 挂载目录</li></ul><p>运行成功之后，可以使用下面的命令查看容器运行状态：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps</span><br></pre></td></tr></table></figure><p>可以看到 GitLab 已经在运行了，有一个属性 STATUS 为 health: starting，说明 gitlab 的服务正在启动中，还没有启动完毕。等这个状态变成 healthy 时则说明已经部署完成，可以访问了。</p><h3 id="访问"><a href="#访问" class="headerlink" title="访问"></a>访问</h3><p>gitlab启动成功后，浏览器访问<a href="http://ip:8880" target="_blank" rel="noopener">http://ip:8880</a>, 即可访问。为了使用域名访问，需要配置nginx：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">upstream gitlab&#123;</span><br><span class="line">    server 127.0.0.1:8880;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name  gitlab.example.com;</span><br><span class="line">    access_log /var/log/nginx/gitlab.example.com-access.log;</span><br><span class="line">    error_log /var/log/nginx/gitlab.example.com-error.log;</span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass_header Server;</span><br><span class="line">        proxy_set_header Host $http_host;</span><br><span class="line">        proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">        proxy_set_header X-Scheme $scheme;</span><br><span class="line">        proxy_pass http://gitlab;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>nginx重启配置生效后，浏览器访问<a href="http://gitlab.example.com" target="_blank" rel="noopener">http://gitlab.example.com</a> 即可正常访问。</p><p>首次访问需要为root用户设置密码，设置完成后需要登录，默认用户名为：root， 密码为刚刚设置的密码。</p><h3 id="配置邮件服务器"><a href="#配置邮件服务器" class="headerlink" title="配置邮件服务器"></a>配置邮件服务器</h3><p>想要让 GitLab 给你发送邮件，还要配置一下邮件服务器，这里以QQ邮箱的 IMAP/SMTP服务 来配置。</p><p>打开邮箱-&gt;设置-&gt;账户，然后开启 IMAP/SMTP服务，然后根据文档获取 授权码 ，这步比较重要。</p><p>然后跳转至挂载目录 <code>/srv/gitlab/config/</code> 编辑<code>gitlab.rb</code> 文件，找到 Email Settings的注释位置，然后修改以下内容：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">### Email Settings</span><br><span class="line">gitlab_rails[&apos;smtp_enable&apos;] = true # 开启 SMTP 功能</span><br><span class="line">gitlab_rails[&apos;smtp_address&apos;] = &quot;smtp.qq.com&quot;</span><br><span class="line">gitlab_rails[&apos;smtp_port&apos;] = 465 # 端口不可以选择587，测试过会发送邮件失败</span><br><span class="line">gitlab_rails[&apos;smtp_user_name&apos;] = &quot;test@qq.com&quot; # 你的邮箱账号</span><br><span class="line">gitlab_rails[&apos;smtp_password&apos;] = &quot;1324dasd&quot; # 授权码，不是密码</span><br><span class="line">gitlab_rails[&apos;smtp_authentication&apos;] = &quot;login&quot;</span><br><span class="line">gitlab_rails[&apos;smtp_enable_starttls_auto&apos;] = true</span><br><span class="line">gitlab_rails[&apos;smtp_tls&apos;] = true</span><br><span class="line">gitlab_rails[&apos;gitlab_email_from&apos;] = &apos;test@qq.com&apos; # 发件人信息，必须跟‘smtp_user_name’保持一致，否则报错</span><br><span class="line">gitlab_rails[&apos;smtp_domain&apos;] = &quot;qq.com&quot; # 修改并不影响</span><br></pre></td></tr></table></figure><p>配置完成后保存，然后输入下面的命令使配置生效。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker exec gitlab gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure><p>使配置生效之后我们可以使用 gitlab 自带的工具进行一下测试。依次执行下面的命令：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 开启 gitlab 的 bash 工具</span><br><span class="line">$ docker exec -it gitlab bash</span><br><span class="line"></span><br><span class="line"># 开启 gitlab-rails 工具</span><br><span class="line">$ gitlab-rails console production</span><br><span class="line"></span><br><span class="line"># 发送邮件进行测试</span><br><span class="line">Notify.test_email(&apos;test_001@123.com&apos;, &apos;Message Subject&apos;, &apos;Message Body&apos;).deliver_now</span><br></pre></td></tr></table></figure><p>测试完成之后退出gitlab的bash工具，重启 gitlab 即可。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker restart gitlab</span><br></pre></td></tr></table></figure><h3 id="修改SSH"><a href="#修改SSH" class="headerlink" title="修改SSH"></a>修改SSH</h3><p>因为项目启动时gitlab内部的22端口号映射到宿主机的端口号是8222，所以需要配置gitlab的ssh端口号：</p><p>找到如下内容，将端口号修改为8222.</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gitlab_rails[&apos;gitlab_shell_ssh_port&apos;] = 8222</span><br></pre></td></tr></table></figure><p>配置完成后保存，然后输入下面的命令使配置生效。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker exec gitlab gitlab-ctl reconfigure</span><br><span class="line">$ docker restart gitlab</span><br></pre></td></tr></table></figure><h3 id="配置-Git-仓库访问路径"><a href="#配置-Git-仓库访问路径" class="headerlink" title="配置 Git 仓库访问路径"></a>配置 Git 仓库访问路径</h3><p>在之前第一次运行 gitlab 容器的时候，有一个参数 hostname 为 gitlab.example.com , 如果配置了域名可以忽略这一步，如果你没有配置相应域名的话，你的仓库的地址将会变为下面这样：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh : git@gitlab.example.com:test/test.git</span><br><span class="line">http：gitlab.example.com/test/test.git</span><br></pre></td></tr></table></figure><p>如果域名不存在的话，这个地址是无法进行 clone 的。</p><p>为了解决这个问题，我们可以设置成 IP 或 你配置了的域名来访问。</p><p>打开文件 <code>/srv/gitlab/config/gitlab.rb</code> 文件并找到 </p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># external_url &apos;GENERATED_EXTERNAL_URL&apos;</span><br></pre></td></tr></table></figure><p>这行，去掉注释，并按照下面的格式修改。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># ip 形式</span><br><span class="line">external_url &apos;http://192.168.1.44&apos;</span><br><span class="line"></span><br><span class="line"># 域名形式</span><br><span class="line">external_url &apos;http://JemGeek.com&apos;</span><br><span class="line"></span><br><span class="line"># 子域名</span><br><span class="line">external_url &apos;http://gitlab.JemGeek.com&apos;</span><br><span class="line"></span><br><span class="line"># 其他形式</span><br><span class="line">external_url &apos;http://JemGeek.com/gitlab&apos;</span><br></pre></td></tr></table></figure><p>以上形式都是可以的。修改完成后，输入命令:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker exec gitlab gitlab-ctl reconfigure</span><br></pre></td></tr></table></figure><p>使配置生效，然后重启 gitlab 即可。</p><h3 id="升级"><a href="#升级" class="headerlink" title="升级"></a>升级</h3><p>参照官方的说明， 将原来的容器停止， 然后删除：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ docker stop gitlab</span><br><span class="line">$ docker rm gitlab</span><br></pre></td></tr></table></figure><p>然后重新拉一个新版本的镜像下来，</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull gitlab/gitlab-ce</span><br></pre></td></tr></table></figure><p>使用原来的运行命令运行：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ docker run --detach \</span><br><span class="line">  --hostname gitlab.example.com \</span><br><span class="line">  --publish 8443:443 --publish 8880:80 --publish 8222:22 \</span><br><span class="line">  --name gitlab \</span><br><span class="line">  --restart always \</span><br><span class="line">  --volume /srv/gitlab/config:/etc/gitlab \</span><br><span class="line">  --volume /srv/gitlab/logs:/var/log/gitlab \</span><br><span class="line">  --volume /srv/gitlab/data:/var/opt/gitlab \</span><br><span class="line">  --privileged=true \</span><br><span class="line">  gitlab/gitlab-ce:latest</span><br></pre></td></tr></table></figure><p>GitLab 在初次运行的时候会自动升级， 为了预防万一， 还是建议先备份一下 <code>/srv/gitlab/</code> 这个目录。</p><p>大版本升级（例如从 8.7.x 升级到 8.8.x）用上面的操作有可能会出现错误， 如果出现错误可以尝试登录到容器内部, 依次执行下面的命令：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gitlab-ctl reconfigure</span><br><span class="line">$ gitlab-ctl restart</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;docker安装gitlab&quot;&gt;&lt;a href=&quot;#docker安装gitlab&quot; class=&quot;headerlink&quot; title=&quot;docker安装gitlab&quot;&gt;&lt;/a&gt;docker安装gitlab&lt;/h2&gt;&lt;p&gt;GitLab 分为 社区版（Communit
+      
+    
+    </summary>
+    
+      <category term="docker" scheme="https://www.silenceboy.com/categories/docker/"/>
+    
+    
+      <category term="docker" scheme="https://www.silenceboy.com/tags/docker/"/>
+    
+      <category term="gitlab" scheme="https://www.silenceboy.com/tags/gitlab/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>js打印带颜色的 console 信息</title>
+    <link href="https://www.silenceboy.com/2019/07/12/js%E6%89%93%E5%8D%B0%E5%B8%A6%E9%A2%9C%E8%89%B2%E7%9A%84-console-%E4%BF%A1%E6%81%AF/"/>
+    <id>https://www.silenceboy.com/2019/07/12/js打印带颜色的-console-信息/</id>
+    <published>2019-07-12T06:30:24.000Z</published>
+    <updated>2021-09-27T07:27:40.441Z</updated>
+    
+    <content type="html"><![CDATA[<p>打印红色的hello world:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">console.log(`\x1b[31mhello world\x1b[31m`)</span><br></pre></td></tr></table></figure><p>以下是可以使用的文本命令的参考：</p><p>前景色（文字颜色）：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">\x1b[30m = 黑色</span><br><span class="line">\x1b[31m = 红色</span><br><span class="line">\x1b[32m = 绿色</span><br><span class="line">\x1b[33m = 黄色</span><br><span class="line">\x1b[34m = 蓝色</span><br><span class="line">\x1b[35m = 洋红色</span><br><span class="line">\x1b[36m = 青色</span><br><span class="line">\x1b[37m = 白色</span><br></pre></td></tr></table></figure><p>背景色：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">\x1b[40m = 黑色</span><br><span class="line">\x1b[41m = 红色</span><br><span class="line">\x1b[42m = 绿色</span><br><span class="line">\x1b[43m = 黄色</span><br><span class="line">\x1b[44m = 蓝色</span><br><span class="line">\x1b[45m = 洋红色</span><br><span class="line">\x1b[46m = 青色</span><br><span class="line">\x1b[47m = 白色</span><br></pre></td></tr></table></figure><p>其他：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">\x1b[0m = 清除样式</span><br><span class="line">\x1b[1m = 加粗</span><br><span class="line">\x1b[2m = 半透明</span><br><span class="line">\x1b[4m = 下划线</span><br><span class="line">\x1b[5m = 闪动</span><br><span class="line">\x1b[7m = 取反：背景色变前景色 前景色变背景色</span><br><span class="line">\x1b[8m = 看不见 但位置还留着</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;打印红色的hello world:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td cl
+      
+    
+    </summary>
+    
+      <category term="javascript" scheme="https://www.silenceboy.com/categories/javascript/"/>
+    
+    
+      <category term="javascript" scheme="https://www.silenceboy.com/tags/javascript/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>eval()与new Function()</title>
+    <link href="https://www.silenceboy.com/2019/04/14/eval-%E4%B8%8Enew-Function/"/>
+    <id>https://www.silenceboy.com/2019/04/14/eval-与new-Function/</id>
+    <published>2019-04-14T12:55:54.000Z</published>
+    <updated>2021-09-27T07:27:40.439Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="eval"><a href="#eval" class="headerlink" title="eval"></a>eval</h3><p><code>eval</code>接受字符串参数，解析其中的js代码。如果编译失败，会抛出异常，否则执行其中的代码，计算返回值。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">eval(&apos;2+2&apos;);  // 4</span><br><span class="line">eval(&apos;console.log(&quot;ok&quot;)&apos;);  // ok</span><br></pre></td></tr></table></figure><p>在实际应用中，通常这样转换JSON。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var jsonStr = &apos;&#123; &quot;age&quot;: 20, &quot;name&quot;: &quot;jack&quot; &#125;&apos;;</span><br><span class="line">eval(&apos;(&apos; + jsonStr + &apos;)&apos;);</span><br></pre></td></tr></table></figure><p>为什么要加括号呢？</p><blockquote><p>因为js中{}通常是表示一个语句块，<code>eval</code>只会计算语句块内的值进行返回。加上括号就变成一个整体的表达式。</p></blockquote><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">console.log( eval(&apos;&#123;&#125;&apos;) );      // undefind</span><br><span class="line">console.log( eval(&apos;(&#123;&#125;)&apos;) );    // Object &#123;&#125;</span><br></pre></td></tr></table></figure><p>使用<code>eval</code>需要注意执行作用域</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">var s = 1;</span><br><span class="line">function a() &#123;</span><br><span class="line">    eval(&apos;var s=2&apos;);</span><br><span class="line">    console.log(s);</span><br><span class="line">&#125;</span><br><span class="line">a();                // 2</span><br><span class="line">console.log(s);     // 1</span><br></pre></td></tr></table></figure><p>在局部环境使用eval便会创建局部变量。可以显示指定<code>eval</code>调用者来改变上下文环境。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">var s = &apos;global&apos;;</span><br><span class="line">function a() &#123;</span><br><span class="line">    eval(&apos;var s = &quot;local&quot;&apos;);</span><br><span class="line">    console.log(s);                 // local</span><br><span class="line">    console.log(eval(&apos;s&apos;));         // local</span><br><span class="line">    console.log(window.eval(&apos;s&apos;));  // global</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h3 id="Function"><a href="#Function" class="headerlink" title="Function"></a>Function</h3><p>在之前我对于<code>Function</code>的了解只限于“定义方法的一种非主流方式”。却忽略了<code>Function</code>与<code>eval</code>相同的字符串参数特性。</p><p>语法：<code>var func = new Function(arg1, arg2, ..., functionBody);</code></p><p>实例：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var add = new Function(&apos;a&apos;, &apos;b&apos;, &apos;return a+b;&apos;);</span><br><span class="line">console.log( add(2, 3) );    // 5</span><br></pre></td></tr></table></figure><p>由于其形参使用字符串的方式表示，也可以使用1个字符串来描述多个形参。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var add = new Function(&apos;a, b&apos;, &apos;return a+b;&apos;);</span><br><span class="line">console.log( add(2, 3) );    // 5</span><br></pre></td></tr></table></figure><p>在转换JSON的实际应用中，只需要这么做。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var jsonStr = &apos;&#123; &quot;age&quot;: 20, &quot;name&quot;: &quot;jack&quot; &#125;&apos;,</span><br><span class="line">    json = (new Function(&apos;return &apos; + jsonStr))();</span><br></pre></td></tr></table></figure><p><code>eval</code> 与 <code>Function</code> 都有着动态编译js代码的作用，但是在实际的编程中并不推荐使用。如果可以，请用更好的方法替代。</p><p>在一些特殊的运用场合，也有一些合理运用的实践。比如模板解析等。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;eval&quot;&gt;&lt;a href=&quot;#eval&quot; class=&quot;headerlink&quot; title=&quot;eval&quot;&gt;&lt;/a&gt;eval&lt;/h3&gt;&lt;p&gt;&lt;code&gt;eval&lt;/code&gt;接受字符串参数，解析其中的js代码。如果编译失败，会抛出异常，否则执行其中的代码，计算返回
+      
+    
+    </summary>
+    
+      <category term="javascript" scheme="https://www.silenceboy.com/categories/javascript/"/>
+    
+    
+      <category term="javascript" scheme="https://www.silenceboy.com/tags/javascript/"/>
+    
+  </entry>
+  
+</feed>

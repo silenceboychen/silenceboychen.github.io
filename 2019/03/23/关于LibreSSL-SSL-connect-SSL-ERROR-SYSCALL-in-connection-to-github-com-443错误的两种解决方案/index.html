@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000">
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top">
+  
+  
+  <title>关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案 | silenceboychen</title>
+  <meta name="description" content="错误来源使用使用hexo部署博客是，遇到以下错误: 123456fatal: unable to access &amp;apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&amp;apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com">
+<meta name="keywords" content="git,hexo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案">
+<meta property="og:url" content="https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="错误来源使用使用hexo部署博客是，遇到以下错误: 123456fatal: unable to access &amp;apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&amp;apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-09-27T07:27:40.447Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案">
+<meta name="twitter:description" content="错误来源使用使用hexo部署博客是，遇到以下错误: 123456fatal: unable to access &amp;apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&amp;apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+</head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">陈天寒</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">Backend Developer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-books">
+          <a href="/books">
+            
+            <i class="icon icon-book-fill"></i>
+            
+            <span class="menu-title">书单</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://weibo.com/u/5124346546" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/">jdk</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/录音/">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则表达式/">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/语言识别/">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/base64/" style="font-size: 13.14px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.71px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.14px;">express.js</a> <a href="/tags/git/" style="font-size: 13.29px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.14px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.86px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.57px;">linux</a> <a href="/tags/mac/" style="font-size: 13px;">mac</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.57px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.14px;">npm</a> <a href="/tags/php/" style="font-size: 13.43px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.14px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.14px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/录音/" style="font-size: 13px;">录音</a> <a href="/tags/正则表达式/" style="font-size: 13px;">正则表达式</a> <a href="/tags/算法/" style="font-size: 13.29px;">算法</a> <a href="/tags/语言识别/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/nodejs/">nodejs</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/10/22/mac电脑M1芯片如何安装低版本node环境/" class="title">mac电脑M1芯片如何安装低版本node环境</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-10-22T09:15:17.000Z" itemprop="datePublished">2021-10-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/linux/">linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2021/05/26/Arch-linux-i3wm运行企业微信和微信/" class="title">Arch linux i3wm运行企业微信和微信</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2021-05-26T14:05:02.000Z" itemprop="datePublished">2021-05-26</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/mysql/">mysql</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/12/22/MySQL-TEXT数据类型的最大长度/" class="title">MySQL TEXT数据类型的最大长度</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-12-22T04:33:17.000Z" itemprop="datePublished">2020-12-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/linux/">linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/ubuntu18-04安装jdk1-8/" class="title">ubuntu18.04安装jdk1.8</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T06:30:31.000Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/linux/">linux</a>
+              </p>
+              <p class="item-title">
+                <a href="/2020/11/28/alsamixer控制音量/" class="title">alsamixer控制音量</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2020-11-28T05:51:40.000Z" itemprop="datePublished">2020-11-28</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+<aside class="sidebar sidebar-toc collapse" id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#错误来源"><span class="toc-number">1.</span> <span class="toc-text">错误来源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#两种解决方案："><span class="toc-number">2.</span> <span class="toc-text">两种解决方案：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#方案一"><span class="toc-number">2.1.</span> <span class="toc-text">方案一</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#方案二"><span class="toc-number">2.2.</span> <span class="toc-text">方案二</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/" class="article-date">
+	  <time datetime="2019-03-23T04:54:30.000Z" itemprop="datePublished">2019-03-23</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/git/">git</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/git/">git</a>, <a class="article-tag-link" href="/tags/hexo/">hexo</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 176(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h3 id="错误来源"><a href="#错误来源" class="headerlink" title="错误来源"></a>错误来源</h3><p>使用使用hexo部署博客是，遇到以下错误:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">fatal: unable to access &apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443</span><br><span class="line">FATAL Something&apos;s wrong. Maybe you can find the solution here: http://hexo.io/docs/troubleshooting.html</span><br><span class="line">Error: Spawn failed</span><br><span class="line">    at ChildProcess.&lt;anonymous&gt; (/Users/chenhao/new_start/nodejs/blog/node_modules/hexo-util/lib/spawn.js:52:19)</span><br><span class="line">    at ChildProcess.emit (events.js:182:13)</span><br><span class="line">    at Process.ChildProcess._handle.onexit (internal/child_process.js:239:12)</span><br></pre></td></tr></table></figure>
+<h3 id="两种解决方案："><a href="#两种解决方案：" class="headerlink" title="两种解决方案："></a>两种解决方案：</h3><h4 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h4><p>取消http代理：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git config --global --unset http.proxy</span><br><span class="line">$ git config --global --unset https.proxy</span><br></pre></td></tr></table></figure>
+<p>设置env <code>GIT_SSL_NO_VERIFY</code>为<code>true</code>然后再次部署：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ env GIT_SSL_NO_VERIFY=true hexo d</span><br></pre></td></tr></table></figure>
+<p>问题解决。</p>
+<h4 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h4><p>在hexo项目的根目录下的_config.yml文件中把仓库链接地址由https修改为ssh的地址。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/" title="关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案" target="_blank" rel="external">https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">陈天寒</span><small class="ml-1x">Backend Developer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2019/03/26/转-Node-js的模块-exports和module-exports/" title="[转]Node.js的模块-exports和module.exports"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2019/03/21/统计指定目录里的代码行数/" title="统计指定目录里的代码行数"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn collapsed" data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">
+        <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="https://weibo.com/u/5124346546" target="_blank" title="Weibo" data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+<script src="/js/plugin.min.js"></script>
+<script src="/js/application.js"></script>
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true
+  })
+  gitalk.render('comments')
+  </script>
+
+      
+
+
+
+
+
+
+
+</body>
+</html>
