@@ -46,7 +46,7 @@
 </head>
 
 
-<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
   <header class="header" itemscope itemtype="http://schema.org/WPHeader">
   <div class="slimContent">
     <div class="navbar-header">
@@ -94,7 +94,7 @@
       </button>
     </div>
     <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
-      <ul class="nav navbar-nav main-nav menu-highlight">
+      <ul class="nav navbar-nav main-nav ">
         
         
         <li class="menu-item menu-item-home">
@@ -334,7 +334,7 @@
   	<article class="content article article-archives article-type-list" itemscope="">
 	    <header class="article-header">
 	      <h1 itemprop="title">归档: 2019</h1>
-	      <p class="text-muted">共 1 篇文章</p>
+	      <p class="text-muted">共 64 篇文章</p>
 	    </header>
 	    <div class="article-body">
 	      
@@ -359,7 +359,7 @@
           <div class="collection">
     
     
-<a href="/2019/03/15/nodejs实现tail-f功能/" class="collection-item" target="_blank" itemprop="url">
+<a href="/2019/03/15/nodejs实现tail-f功能/" class="collection-item"   itemprop="url">
   <time datetime="2019-03-15T01:37:54.000Z" itemprop="datePublished">2019-03-15</time>
   <span>&nbsp;&nbsp;&nbsp;</span> nodejs实现tail -f功能
 </a>
@@ -376,14 +376,25 @@
     
     <nav class="bar bar-footer clearfix" data-stick-bottom>
         <div class="bar-inner">
-        <div class="pager pull-left">
+        <ul class="pager pull-left">
             
-            <a class="extend prev" rel="prev" href="/archives/2019/page/2/"><i class="icon icon-angle-left"></i> 上一页</a><a class="page-number" href="/archives/2019/">1</a><a class="page-number" href="/archives/2019/page/2/">2</a><span class="page-number current">3</span>
+            <li class="prev">
+                <a href="/archives/2019/page/2/">
+                    <i class="icon icon-angle-left"></i>
+                    上一页
+                </a>
+            </li>
             
-            <a class="next disabled" href="javascript:;">下一页 <i class="icon icon-angle-right"></i></a>
             
-        </div>
-        <div class="total-article bar-right">Page 3 of 3</div>
+            <li class="next disabled">
+                <a href="javascript:;">
+                    下一页
+                    <i class="icon icon-angle-right"></i>                    
+                </a>
+            </li>
+            
+        </ul>
+            <div class="total-article bar-right">Page 3 of 3</div>
         </div>
     </nav>
     

@@ -46,7 +46,7 @@
 </head>
 
 
-<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
   <header class="header" itemscope itemtype="http://schema.org/WPHeader">
   <div class="slimContent">
     <div class="navbar-header">
@@ -94,7 +94,7 @@
       </button>
     </div>
     <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
-      <ul class="nav navbar-nav main-nav menu-highlight">
+      <ul class="nav navbar-nav main-nav ">
         
         
         <li class="menu-item menu-item-home">
@@ -338,27 +338,21 @@
         <ul>
           <li><a href="/tags">All</a></li>
           
-          <li><a href="/tags/linux/">linux</a></li>
-          
-          <li><a href="/tags/i3wm/">i3wm</a></li>
-          
-          <li><a href="/tags/i3/">i3</a></li>
-          
           <li><a href="/tags/docker/">docker</a></li>
           
           <li><a href="/tags/javascript/">javascript</a></li>
+          
+          <li><a href="/tags/算法/">算法</a></li>
           
           <li><a href="/tags/chrome/">chrome</a></li>
           
           <li><a href="/tags/vim/">vim</a></li>
           
-          <li><a href="/tags/算法/">算法</a></li>
+          <li><a href="/tags/linux/">linux</a></li>
           
           <li><a href="/tags/shell/">shell</a></li>
           
           <li><a href="/tags/mysql/">mysql</a></li>
-          
-          <li><a href="/tags/jira/">jira</a></li>
           
           <li><a href="/tags/php/">php</a></li>
           
@@ -366,11 +360,13 @@
           
           <li><a href="/tags/base64/">base64</a></li>
           
+          <li><a href="/tags/gitlab/">gitlab</a></li>
+          
+          <li><a href="/tags/jira/">jira</a></li>
+          
           <li><a href="/tags/express-js/">express.js</a></li>
           
           <li><a href="/tags/middleware/">middleware</a></li>
-          
-          <li><a href="/tags/gitlab/">gitlab</a></li>
           
           <li><a href="/tags/html5/">html5</a></li>
           
@@ -382,21 +378,25 @@
           
           <li><a href="/tags/正则表达式/">正则表达式</a></li>
           
+          <li><a href="/tags/i3wm/">i3wm</a></li>
+          
+          <li><a href="/tags/i3/">i3</a></li>
+          
+          <li><a href="/tags/sql-server/">sql server</a></li>
+          
+          <li><a href="/tags/tailf/">tailf</a></li>
+          
           <li><a href="/tags/mac/">mac</a></li>
           
           <li><a href="/tags/M1/">M1</a></li>
           
-          <li><a href="/tags/sql-server/">sql server</a></li>
+          <li><a href="/tags/redis/">redis</a></li>
           
           <li><a href="/tags/excel/">excel</a></li>
           
-          <li><a href="/tags/tailf/">tailf</a></li>
-          
-          <li><a href="/tags/redis/">redis</a></li>
+          <li><a href="/tags/pm2/">pm2</a></li>
           
           <li><a href="/tags/ssh/">ssh</a></li>
-          
-          <li><a href="/tags/vi/">vi</a></li>
           
           <li><a href="/tags/ubuntu/">ubuntu</a></li>
           
@@ -404,27 +404,27 @@
           
           <li><a href="/tags/jdk/">jdk</a></li>
           
-          <li><a href="/tags/dockerfile/">dockerfile</a></li>
+          <li><a href="/tags/vi/">vi</a></li>
           
           <li><a href="/tags/scp/">scp</a></li>
           
           <li><a href="/tags/zsh/">zsh</a></li>
           
-          <li><a href="/tags/npm/">npm</a></li>
-          
-          <li><a href="/tags/pm2/">pm2</a></li>
-          
-          <li><a href="/tags/sms/">sms</a></li>
+          <li><a href="/tags/dockerfile/">dockerfile</a></li>
           
           <li><a href="/tags/shadowsock/">shadowsock</a></li>
           
-          <li><a href="/tags/gitlab-runner/">gitlab-runner</a></li>
+          <li><a href="/tags/npm/">npm</a></li>
+          
+          <li><a href="/tags/sms/">sms</a></li>
           
           <li><a href="/tags/hexo/">hexo</a></li>
           
-          <li><a href="/tags/buffer/">buffer</a></li>
+          <li><a href="/tags/gitlab-runner/">gitlab-runner</a></li>
           
           <li><a href="/tags/portainer/">portainer</a></li>
+          
+          <li><a href="/tags/buffer/">buffer</a></li>
           
         </ul>
       </nav>
@@ -704,14 +704,25 @@
     
     <nav class="bar bar-footer clearfix" data-stick-bottom>
         <div class="bar-inner">
-        <div class="pager pull-left">
+        <ul class="pager pull-left">
             
-            <a class="prev disabled" href="javascript:;"><i class="icon icon-angle-left"></i> 上一页</a>
+            <li class="prev disabled">
+                <a href="javascript:;">
+                    <i class="icon icon-angle-left"></i>
+                    上一页
+                </a>
+            </li>
             
-            <span class="page-number current">1</span><a class="page-number" href="/tags/nodejs/page/2/">2</a><a class="extend next" rel="next" href="/tags/nodejs/page/2/">下一页 <i class="icon icon-angle-right"></i></a>
             
-        </div>
-        <div class="total-article bar-right">Page 1 of 2</div>
+            <li class="next">
+                <a href="/tags/nodejs/page/2/">
+                    下一页
+                    <i class="icon icon-angle-right"></i>
+                </a>
+            </li>
+            
+        </ul>
+            <div class="total-article bar-right">Page 1 of 2</div>
         </div>
     </nav>
     

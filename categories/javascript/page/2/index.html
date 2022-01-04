@@ -46,7 +46,7 @@
 </head>
 
 
-<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+<body class="main-center" itemscope itemtype="http://schema.org/WebPage">
   <header class="header" itemscope itemtype="http://schema.org/WPHeader">
   <div class="slimContent">
     <div class="navbar-header">
@@ -94,7 +94,7 @@
       </button>
     </div>
     <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
-      <ul class="nav navbar-nav main-nav menu-highlight">
+      <ul class="nav navbar-nav main-nav ">
         
         
         <li class="menu-item menu-item-home">
@@ -338,15 +338,13 @@
         <ul>
           <li><a href="/categories">All</a></li>
           
-          <li><a href="/categories/linux/">linux</a></li>
-          
           <li><a href="/categories/docker/">docker</a></li>
           
           <li><a href="/categories/javascript/">javascript</a></li>
           
-          <li><a href="/categories/chrome/">chrome</a></li>
-          
           <li><a href="/categories/算法/">算法</a></li>
+          
+          <li><a href="/categories/chrome/">chrome</a></li>
           
           <li><a href="/categories/shell/">shell</a></li>
           
@@ -356,6 +354,8 @@
           
           <li><a href="/categories/nodejs/">nodejs</a></li>
           
+          <li><a href="/categories/linux/">linux</a></li>
+          
           <li><a href="/categories/html5/">html5</a></li>
           
           <li><a href="/categories/git/">git</a></li>
@@ -364,9 +364,9 @@
           
           <li><a href="/categories/vim/">vim</a></li>
           
-          <li><a href="/categories/npm/">npm</a></li>
-          
           <li><a href="/categories/shadowsock/">shadowsock</a></li>
+          
+          <li><a href="/categories/npm/">npm</a></li>
           
         </ul>
       </nav>
@@ -388,7 +388,7 @@
             <div class="collection">
               
                 
-<a href="/2016/05/24/js获取内容中的url链接，并设置a标签/" class="collection-item" target="_blank" itemprop="url">
+<a href="/2016/05/24/js获取内容中的url链接，并设置a标签/" class="collection-item"   itemprop="url">
   <time datetime="2016-05-24T01:39:27.000Z" itemprop="datePublished">2016-05-24</time>
   <span>&nbsp;&nbsp;&nbsp;</span> js获取内容中的url链接，并设置a标签
 </a>
@@ -405,14 +405,25 @@
     
     <nav class="bar bar-footer clearfix" data-stick-bottom>
         <div class="bar-inner">
-        <div class="pager pull-left">
+        <ul class="pager pull-left">
             
-            <a class="extend prev" rel="prev" href="/categories/javascript/"><i class="icon icon-angle-left"></i> 上一页</a><a class="page-number" href="/categories/javascript/">1</a><span class="page-number current">2</span>
+            <li class="prev">
+                <a href="/categories/javascript/">
+                    <i class="icon icon-angle-left"></i>
+                    上一页
+                </a>
+            </li>
             
-            <a class="next disabled" href="javascript:;">下一页 <i class="icon icon-angle-right"></i></a>
             
-        </div>
-        <div class="total-article bar-right">Page 2 of 2</div>
+            <li class="next disabled">
+                <a href="javascript:;">
+                    下一页
+                    <i class="icon icon-angle-right"></i>                    
+                </a>
+            </li>
+            
+        </ul>
+            <div class="total-article bar-right">Page 2 of 2</div>
         </div>
     </nav>
     
