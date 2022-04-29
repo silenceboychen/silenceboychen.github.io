@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2022-04-29T03:56:38.616Z</updated>
+  <updated>2022-04-29T09:27:28.102Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>mac卸载jdk</title>
+    <link href="https://www.silenceboy.com/2022/04/29/mac%E5%8D%B8%E8%BD%BDjdk/"/>
+    <id>https://www.silenceboy.com/2022/04/29/mac卸载jdk/</id>
+    <published>2022-04-29T09:25:19.000Z</published>
+    <updated>2022-04-29T09:27:28.102Z</updated>
+    
+    <content type="html"><![CDATA[<ol><li>删除运行路径和运行环境等</li></ol><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo rm -fr /Library/Internet\ Plug-Ins/JavaAppletPlugin.plugin</span><br><span class="line">sudo rm -fr /Library/PreferencesPanes/JavaControlPanel.prefPane</span><br><span class="line">sudo rm -fr ~/Library/Application\ Support/Java</span><br></pre></td></tr></table></figure><ol start="2"><li>删除当前版本的jdk</li></ol><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rm -rf /Library/Java/JavaVirtualMachines/jdk1.8.0_301.jdk</span><br></pre></td></tr></table></figure><ol start="3"><li>检查是否卸载成功</li></ol><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -version</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;ol&gt;
+&lt;li&gt;删除运行路径和运行环境等&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span cla
+      
+    
+    </summary>
+    
+      <category term="mac" scheme="https://www.silenceboy.com/categories/mac/"/>
+    
+    
+      <category term="mac" scheme="https://www.silenceboy.com/tags/mac/"/>
+    
+      <category term="jdk" scheme="https://www.silenceboy.com/tags/jdk/"/>
+    
+  </entry>
   
   <entry>
     <title>docker跨平台打包问题does not match the detected host platform</title>
@@ -164,9 +194,9 @@
     
       <category term="ubuntu" scheme="https://www.silenceboy.com/tags/ubuntu/"/>
     
-      <category term="java" scheme="https://www.silenceboy.com/tags/java/"/>
-    
       <category term="jdk" scheme="https://www.silenceboy.com/tags/jdk/"/>
+    
+      <category term="java" scheme="https://www.silenceboy.com/tags/java/"/>
     
   </entry>
   
@@ -545,32 +575,6 @@
       <category term="docker" scheme="https://www.silenceboy.com/tags/docker/"/>
     
       <category term="gitlab" scheme="https://www.silenceboy.com/tags/gitlab/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>js打印带颜色的 console 信息</title>
-    <link href="https://www.silenceboy.com/2019/07/12/js%E6%89%93%E5%8D%B0%E5%B8%A6%E9%A2%9C%E8%89%B2%E7%9A%84-console-%E4%BF%A1%E6%81%AF/"/>
-    <id>https://www.silenceboy.com/2019/07/12/js打印带颜色的-console-信息/</id>
-    <published>2019-07-12T06:30:24.000Z</published>
-    <updated>2021-09-27T07:27:40.441Z</updated>
-    
-    <content type="html"><![CDATA[<p>打印红色的hello world:</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">console.log(`\x1b[31mhello world\x1b[31m`)</span><br></pre></td></tr></table></figure><p>以下是可以使用的文本命令的参考：</p><p>前景色（文字颜色）：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">\x1b[30m = 黑色</span><br><span class="line">\x1b[31m = 红色</span><br><span class="line">\x1b[32m = 绿色</span><br><span class="line">\x1b[33m = 黄色</span><br><span class="line">\x1b[34m = 蓝色</span><br><span class="line">\x1b[35m = 洋红色</span><br><span class="line">\x1b[36m = 青色</span><br><span class="line">\x1b[37m = 白色</span><br></pre></td></tr></table></figure><p>背景色：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">\x1b[40m = 黑色</span><br><span class="line">\x1b[41m = 红色</span><br><span class="line">\x1b[42m = 绿色</span><br><span class="line">\x1b[43m = 黄色</span><br><span class="line">\x1b[44m = 蓝色</span><br><span class="line">\x1b[45m = 洋红色</span><br><span class="line">\x1b[46m = 青色</span><br><span class="line">\x1b[47m = 白色</span><br></pre></td></tr></table></figure><p>其他：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">\x1b[0m = 清除样式</span><br><span class="line">\x1b[1m = 加粗</span><br><span class="line">\x1b[2m = 半透明</span><br><span class="line">\x1b[4m = 下划线</span><br><span class="line">\x1b[5m = 闪动</span><br><span class="line">\x1b[7m = 取反：背景色变前景色 前景色变背景色</span><br><span class="line">\x1b[8m = 看不见 但位置还留着</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;打印红色的hello world:&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td cl
-      
-    
-    </summary>
-    
-      <category term="javascript" scheme="https://www.silenceboy.com/categories/javascript/"/>
-    
-    
-      <category term="javascript" scheme="https://www.silenceboy.com/tags/javascript/"/>
     
   </entry>
   
