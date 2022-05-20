@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2022-05-20T06:17:05.279Z</updated>
+  <updated>2022-05-20T06:19:34.769Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -21,16 +21,16 @@
     <link href="https://www.silenceboy.com/2022/05/20/macbook%E5%A6%82%E4%BD%95%E5%8D%B8%E8%BD%BD%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/"/>
     <id>https://www.silenceboy.com/2022/05/20/macbook如何卸载天空卫士/</id>
     <published>2022-05-20T06:07:27.000Z</published>
-    <updated>2022-05-20T06:17:05.279Z</updated>
+    <updated>2022-05-20T06:19:34.769Z</updated>
     
-    <content type="html"><![CDATA[<ol><li><p>首先找到按照天空卫士的目录：<code>/Library/Application Support/SkyGuard</code></p></li><li><p>电脑关机，长按开机键直到进入recovery模式, 点自己的用户，输入密码，点下一步，然后到左上方找到终端打开</p></li><li><p>diskutil list 查看目前的磁盘, 找到标记有<code>synthesized</code>的磁盘，并找到对应的数据盘（有data关键字），这里假设为：<code>/dev/disk3s3</code></p></li><li><p>执行<code>diskutil mount /dev/disk3s3</code>, 可能会报 <code>this is an encrypted and locked APFS Volume</code>的错，根据提示执行：<code>diskutil apfs unlockVolume /dev/disk3s3</code>，然后输入密码。再次执行<code>diskutil mount /dev/disk3s3</code>即可。</p></li><li><p>进入<code>/Volumes/Macintosh HD/Library/Application Support</code>目录，可以看到有<code>SkyGuard</code>文件。</p></li><li><p>执行<code>rm -rf SkyGuard</code>删除天空位置文件目录</p></li><li><p><code>reboot</code>重启电脑，发现天空卫士已成功卸载</p></li></ol>]]></content>
+    <content type="html"><![CDATA[<ol><li><p>首先找到安装天空卫士的目录：<code>/Library/Application Support/SkyGuard</code></p></li><li><p>电脑关机，长按开机键直到进入recovery模式, 点自己的用户，输入密码，点下一步，然后到左上方找到终端打开</p></li><li><p>diskutil list 查看目前的磁盘, 找到标记有<code>synthesized</code>的磁盘，并找到对应的数据盘（有data关键字），这里假设为：<code>/dev/disk3s3</code></p></li><li><p>执行<code>diskutil mount /dev/disk3s3</code>, 可能会报 <code>this is an encrypted and locked APFS Volume</code>的错，根据提示执行：<code>diskutil apfs unlockVolume /dev/disk3s3</code>，然后输入密码。再次执行<code>diskutil mount /dev/disk3s3</code>即可。</p></li><li><p>进入<code>/Volumes/Macintosh HD/Library/Application Support</code>目录，可以看到有<code>SkyGuard</code>文件。</p></li><li><p>执行<code>rm -rf SkyGuard</code>删除天空位置文件目录</p></li><li><p><code>reboot</code>重启电脑，发现天空卫士已成功卸载</p></li></ol>]]></content>
     
     <summary type="html">
     
       
       
         &lt;ol&gt;
-&lt;li&gt;&lt;p&gt;首先找到按照天空卫士的目录：&lt;code&gt;/Library/Application Support/SkyGuard&lt;/code&gt;&lt;/p&gt;
+&lt;li&gt;&lt;p&gt;首先找到安装天空卫士的目录：&lt;code&gt;/Library/Application Support/SkyGuard&lt;/code&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;&lt;p&gt;电脑关机，长按开机键直到进入recovery模式, 点自己的用户，输入密码，点下一步，然后到
       
