@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2023-06-18T08:06:24.064Z</updated>
+  <updated>2023-06-26T02:41:41.277Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>grpc系列课程（五）：grpc调试工具</title>
+    <link href="https://www.silenceboy.com/2023/06/26/grpc%E7%B3%BB%E5%88%97%E8%AF%BE%E7%A8%8B%EF%BC%88%E4%BA%94%EF%BC%89%EF%BC%9Agrpc%E8%B0%83%E8%AF%95%E5%B7%A5%E5%85%B7/"/>
+    <id>https://www.silenceboy.com/2023/06/26/grpc系列课程（五）：grpc调试工具/</id>
+    <published>2023-06-26T02:38:01.000Z</published>
+    <updated>2023-06-26T02:41:41.277Z</updated>
+    
+    <content type="html"><![CDATA[<blockquote><p>开发环境：</p><p>系统： ubuntu20.04</p><p>go版本： 1.19</p><p>编辑器： goland</p></blockquote><p>平时我们编写http的api接口时能够很方便的通过postman工具进行接口调试，那么grpc接口是否也有类似postman的工具可以调试呐？<br>当然可以，github上有一款工具<a href="https://github.com/fullstorydev/grpcui">grpcui</a>，专门用来在浏览器中进行grpc接口调试。</p><h2 id="安装grpcui工具"><a href="#安装grpcui工具" class="headerlink" title="安装grpcui工具"></a>安装grpcui工具</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go install github.com/fullstorydev/grpcui/cmd/grpcui@latest</span><br></pre></td></tr></table></figure><h2 id="项目测试"><a href="#项目测试" class="headerlink" title="项目测试"></a>项目测试</h2><p>我们以<code>demo_1</code>测试代码为例进行调试。首先在项目中安装依赖：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go get github.com/fullstorydev/grpcui</span><br></pre></td></tr></table></figure><h3 id="运行项目"><a href="#运行项目" class="headerlink" title="运行项目"></a>运行项目</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go run server/main.go</span><br></pre></td></tr></table></figure><h3 id="启动grpcui"><a href="#启动grpcui" class="headerlink" title="启动grpcui"></a>启动grpcui</h3><p>另起一个终端，执行一下命令，注意这里的端口号要和grpc服务端口号保持一致。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ grpcui -plaintext 127.0.0.1:8080</span><br></pre></td></tr></table></figure><p>如果你在执行以上命令的时候出现一下报错：</p><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Failed to compute set of methods to expose: server does not support the reflection API</span><br></pre></td></tr></table></figure><p>需要在<code>server/main.go</code>文件中添加如下代码，增加反射：</p><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reflection.Register(s)</span><br></pre></td></tr></table></figure><p>此时再运行以上启动grpcui命令，可看到一下输出：</p><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gRPC Web UI available at http://127.0.0.1:41619/</span><br><span class="line">Opening in existing browser session.</span><br></pre></td></tr></table></figure><h2 id="浏览器调试"><a href="#浏览器调试" class="headerlink" title="浏览器调试"></a>浏览器调试</h2><p>浏览器打开<code>http://127.0.0.1:41619/</code> ,可以看到grpcui调试页面：<br><img src="/../images/2023-06-18_15-34.png" alt=""></p><p>点击<code>Invoke</code>按钮，可以看到<code>Response</code>tab页有对于的相应数据：<br><img src="/../images/2023-06-18_15-36.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;blockquote&gt;
+&lt;p&gt;开发环境：&lt;/p&gt;
+&lt;p&gt;系统： ubuntu20.04&lt;/p&gt;
+&lt;p&gt;go版本： 1.19&lt;/p&gt;
+&lt;p&gt;编辑器： goland&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;平时我们编写http的api接口时能够很方便的通过postman工具进行接
+      
+    
+    </summary>
+    
+      <category term="go" scheme="https://www.silenceboy.com/categories/go/"/>
+    
+    
+      <category term="go" scheme="https://www.silenceboy.com/tags/go/"/>
+    
+  </entry>
   
   <entry>
     <title>grpc系列课程（四）：双向流式rpc</title>
@@ -563,34 +594,6 @@
     
     
       <category term="mysql" scheme="https://www.silenceboy.com/tags/mysql/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>pm2日志拆分</title>
-    <link href="https://www.silenceboy.com/2019/12/20/pm2%E6%97%A5%E5%BF%97%E6%8B%86%E5%88%86/"/>
-    <id>https://www.silenceboy.com/2019/12/20/pm2日志拆分/</id>
-    <published>2019-12-20T03:41:48.000Z</published>
-    <updated>2023-06-14T01:57:20.433Z</updated>
-    
-    <content type="html"><![CDATA[<p>pm2默认会将日志文件写入家目录下的 <code>.pm2/logs</code> 目录中，但是pm2的日志文件不能自动分割，这会导致一个文件不断变大，不但影响性能，查看这些日志也会带来麻烦。</p><h3 id="pm2的日志切割模块pm2-logrotate"><a href="#pm2的日志切割模块pm2-logrotate" class="headerlink" title="pm2的日志切割模块pm2-logrotate"></a>pm2的日志切割模块pm2-logrotate</h3><ul><li>安装<code>pm2-logrotate</code>：</li></ul><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pm2 install pm2-logrotate</span><br></pre></td></tr></table></figure><ul><li>设置切割规则</li></ul><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1. 设置文件大小为100M，大于等于开始切割</span><br><span class="line">pm2 set pm2-logrotate:max_size 100M</span><br><span class="line"></span><br><span class="line">2.设置文件切割的监控间，监控间隔比较大，可能会使切割出的文件大小和max_size有出入</span><br><span class="line">pm2 set pm2-logrotate:workerInterval 1</span><br><span class="line"></span><br><span class="line">3. 设置文件最多多少个，超过则删除</span><br><span class="line">pm2 set pm2-logrotate:retain 10</span><br><span class="line"></span><br><span class="line">4. 设置文件是否压缩</span><br><span class="line">$ pm2 set pm2-logrotate:compress false</span><br><span class="line"></span><br><span class="line">5. 设置文件命名格式</span><br><span class="line">$ pm2 set pm2-logrotate:dateFormat YYYY-MM-DD_HH-mm-ss</span><br><span class="line"></span><br></pre></td></tr></table></figure><ul><li>更新pm2</li></ul><p>执行一下命令使pm2配置生效</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pm2 update</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;pm2默认会将日志文件写入家目录下的 &lt;code&gt;.pm2/logs&lt;/code&gt; 目录中，但是pm2的日志文件不能自动分割，这会导致一个文件不断变大，不但影响性能，查看这些日志也会带来麻烦。&lt;/p&gt;
-&lt;h3 id=&quot;pm2的日志切割模块pm2-logrotate&quot;&gt;&lt;a 
-      
-    
-    </summary>
-    
-      <category term="nodejs" scheme="https://www.silenceboy.com/categories/nodejs/"/>
-    
-    
-      <category term="nodejs" scheme="https://www.silenceboy.com/tags/nodejs/"/>
-    
-      <category term="pm2" scheme="https://www.silenceboy.com/tags/pm2/"/>
     
   </entry>
   
