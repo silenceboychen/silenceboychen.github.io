@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>blog</title>
   
-  <subtitle>silenceboychen&#39;s blog</subtitle>
+  <subtitle>morty&#39;s blog</subtitle>
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
@@ -10,7 +10,7 @@
   <id>https://www.silenceboy.com/</id>
   
   <author>
-    <name>chenhao</name>
+    <name>morty</name>
     
   </author>
   
