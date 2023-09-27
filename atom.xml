@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2023-07-11T02:50:50.019Z</updated>
+  <updated>2023-09-27T09:23:34.978Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>shell脚本里的#*@是什么意思</title>
+    <link href="https://www.silenceboy.com/2023/09/27/shell%E8%84%9A%E6%9C%AC%E9%87%8C%E7%9A%84-%E6%98%AF%E4%BB%80%E4%B9%88%E6%84%8F%E6%80%9D/"/>
+    <id>https://www.silenceboy.com/2023/09/27/shell脚本里的-是什么意思/</id>
+    <published>2023-09-27T09:22:45.000Z</published>
+    <updated>2023-09-27T09:23:34.978Z</updated>
+    
+    <content type="html"><![CDATA[<p>在Shell脚本中，${variable#pattern} 是一种字符串处理方式，其中 # 后跟着一个模式（pattern）。这个语法的作用是从字符串变量 variable 的开头删除匹配 pattern 的最短子串，并返回删除后的结果。${variable#*@} 的含义是：</p><p>● variable 是一个字符串变量，通常是一个包含文本的字符串。</p><p>● # 表示从字符串开头开始匹配。</p><p>● *@ 是一个通配符模式，它匹配字符串中的任意字符序列，直到第一个 @ 字符。</p><p>所以，${audioplay#<em>@} 的作用是从变量 audioplay 的开头删除匹配 </em>@ 模式的最短子串，并返回删除后的结果。通常，这种操作用于处理文本或字符串，以过滤掉或提取感兴趣的部分。<br>例如，如果 audioplay 的值是 “<a href="mailto:user@example.com">user@example.com</a>“，那么 ${audioplay#*@} 的结果将是 “example.com”，因为它删除了字符串中第一个 “@” 符号及其之前的部分。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;在Shell脚本中，${variable#pattern} 是一种字符串处理方式，其中 # 后跟着一个模式（pattern）。这个语法的作用是从字符串变量 variable 的开头删除匹配 pattern 的最短子串，并返回删除后的结果。${variable#*@} 的含义
+      
+    
+    </summary>
+    
+      <category term="shell" scheme="https://www.silenceboy.com/categories/shell/"/>
+    
+    
+      <category term="shell" scheme="https://www.silenceboy.com/tags/shell/"/>
+    
+  </entry>
   
   <entry>
     <title>用go开发sse接口</title>
@@ -574,31 +599,6 @@
       <category term="scp" scheme="https://www.silenceboy.com/tags/scp/"/>
     
       <category term="zsh" scheme="https://www.silenceboy.com/tags/zsh/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>git clone 出现ssh: connect to host github.com port 22: Connection timed out解决方案</title>
-    <link href="https://www.silenceboy.com/2020/03/04/git-clone-%E5%87%BA%E7%8E%B0ssh-connect-to-host-github-com-port-22-Connection-timed-out%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"/>
-    <id>https://www.silenceboy.com/2020/03/04/git-clone-出现ssh-connect-to-host-github-com-port-22-Connection-timed-out解决方案/</id>
-    <published>2020-03-04T05:07:40.000Z</published>
-    <updated>2023-06-14T01:57:20.433Z</updated>
-    
-    <content type="html"><![CDATA[<p>物理机服务器，安装<code>git</code>之后，想从<code>github</code>上<code>clone</code>自己的项目运行，<code>ssh key</code>已经配置过, 但在执行<code>git clone</code>命令时出现了如下报错：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure><h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>在系统<code>~/.ssh</code>目录下执行<code>touch config</code>命令新建<code>config</code>文件，并修改文件权限：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod 600 config</span><br></pre></td></tr></table></figure><p>然后在<code>config</code>文件中添加如下内容：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">User email@qq.com  // 替换成自己的github登录邮箱</span><br><span class="line">Hostname ssh.github.com</span><br><span class="line">PreferredAuthentications publickey</span><br><span class="line">IdentityFile ~/.ssh/id_rsa</span><br><span class="line">Port 443</span><br></pre></td></tr></table></figure><p>然后设置：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global user.name &quot;XXX&quot;</span><br><span class="line">git config --global user.email XXX@xx.com</span><br></pre></td></tr></table></figure><p>此时再去执行<code>git clone</code>命令，一切正常。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;物理机服务器，安装&lt;code&gt;git&lt;/code&gt;之后，想从&lt;code&gt;github&lt;/code&gt;上&lt;code&gt;clone&lt;/code&gt;自己的项目运行，&lt;code&gt;ssh key&lt;/code&gt;已经配置过, 但在执行&lt;code&gt;git clone&lt;/code&gt;命令时出现了如下
-      
-    
-    </summary>
-    
-      <category term="git" scheme="https://www.silenceboy.com/categories/git/"/>
-    
-    
-      <category term="git" scheme="https://www.silenceboy.com/tags/git/"/>
     
   </entry>
   
