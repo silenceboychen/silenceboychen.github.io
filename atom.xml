@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2023-09-27T09:23:34.978Z</updated>
+  <updated>2023-09-27T09:30:13.292Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -21,15 +21,15 @@
     <link href="https://www.silenceboy.com/2023/09/27/shell%E8%84%9A%E6%9C%AC%E9%87%8C%E7%9A%84-%E6%98%AF%E4%BB%80%E4%B9%88%E6%84%8F%E6%80%9D/"/>
     <id>https://www.silenceboy.com/2023/09/27/shell脚本里的-是什么意思/</id>
     <published>2023-09-27T09:22:45.000Z</published>
-    <updated>2023-09-27T09:23:34.978Z</updated>
+    <updated>2023-09-27T09:30:13.292Z</updated>
     
-    <content type="html"><![CDATA[<p>在Shell脚本中，${variable#pattern} 是一种字符串处理方式，其中 # 后跟着一个模式（pattern）。这个语法的作用是从字符串变量 variable 的开头删除匹配 pattern 的最短子串，并返回删除后的结果。${variable#*@} 的含义是：</p><p>● variable 是一个字符串变量，通常是一个包含文本的字符串。</p><p>● # 表示从字符串开头开始匹配。</p><p>● *@ 是一个通配符模式，它匹配字符串中的任意字符序列，直到第一个 @ 字符。</p><p>所以，${audioplay#<em>@} 的作用是从变量 audioplay 的开头删除匹配 </em>@ 模式的最短子串，并返回删除后的结果。通常，这种操作用于处理文本或字符串，以过滤掉或提取感兴趣的部分。<br>例如，如果 audioplay 的值是 “<a href="mailto:user@example.com">user@example.com</a>“，那么 ${audioplay#*@} 的结果将是 “example.com”，因为它删除了字符串中第一个 “@” 符号及其之前的部分。</p>]]></content>
+    <content type="html"><![CDATA[<p>在Shell脚本中，<code>$&#123;variable#pattern&#125;</code> 是一种字符串处理方式，其中 <code>#</code> 后跟着一个模式<code>（pattern）</code>。这个语法的作用是从字符串变量 variable 的开头删除匹配 <code>pattern</code> 的最短子串，并返回删除后的结果。<code>$&#123;variable#*@&#125;</code> 的含义是：</p><p>● <code>variable</code> 是一个字符串变量，通常是一个包含文本的字符串。</p><p>● <code>#</code> 表示从字符串开头开始匹配。</p><p>● <code>*@</code> 是一个通配符模式，它匹配字符串中的任意字符序列，直到第一个 @ 字符。</p><p>所以，<code>$&#123;variable#*@&#125;</code> 的作用是从变量 <code>variable</code> 的开头删除匹配 <code>*@</code> 模式的最短子串，并返回删除后的结果。通常，这种操作用于处理文本或字符串，以过滤掉或提取感兴趣的部分。<br>例如，如果 <code>variable</code> 的值是 <code>&quot;user@example.com&quot;</code>，那么 <code>$&#123;variable#*@&#125;</code> 的结果将是 <code>&quot;example.com&quot;</code>，因为它删除了字符串中第一个 <code>&quot;@&quot;</code> 符号及其之前的部分。</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;在Shell脚本中，${variable#pattern} 是一种字符串处理方式，其中 # 后跟着一个模式（pattern）。这个语法的作用是从字符串变量 variable 的开头删除匹配 pattern 的最短子串，并返回删除后的结果。${variable#*@} 的含义
+        &lt;p&gt;在Shell脚本中，&lt;code&gt;$&amp;#123;variable#pattern&amp;#125;&lt;/code&gt; 是一种字符串处理方式，其中 &lt;code&gt;#&lt;/code&gt; 后跟着一个模式&lt;code&gt;（pattern）&lt;/code&gt;。这个语法的作用是从字符串变量 variable 的
       
     
     </summary>
