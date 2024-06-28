@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2024-06-24T08:10:17.375Z</updated>
+  <updated>2024-06-28T07:23:01.137Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>docker容器默认用户非root，且不知道密码，无法执行sudo操作，该怎么解决？</title>
+    <link href="https://www.silenceboy.com/2024/06/28/docker%E5%AE%B9%E5%99%A8%E9%BB%98%E8%AE%A4%E7%94%A8%E6%88%B7%E9%9D%9Eroot%EF%BC%8C%E4%B8%94%E4%B8%8D%E7%9F%A5%E9%81%93%E5%AF%86%E7%A0%81%EF%BC%8C%E6%97%A0%E6%B3%95%E6%89%A7%E8%A1%8Csudo%E6%93%8D%E4%BD%9C%EF%BC%8C%E8%AF%A5%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%EF%BC%9F/"/>
+    <id>https://www.silenceboy.com/2024/06/28/docker容器默认用户非root，且不知道密码，无法执行sudo操作，该怎么解决？/</id>
+    <published>2024-06-28T07:22:18.000Z</published>
+    <updated>2024-06-28T07:23:01.137Z</updated>
+    
+    <content type="html"><![CDATA[<p>如果你在 Docker 容器中默认用户是 <code>dev</code>，但不知道密码，无法执行 <code>sudo</code> 操作，你可以通过以下几种方法来解决这个问题：</p><h3 id="方法一：以-root-用户重新启动容器"><a href="#方法一：以-root-用户重新启动容器" class="headerlink" title="方法一：以 root 用户重新启动容器"></a>方法一：以 root 用户重新启动容器</h3><p>你可以以 <code>root</code> 用户重新启动容器，然后更改 <code>dev</code> 用户的密码或者直接执行你需要的操作。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root -it &lt;container_id_or_name&gt; /bin/bash</span><br></pre></td></tr></table></figure><h3 id="方法二：修改-Dockerfile-重新构建镜像"><a href="#方法二：修改-Dockerfile-重新构建镜像" class="headerlink" title="方法二：修改 Dockerfile 重新构建镜像"></a>方法二：修改 Dockerfile 重新构建镜像</h3><p>如果你有 Dockerfile，可以修改 Dockerfile 来设置 <code>dev</code> 用户的密码或者直接使用 <code>root</code> 用户。</p><p>例如，修改 Dockerfile 来设置 <code>dev</code> 用户的密码：</p><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> your_base_image</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置 dev 用户的密码</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">echo</span> <span class="string">'dev:your_new_password'</span> | chpasswd</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 其他 Dockerfile 指令</span></span><br></pre></td></tr></table></figure><p>然后重新构建镜像并运行容器：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker build -t your_image_name .</span><br><span class="line">docker run -it your_image_name</span><br></pre></td></tr></table></figure><h3 id="方法三：创建新的镜像并修改用户配置"><a href="#方法三：创建新的镜像并修改用户配置" class="headerlink" title="方法三：创建新的镜像并修改用户配置"></a>方法三：创建新的镜像并修改用户配置</h3><p>如果你没有 Dockerfile，但可以访问容器的镜像，你可以创建一个新的镜像并修改用户配置。</p><ol><li><p>首先，启动一个新的容器并进入：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name temp_container your_image_name /bin/bash</span><br></pre></td></tr></table></figure></li><li><p>在容器中修改 <code>dev</code> 用户的密码：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">'dev:your_new_password'</span> | chpasswd</span><br></pre></td></tr></table></figure></li><li><p>退出容器并提交更改：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">exit</span></span><br><span class="line">docker commit temp_container your_new_image_name</span><br></pre></td></tr></table></figure></li><li><p>使用新的镜像启动容器：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it your_new_image_name</span><br></pre></td></tr></table></figure></li></ol><h3 id="方法四：直接进入容器并修改密码"><a href="#方法四：直接进入容器并修改密码" class="headerlink" title="方法四：直接进入容器并修改密码"></a>方法四：直接进入容器并修改密码</h3><p>如果容器已经在运行，你可以直接进入容器并修改 <code>dev</code> 用户的密码。</p><ol><li><p>首先，以 <code>root</code> 用户进入容器：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root -it &lt;container_id_or_name&gt; /bin/bash</span><br></pre></td></tr></table></figure></li><li><p>在容器中修改 <code>dev</code> 用户的密码：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">'dev:your_new_password'</span> | chpasswd</span><br></pre></td></tr></table></figure></li></ol><h3 id="方法五：使用-docker-commit-修改现有容器"><a href="#方法五：使用-docker-commit-修改现有容器" class="headerlink" title="方法五：使用 docker commit 修改现有容器"></a>方法五：使用 <code>docker commit</code> 修改现有容器</h3><p>如果你已经有一个运行中的容器，可以使用 <code>docker commit</code> 来创建一个新的镜像，并在新镜像中修改 <code>dev</code> 用户的密码。</p><ol><li><p>首先，以 <code>root</code> 用户进入容器：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -u root -it &lt;container_id_or_name&gt; /bin/bash</span><br></pre></td></tr></table></figure></li><li><p>在容器中修改 <code>dev</code> 用户的密码：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">'dev:your_new_password'</span> | chpasswd</span><br></pre></td></tr></table></figure></li><li><p>退出容器并提交更改：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">exit</span></span><br><span class="line">docker commit &lt;container_id_or_name&gt; your_new_image_name</span><br></pre></td></tr></table></figure></li><li><p>使用新的镜像启动容器：</p> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it your_new_image_name</span><br></pre></td></tr></table></figure></li></ol><p>通过这些方法，你可以解决无法执行 <code>sudo</code> 操作的问题，并根据需要修改 <code>dev</code> 用户的密码或直接使用 <code>root</code> 用户。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;如果你在 Docker 容器中默认用户是 &lt;code&gt;dev&lt;/code&gt;，但不知道密码，无法执行 &lt;code&gt;sudo&lt;/code&gt; 操作，你可以通过以下几种方法来解决这个问题：&lt;/p&gt;
+&lt;h3 id=&quot;方法一：以-root-用户重新启动容器&quot;&gt;&lt;a href=&quot;#方法一
+      
+    
+    </summary>
+    
+      <category term="docker" scheme="https://www.silenceboy.com/categories/docker/"/>
+    
+    
+      <category term="docker" scheme="https://www.silenceboy.com/tags/docker/"/>
+    
+  </entry>
   
   <entry>
     <title>代码扫描工具：sonar、fireline、coverity、fortify、blackduck对比</title>
@@ -572,32 +598,6 @@
     
     
       <category term="linux" scheme="https://www.silenceboy.com/tags/linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>使用npm安装依赖时报错：gyp: No Xcode or CLT version detected!</title>
-    <link href="https://www.silenceboy.com/2020/05/05/%E4%BD%BF%E7%94%A8npm%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E6%97%B6%E6%8A%A5%E9%94%99%EF%BC%9Agyp-No-Xcode-or-CLT-version-detected/"/>
-    <id>https://www.silenceboy.com/2020/05/05/使用npm安装依赖时报错：gyp-No-Xcode-or-CLT-version-detected/</id>
-    <published>2020-05-05T08:47:52.000Z</published>
-    <updated>2021-09-27T07:27:40.446Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近在macOS中使用npm安装模块，出现如下错误：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">npm WARN deprecated fsevents@1.2.12: fsevents 1 will break on node v14+. Upgrade to fsevents 2 with massive improvements.</span><br><span class="line"></span><br><span class="line">&gt; fsevents@1.2.12 install /Users/chenhao/outsourcing/egg-car/node_modules/fsevents</span><br><span class="line">&gt; node-gyp rebuild</span><br><span class="line"></span><br><span class="line">No receipt for &apos;com.apple.pkg.CLTools_Executables&apos; found at &apos;/&apos;.</span><br><span class="line"></span><br><span class="line">No receipt for &apos;com.apple.pkg.DeveloperToolsCLILeo&apos; found at &apos;/&apos;.</span><br><span class="line"></span><br><span class="line">No receipt for &apos;com.apple.pkg.DeveloperToolsCLI&apos; found at &apos;/&apos;.</span><br><span class="line"></span><br><span class="line">gyp: No Xcode or CLT version detected!</span><br><span class="line">gyp ERR! configure error</span><br><span class="line">gyp ERR! stack Error: `gyp` failed with exit code: 1</span><br><span class="line">gyp ERR! stack     at ChildProcess.onCpExit (/Users/chenhao/.nvm/versions/node/v10.16.0/lib/node_modules/npm/node_modules/node-gyp/lib/configure.js:351:16)</span><br><span class="line">gyp ERR! stack     at ChildProcess.emit (events.js:198:13)</span><br><span class="line">gyp ERR! stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:248:12)</span><br><span class="line">gyp ERR! System Darwin 19.4.0</span><br><span class="line">gyp ERR! command &quot;/Users/chenhao/.nvm/versions/node/v10.16.0/bin/node&quot; &quot;/Users/chenhao/.nvm/versions/node/v10.16.0/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js&quot; &quot;rebuild&quot;</span><br><span class="line">gyp ERR! cwd /Users/chenhao/outsourcing/egg-car/node_modules/fsevents</span><br><span class="line">gyp ERR! node -v v10.16.0</span><br><span class="line">gyp ERR! node-gyp -v v5.0.5</span><br><span class="line">gyp ERR! not ok</span><br></pre></td></tr></table></figure><p>网上查找解决方案，都是通过执行<code>xcode-select --install</code>命令修复，但是执行该命令时会出现如下提示：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xcode-select: error: command line tools are already installed, use &quot;Software Update&quot; to install updates</span><br></pre></td></tr></table></figure><p>最终的解决办法是先卸载之前安装的<code>xcode-select</code>，并重新安装：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo rm -rf $(xcode-select -print-path)</span><br><span class="line">$ xcode-select --install</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;最近在macOS中使用npm安装模块，出现如下错误：&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span cl
-      
-    
-    </summary>
-    
-      <category term="npm" scheme="https://www.silenceboy.com/categories/npm/"/>
-    
-    
-      <category term="npm" scheme="https://www.silenceboy.com/tags/npm/"/>
     
   </entry>
   
