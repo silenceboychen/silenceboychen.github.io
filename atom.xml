@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2024-10-21T06:23:53.596Z</updated>
+  <updated>2024-10-21T06:26:19.127Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>SOC中除了R核和A核还有哪些处理器核心</title>
+    <link href="https://www.silenceboy.com/2024/10/21/SOC%E4%B8%AD%E9%99%A4%E4%BA%86R%E6%A0%B8%E5%92%8CA%E6%A0%B8%E8%BF%98%E6%9C%89%E5%93%AA%E4%BA%9B%E5%A4%84%E7%90%86%E5%99%A8%E6%A0%B8%E5%BF%83/"/>
+    <id>https://www.silenceboy.com/2024/10/21/SOC中除了R核和A核还有哪些处理器核心/</id>
+    <published>2024-10-21T06:25:57.000Z</published>
+    <updated>2024-10-21T06:26:19.127Z</updated>
+    
+    <content type="html"><![CDATA[<p>除了R核（实时核心）和A核（应用核心），在系统级芯片（SoC）设计中，还有其他类型的处理器核心，它们各自有特定的用途和特点。以下是一些常见的核心类型：</p><h3 id="M核（Microcontroller-Core）"><a href="#M核（Microcontroller-Core）" class="headerlink" title="M核（Microcontroller Core）"></a>M核（Microcontroller Core）</h3><p>M核通常指的是微控制器核心，主要用于低功耗、低成本的嵌入式系统。以下是M核的一些特点和应用：</p><ol><li><strong>低功耗</strong>：设计目标是尽量减少功耗，适合电池供电的设备。</li><li><strong>简单架构</strong>：通常具有较简单的指令集和架构，易于编程和调试。</li><li><strong>集成外设</strong>：通常集成了丰富的外设接口，如ADC、DAC、UART、I2C、SPI等。</li><li><strong>实时性</strong>：虽然不如R核那样严格，但也能处理一些实时任务。</li></ol><h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><ul><li>家用电器</li><li>传感器节点</li><li>简单控制系统</li><li>物联网设备</li></ul><h3 id="NPU（Neural-Processing-Unit）"><a href="#NPU（Neural-Processing-Unit）" class="headerlink" title="NPU（Neural Processing Unit）"></a>NPU（Neural Processing Unit）</h3><p>NPU是神经网络处理单元，专门用于加速深度学习和人工智能任务。以下是NPU的一些特点和应用：</p><ol><li><strong>高效计算</strong>：专门优化用于矩阵运算和卷积操作，适合深度学习模型的推理和训练。</li><li><strong>并行处理</strong>：具有高度并行的计算能力，能够同时处理大量数据。</li><li><strong>低功耗</strong>：相对于通用处理器，NPU在执行AI任务时具有更高的能效比。</li></ol><h4 id="应用场景-1"><a href="#应用场景-1" class="headerlink" title="应用场景"></a>应用场景</h4><ul><li>图像和视频处理</li><li>语音识别</li><li>自然语言处理</li><li>自动驾驶</li></ul><h3 id="DSP（Digital-Signal-Processor）"><a href="#DSP（Digital-Signal-Processor）" class="headerlink" title="DSP（Digital Signal Processor）"></a>DSP（Digital Signal Processor）</h3><p>DSP是数字信号处理器，专门用于处理数字信号，如音频、视频和通信信号。以下是DSP的一些特点和应用：</p><ol><li><strong>高效信号处理</strong>：专门优化用于快速傅里叶变换（FFT）、滤波和其他信号处理算法。</li><li><strong>实时处理</strong>：能够实时处理输入信号，适合实时音频和视频处理。</li><li><strong>低延迟</strong>：设计目标是尽量减少处理延迟，确保信号处理的实时性。</li></ol><h4 id="应用场景-2"><a href="#应用场景-2" class="headerlink" title="应用场景"></a>应用场景</h4><ul><li>音频处理（如回声消除、降噪）</li><li>视频处理（如编码、解码）</li><li>通信系统（如调制、解调）</li><li>雷达和声纳</li></ul><h3 id="GPU（Graphics-Processing-Unit）"><a href="#GPU（Graphics-Processing-Unit）" class="headerlink" title="GPU（Graphics Processing Unit）"></a>GPU（Graphics Processing Unit）</h3><p>GPU是图形处理单元，主要用于图形渲染和计算加速。以下是GPU的一些特点和应用：</p><ol><li><strong>高并行性</strong>：具有大量并行处理单元，能够同时处理大量数据。</li><li><strong>图形渲染</strong>：专门用于处理图形渲染任务，如3D图形、游戏图形等。</li><li><strong>通用计算</strong>：近年来，GPU也被广泛用于通用计算（GPGPU），如科学计算、机器学习等。</li></ol><h4 id="应用场景-3"><a href="#应用场景-3" class="headerlink" title="应用场景"></a>应用场景</h4><ul><li>游戏和娱乐</li><li>图形设计和渲染</li><li>科学计算</li><li>深度学习</li></ul><h3 id="VPU（Vision-Processing-Unit）"><a href="#VPU（Vision-Processing-Unit）" class="headerlink" title="VPU（Vision Processing Unit）"></a>VPU（Vision Processing Unit）</h3><p>VPU是视觉处理单元，专门用于处理计算机视觉任务。以下是VPU的一些特点和应用：</p><ol><li><strong>优化视觉任务</strong>：专门优化用于图像和视频处理任务，如对象检测、图像识别等。</li><li><strong>高效能效比</strong>：在处理视觉任务时具有高效的能效比。</li><li><strong>实时处理</strong>：能够实时处理图像和视频数据，适合实时应用。</li></ol><h4 id="应用场景-4"><a href="#应用场景-4" class="headerlink" title="应用场景"></a>应用场景</h4><ul><li>计算机视觉</li><li>增强现实（AR）和虚拟现实（VR）</li><li>自动驾驶</li><li>安全监控</li></ul><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在现代SoC设计中，除了R核和A核，还有多种类型的处理器核心，如M核、NPU、DSP、GPU和VPU等。每种核心都有其特定的用途和优势，通过组合使用这些核心，SoC能够在单一芯片上实现多种功能，满足不同应用场景的需求。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;除了R核（实时核心）和A核（应用核心），在系统级芯片（SoC）设计中，还有其他类型的处理器核心，它们各自有特定的用途和特点。以下是一些常见的核心类型：&lt;/p&gt;
+&lt;h3 id=&quot;M核（Microcontroller-Core）&quot;&gt;&lt;a href=&quot;#M核（Microcontr
+      
+    
+    </summary>
+    
+      <category term="SoC" scheme="https://www.silenceboy.com/categories/SoC/"/>
+    
+    
+      <category term="SoC" scheme="https://www.silenceboy.com/tags/SoC/"/>
+    
+  </entry>
   
   <entry>
     <title>SOC的R核、A核有什么区别</title>
@@ -569,35 +595,6 @@
     
     
       <category term="mysql" scheme="https://www.silenceboy.com/tags/mysql/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ubuntu18.04安装jdk1.8</title>
-    <link href="https://www.silenceboy.com/2020/11/28/ubuntu18-04%E5%AE%89%E8%A3%85jdk1-8/"/>
-    <id>https://www.silenceboy.com/2020/11/28/ubuntu18-04安装jdk1-8/</id>
-    <published>2020-11-28T06:30:31.000Z</published>
-    <updated>2021-09-27T07:27:40.445Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="下载jdk安装包"><a href="#下载jdk安装包" class="headerlink" title="下载jdk安装包"></a>下载jdk安装包</h3><pre><code>https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html</code></pre><h3 id="解压"><a href="#解压" class="headerlink" title="解压"></a>解压</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf jdk-8u171-linux-x64.tar.gz</span><br></pre></td></tr></table></figure><h3 id="移动到自己想放的位置"><a href="#移动到自己想放的位置" class="headerlink" title="移动到自己想放的位置"></a>移动到自己想放的位置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">##将文件从下载目录 挪到/usr/local下</span><br><span class="line">sudo mv jdk1.8.0_171  /usr/local/jdk1.8</span><br></pre></td></tr></table></figure><h3 id="设置环境变量"><a href="#设置环境变量" class="headerlink" title="设置环境变量"></a>设置环境变量</h3><ul><li><p>设置全局生效</p><p>  修改全局配置文件，作用与所有用户： <code>vim /etc/profile</code></p>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   export JAVA_HOME=/usr/local/jdk1.8</span><br><span class="line">export JRE_HOME=$&#123;JAVA_HOME&#125;/jre</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/lib</span><br><span class="line">export PATH=.:$&#123;JAVA_HOME&#125;/bin:$PATH</span><br></pre></td></tr></table></figure></li></ul><ul><li><p>设置当前用户生效</p><p>  修改当前用户配置文件，只作用于当前用户：<code>vim ~/.bashrc</code></p>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   export JAVA_HOME=/usr/local/jdk1.8</span><br><span class="line">export JRE_HOME=$&#123;JAVA_HOME&#125;/jre</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/lib</span><br><span class="line">export PATH=.:$&#123;JAVA_HOME&#125;/bin:$PATH</span><br></pre></td></tr></table></figure></li></ul><h3 id="使修改的配置立刻生效"><a href="#使修改的配置立刻生效" class="headerlink" title="使修改的配置立刻生效"></a>使修改的配置立刻生效</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">##对应方法一：</span><br><span class="line">source /etc/profile </span><br><span class="line">##对应方法二：</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure><h3 id="检查是否安装成功"><a href="#检查是否安装成功" class="headerlink" title="检查是否安装成功"></a>检查是否安装成功</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -version</span><br></pre></td></tr></table></figure>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;下载jdk安装包&quot;&gt;&lt;a href=&quot;#下载jdk安装包&quot; class=&quot;headerlink&quot; title=&quot;下载jdk安装包&quot;&gt;&lt;/a&gt;下载jdk安装包&lt;/h3&gt;&lt;pre&gt;&lt;code&gt;https://www.oracle.com/java/technologi
-      
-    
-    </summary>
-    
-      <category term="linux" scheme="https://www.silenceboy.com/categories/linux/"/>
-    
-    
-      <category term="ubuntu" scheme="https://www.silenceboy.com/tags/ubuntu/"/>
-    
-      <category term="jdk" scheme="https://www.silenceboy.com/tags/jdk/"/>
-    
-      <category term="java" scheme="https://www.silenceboy.com/tags/java/"/>
     
   </entry>
   
