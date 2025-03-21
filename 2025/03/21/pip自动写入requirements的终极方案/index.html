@@ -17,21 +17,21 @@
   <meta http-equiv="window-target" content="_top">
   
   
-  <title>关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案 | morty的个人博客</title>
-  <meta name="description" content="错误来源使用使用hexo部署博客是，遇到以下错误: 123456fatal: unable to access &amp;apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&amp;apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com">
-<meta name="keywords" content="git,hexo">
+  <title>pip自动写入requirements的终极方案 | morty的个人博客</title>
+  <meta name="description" content="在Python开发中，手动维护requirements.txt文件容易遗漏依赖项。本文将介绍三种自动化解决方案，让依赖管理更高效。  方案一：智能Shell别名（原生pip增强）实现原理： 通过Shell函数封装pip命令，在执行安装后自动更新requirements文件 配置方法（在.bashrc/.zshrc中添加）： 1234567pip() &amp;#123;    if [ &quot;$1&quot; = &quot;i">
+<meta name="keywords" content="python">
 <meta property="og:type" content="article">
-<meta property="og:title" content="关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案">
-<meta property="og:url" content="https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/index.html">
+<meta property="og:title" content="pip自动写入requirements的终极方案">
+<meta property="og:url" content="https://www.silenceboy.com/2025/03/21/pip自动写入requirements的终极方案/index.html">
 <meta property="og:site_name" content="blog">
-<meta property="og:description" content="错误来源使用使用hexo部署博客是，遇到以下错误: 123456fatal: unable to access &amp;apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&amp;apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com">
+<meta property="og:description" content="在Python开发中，手动维护requirements.txt文件容易遗漏依赖项。本文将介绍三种自动化解决方案，让依赖管理更高效。  方案一：智能Shell别名（原生pip增强）实现原理： 通过Shell函数封装pip命令，在执行安装后自动更新requirements文件 配置方法（在.bashrc/.zshrc中添加）： 1234567pip() &amp;#123;    if [ &quot;$1&quot; = &quot;i">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2021-09-27T07:27:40.447Z">
+<meta property="og:updated_time" content="2025-03-21T04:52:40.422Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案">
-<meta name="twitter:description" content="错误来源使用使用hexo部署博客是，遇到以下错误: 123456fatal: unable to access &amp;apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&amp;apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com">
+<meta name="twitter:title" content="pip自动写入requirements的终极方案">
+<meta name="twitter:description" content="在Python开发中，手动维护requirements.txt文件容易遗漏依赖项。本文将介绍三种自动化解决方案，让依赖管理更高效。  方案一：智能Shell别名（原生pip增强）实现原理： 通过Shell函数封装pip命令，在执行安装后自动更新requirements文件 配置方法（在.bashrc/.zshrc中添加）： 1234567pip() &amp;#123;    if [ &quot;$1&quot; = &quot;i">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/index.html">
+  <link rel="canonical" href="https://www.silenceboy.com/2025/03/21/pip自动写入requirements的终极方案/index.html">
   
     <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
   
@@ -324,21 +324,21 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#错误来源"><span class="toc-number">1.</span> <span class="toc-text">错误来源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#两种解决方案："><span class="toc-number">2.</span> <span class="toc-text">两种解决方案：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#方案一"><span class="toc-number">2.1.</span> <span class="toc-text">方案一</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#方案二"><span class="toc-number">2.2.</span> <span class="toc-text">方案二</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#方案一：智能Shell别名（原生pip增强）"><span class="toc-number">1.</span> <span class="toc-text">方案一：智能Shell别名（原生pip增强）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#方案二：pip-autosave工具（专业级自动记录）"><span class="toc-number">2.</span> <span class="toc-text">方案二：pip-autosave工具（专业级自动记录）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#方案三：现代项目管理工具集成"><span class="toc-number">3.</span> <span class="toc-text">方案三：现代项目管理工具集成</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#版本控制最佳实践"><span class="toc-number">4.</span> <span class="toc-text">版本控制最佳实践</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不同方案的适用场景对比"><span class="toc-number">5.</span> <span class="toc-text">不同方案的适用场景对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常见问题解决方案"><span class="toc-number">6.</span> <span class="toc-text">常见问题解决方案</span></a></li></ol>
     </nav>
   </div>
 </aside>
 
 <main class="main" role="main">
   <div class="content">
-  <article id="post-关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-pip自动写入requirements的终极方案" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案
+      pip自动写入requirements的终极方案
     </h1>
   
 
@@ -346,20 +346,20 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/" class="article-date">
-	  <time datetime="2019-03-23T04:54:30.000Z" itemprop="datePublished">2019-03-23</time>
+	<a href="/2025/03/21/pip自动写入requirements的终极方案/" class="article-date">
+	  <time datetime="2025-03-21T04:50:53.000Z" itemprop="datePublished">2025-03-21</time>
 	</a>
 </span>
         
   <span class="article-category">
     <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/git/">git</a>
+    <a class="article-category-link" href="/categories/python/">python</a>
   </span>
 
         
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link" href="/tags/git/">git</a>, <a class="article-tag-link" href="/tags/hexo/">hexo</a>
+	<a class="article-tag-link" href="/tags/python/">python</a>
   </span>
 
 
@@ -372,27 +372,100 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2025/03/21/pip自动写入requirements的终极方案/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 176(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 772(字)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 3(分)</span>
 	
 
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <h3 id="错误来源"><a href="#错误来源" class="headerlink" title="错误来源"></a>错误来源</h3><p>使用使用hexo部署博客是，遇到以下错误:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">fatal: unable to access &apos;https://github.com/silenceboychen/silenceboychen.github.io.git/&apos;: LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443</span><br><span class="line">FATAL Something&apos;s wrong. Maybe you can find the solution here: http://hexo.io/docs/troubleshooting.html</span><br><span class="line">Error: Spawn failed</span><br><span class="line">    at ChildProcess.&lt;anonymous&gt; (/Users/chenhao/new_start/nodejs/blog/node_modules/hexo-util/lib/spawn.js:52:19)</span><br><span class="line">    at ChildProcess.emit (events.js:182:13)</span><br><span class="line">    at Process.ChildProcess._handle.onexit (internal/child_process.js:239:12)</span><br></pre></td></tr></table></figure>
-<h3 id="两种解决方案："><a href="#两种解决方案：" class="headerlink" title="两种解决方案："></a>两种解决方案：</h3><h4 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h4><p>取消http代理：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git config --global --unset http.proxy</span><br><span class="line">$ git config --global --unset https.proxy</span><br></pre></td></tr></table></figure>
-<p>设置env <code>GIT_SSL_NO_VERIFY</code>为<code>true</code>然后再次部署：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ env GIT_SSL_NO_VERIFY=true hexo d</span><br></pre></td></tr></table></figure>
-<p>问题解决。</p>
-<h4 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h4><p>在hexo项目的根目录下的_config.yml文件中把仓库链接地址由https修改为ssh的地址。</p>
+        <p>在Python开发中，手动维护requirements.txt文件容易遗漏依赖项。本文将介绍三种自动化解决方案，让依赖管理更高效。</p>
+<hr>
+<h3 id="方案一：智能Shell别名（原生pip增强）"><a href="#方案一：智能Shell别名（原生pip增强）" class="headerlink" title="方案一：智能Shell别名（原生pip增强）"></a>方案一：智能Shell别名（原生pip增强）</h3><p><strong>实现原理：</strong> 通过Shell函数封装pip命令，在执行安装后自动更新requirements文件</p>
+<p><strong>配置方法（在.bashrc/.zshrc中添加）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">pip</span></span>() &#123;</span><br><span class="line">    <span class="keyword">if</span> [ <span class="string">"<span class="variable">$1</span>"</span> = <span class="string">"install"</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">command</span> pip <span class="string">"<span class="variable">$@</span>"</span> &amp;&amp; pip freeze --exclude-editable | grep -v <span class="string">'^#'</span> &gt; requirements.txt</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">command</span> pip <span class="string">"<span class="variable">$@</span>"</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>使用示例：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装包并自动记录</span></span><br><span class="line">pip install requests==2.26.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装多个包（支持所有pip参数）</span></span><br><span class="line">pip install django~=3.2.0 celery[redis]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开发模式安装（不会记录到requirements）</span></span><br><span class="line">pip install -e .</span><br></pre></td></tr></table></figure></p>
+<p><strong>方案特点：</strong></p>
+<ul>
+<li>✅ 零依赖，纯Shell实现</li>
+<li>🛡️ 排除<code>-e</code>安装的本地包</li>
+<li>🔍 自动过滤注释行</li>
+<li>⚠️ 注意：会覆盖原有requirements文件</li>
+</ul>
+<hr>
+<h3 id="方案二：pip-autosave工具（专业级自动记录）"><a href="#方案二：pip-autosave工具（专业级自动记录）" class="headerlink" title="方案二：pip-autosave工具（专业级自动记录）"></a>方案二：pip-autosave工具（专业级自动记录）</h3><p><strong>安装使用：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install pip-autosave</span><br></pre></td></tr></table></figure></p>
+<p><strong>使用场景：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基础用法（自动生成requirements.txt）</span></span><br><span class="line">pip install requests --save</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定保存文件</span></span><br><span class="line">pip install pandas --save requirements-dev.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 批量安装并记录</span></span><br><span class="line">pip install -r base-requirements.txt --save</span><br></pre></td></tr></table></figure></p>
+<p><strong>核心功能：</strong></p>
+<ul>
+<li>📦 增量更新模式（保留已有依赖）</li>
+<li>🎯 智能版本锁定（记录精确版本号）</li>
+<li>🔄 支持多环境文件（dev/prod）</li>
+<li>📊 生成依赖关系树可视化：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip show pandas --save --tree</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h3 id="方案三：现代项目管理工具集成"><a href="#方案三：现代项目管理工具集成" class="headerlink" title="方案三：现代项目管理工具集成"></a>方案三：现代项目管理工具集成</h3><p><strong>1. Pipenv工作流：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装并自动更新Pipfile</span></span><br><span class="line">pipenv install requests</span><br><span class="line">pipenv install --dev pytest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成标准requirements文件</span></span><br><span class="line">pipenv requirements &gt; requirements.txt</span><br></pre></td></tr></table></figure></p>
+<p><strong>2. Poetry配置：</strong><br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pyproject.toml 配置示例</span></span><br><span class="line"><span class="section">[tool.poetry.dependencies]</span></span><br><span class="line"><span class="attr">python</span> = <span class="string">"^3.8"</span></span><br><span class="line"><span class="attr">requests</span> = &#123; version = <span class="string">"*"</span>, optional = <span class="literal">true</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="section">[tool.poetry.dev-dependencies]</span></span><br><span class="line"><span class="attr">pytest</span> = <span class="string">"^6.2.5"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出requirements.txt</span></span><br><span class="line">poetry export -f requirements.txt --output requirements.txt</span><br></pre></td></tr></table></figure></p>
+<p><strong>3. Hatch环境管理：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建带自动依赖跟踪的环境</span></span><br><span class="line">hatch env create myenv</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在环境中安装依赖</span></span><br><span class="line">hatch run myenv pip install numpy</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h3 id="版本控制最佳实践"><a href="#版本控制最佳实践" class="headerlink" title="版本控制最佳实践"></a>版本控制最佳实践</h3><ol>
+<li><p><strong>差异化版本记录：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生产依赖</span></span><br><span class="line">pip freeze --exclude-editable | grep -v <span class="string">'pkg-resources==0.0.0'</span> &gt; requirements.txt</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 开发依赖</span></span><br><span class="line">pip freeze --exclude-editable | grep -E <span class="string">'(pytest|coverage)'</span> &gt; requirements-dev.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>依赖树可视化检查：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pipdeptree --exclude pip,pip-autosave,setuptools,wheel</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>安全更新策略：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看过时依赖</span></span><br><span class="line">pip list --outdated --format=columns</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 批量更新命令</span></span><br><span class="line">pip install $(pip list --outdated | awk <span class="string">'NR&gt;2 &#123;print $1&#125;'</span>) --upgrade</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<hr>
+<h3 id="不同方案的适用场景对比"><a href="#不同方案的适用场景对比" class="headerlink" title="不同方案的适用场景对比"></a>不同方案的适用场景对比</h3><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>适用场景</th>
+<th>优势</th>
+<th>局限性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shell别名</td>
+<td>快速原型开发</td>
+<td>无需安装新工具</td>
+<td>功能有限，可能覆盖文件</td>
+</tr>
+<tr>
+<td>pip-autosave</td>
+<td>企业级项目</td>
+<td>精细控制，支持多环境</td>
+<td>需要额外安装</td>
+</tr>
+<tr>
+<td>Pipenv/Poetry</td>
+<td>长期维护的大型项目</td>
+<td>完整依赖解析，支持锁定文件</td>
+<td>学习成本较高</td>
+</tr>
+<tr>
+<td>Hatch</td>
+<td>多环境复杂配置</td>
+<td>集成测试和构建流程</td>
+<td>生态系统较新</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="常见问题解决方案"><a href="#常见问题解决方案" class="headerlink" title="常见问题解决方案"></a>常见问题解决方案</h3><p><strong>Q：如何处理不同操作系统依赖？</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用平台标记</span></span><br><span class="line">pip install pywin32 --save; sys_platform == <span class="string">'win32'</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>Q：如何避免开发工具污染生产依赖？</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用分层requirements文件</span></span><br><span class="line">.</span><br><span class="line">├── requirements</span><br><span class="line">│   ├── base.txt</span><br><span class="line">│   ├── dev.txt</span><br><span class="line">│   └── prod.txt</span><br></pre></td></tr></table></figure></p>
+<p><strong>Q：依赖冲突自动解决示例：</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用版本范围语法</span></span><br><span class="line">Django&gt;=<span class="number">3.2</span>,&lt;<span class="number">4.0</span></span><br><span class="line">requests&gt;=<span class="number">2.25</span><span class="number">.1</span>,!=<span class="number">2.28</span><span class="number">.0</span></span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -402,7 +475,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/" title="关于LibreSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443错误的两种解决方案" target="_blank" rel="external">https://www.silenceboy.com/2019/03/23/关于LibreSSL-SSL-connect-SSL-ERROR-SYSCALL-in-connection-to-github-com-443错误的两种解决方案/</a>
+      <a href="https://www.silenceboy.com/2025/03/21/pip自动写入requirements的终极方案/" title="pip自动写入requirements的终极方案" target="_blank" rel="external">https://www.silenceboy.com/2025/03/21/pip自动写入requirements的终极方案/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -448,13 +521,9 @@
   
   <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/2019/03/26/转-Node-js的模块-exports和module-exports/" title="[转]Node.js的模块-exports和module.exports"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
-    
     
     <li class="next">
-      <a href="/2019/03/21/统计指定目录里的代码行数/" title="统计指定目录里的代码行数"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/2025/03/21/Python虚拟环境创建、激活、管理与最佳实践/" title="Python虚拟环境创建、激活、管理与最佳实践"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
