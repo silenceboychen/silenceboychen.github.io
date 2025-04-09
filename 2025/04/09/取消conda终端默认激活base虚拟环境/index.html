@@ -17,19 +17,21 @@
   <meta http-equiv="window-target" content="_top">
   
   
-  <title>归档: 2022 | morty的个人博客</title>
-  <meta name="description" content="morty的个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="blog">
-<meta property="og:url" content="https://www.silenceboy.com/archives/2022/index.html">
+  <title>取消conda终端默认激活base虚拟环境 | morty的个人博客</title>
+  <meta name="description" content="默认情况下，安装完conda后，每次打开终端都会自动激活base环境。如果你不习惯这一行为，可以通过修改conda的相关配置，使终端启动时不再默认激活base环境。 ▶️ 临时关闭 auto activate (当前终端有效)如果你只是想一次性临时地关闭，可以运行： 1conda deactivate 但是这种方式仅对当前打开的终端临时生效，打开新的终端窗口时，base还是会自动激活。 ✅ 长期永">
+<meta name="keywords" content="python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="取消conda终端默认激活base虚拟环境">
+<meta property="og:url" content="https://www.silenceboy.com/2025/04/09/取消conda终端默认激活base虚拟环境/index.html">
 <meta property="og:site_name" content="blog">
-<meta property="og:description" content="morty的个人博客">
+<meta property="og:description" content="默认情况下，安装完conda后，每次打开终端都会自动激活base环境。如果你不习惯这一行为，可以通过修改conda的相关配置，使终端启动时不再默认激活base环境。 ▶️ 临时关闭 auto activate (当前终端有效)如果你只是想一次性临时地关闭，可以运行： 1conda deactivate 但是这种方式仅对当前打开的终端临时生效，打开新的终端窗口时，base还是会自动激活。 ✅ 长期永">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2025-04-09T10:20:52.786Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="blog">
-<meta name="twitter:description" content="morty的个人博客">
+<meta name="twitter:title" content="取消conda终端默认激活base虚拟环境">
+<meta name="twitter:description" content="默认情况下，安装完conda后，每次打开终端都会自动激活base环境。如果你不习惯这一行为，可以通过修改conda的相关配置，使终端启动时不再默认激活base环境。 ▶️ 临时关闭 auto activate (当前终端有效)如果你只是想一次性临时地关闭，可以运行： 1conda deactivate 但是这种方式仅对当前打开的终端临时生效，打开新的终端窗口时，base还是会自动激活。 ✅ 长期永">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://www.silenceboy.com/archives/2022/index.html">
+  <link rel="canonical" href="https://www.silenceboy.com/2025/04/09/取消conda终端默认激活base虚拟环境/index.html">
   
     <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
   
@@ -318,79 +320,224 @@
 
   
   
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#▶️-临时关闭-auto-activate-当前终端有效"><span class="toc-number">1.</span> <span class="toc-text">▶️ 临时关闭 auto activate (当前终端有效)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#✅-长期永久关闭默认激活-推荐"><span class="toc-number">2.</span> <span class="toc-text">✅ 长期永久关闭默认激活 (推荐)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#📝-如果你后悔了，如何恢复自动激活base？"><span class="toc-number">3.</span> <span class="toc-text">📝 如果你后悔了，如何恢复自动激活base？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#🔍-验证你的配置"><span class="toc-number">4.</span> <span class="toc-text">🔍 验证你的配置</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
 <main class="main" role="main">
-  	<article class="content article article-archives article-type-list" itemscope="">
-	    <header class="article-header">
-	      <h1 itemprop="title">归档: 2022</h1>
-	      <p class="text-muted">共 87 篇文章</p>
-	    </header>
-	    <div class="article-body">
-	      
+  <div class="content">
+  <article id="post-取消conda终端默认激活base虚拟环境" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
   
+    <h1 class="article-title" itemprop="name">
+      取消conda终端默认激活base虚拟环境
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2025/04/09/取消conda终端默认激活base虚拟环境/" class="article-date">
+	  <time datetime="2025-04-09T10:20:02.000Z" itemprop="datePublished">2025-04-09</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/python/">python</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link" href="/tags/python/">python</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2025/04/09/取消conda终端默认激活base虚拟环境/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 345(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>默认情况下，安装完conda后，每次打开终端都会自动激活<code>base</code>环境。如果你不习惯这一行为，可以通过修改conda的相关配置，使终端启动时不再默认激活<code>base</code>环境。</p>
+<h2 id="▶️-临时关闭-auto-activate-当前终端有效"><a href="#▶️-临时关闭-auto-activate-当前终端有效" class="headerlink" title="▶️ 临时关闭 auto activate (当前终端有效)"></a>▶️ 临时关闭 auto activate (当前终端有效)</h2><p>如果你只是想一次性临时地关闭，可以运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
+<p>但是这种方式仅对当前打开的终端临时生效，打开新的终端窗口时，<code>base</code>还是会自动激活。</p>
+<h2 id="✅-长期永久关闭默认激活-推荐"><a href="#✅-长期永久关闭默认激活-推荐" class="headerlink" title="✅ 长期永久关闭默认激活 (推荐)"></a>✅ 长期永久关闭默认激活 (推荐)</h2><p>要永久关闭每次终端自动激活<code>base</code>环境，可以运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda config --<span class="built_in">set</span> auto_activate_base <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p>以上命令会修改conda配置文件<code>~/.condarc</code>，添加如下内容：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">auto_activate_base:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p>以后你每次打开新的终端窗口时，<code>base</code>将不会再自动激活。</p>
+<h2 id="📝-如果你后悔了，如何恢复自动激活base？"><a href="#📝-如果你后悔了，如何恢复自动激活base？" class="headerlink" title="📝 如果你后悔了，如何恢复自动激活base？"></a>📝 如果你后悔了，如何恢复自动激活base？</h2><p>再次启用自动激活：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda config --<span class="built_in">set</span> auto_activate_base <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<h2 id="🔍-验证你的配置"><a href="#🔍-验证你的配置" class="headerlink" title="🔍 验证你的配置"></a>🔍 验证你的配置</h2><p>执行以下命令验证：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda config --show | grep auto_activate_base</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">auto_activate_base:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p>代表成功地关闭了默认激活行为。</p>
+<p>⚠️ <strong>注意</strong>：</p>
+<ul>
+<li>在关闭默认激活之后，如果想激活base或其他虚拟环境，就需要手动运行：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">conda activate base       <span class="comment">#激活base</span></span><br><span class="line">conda activate env_name   <span class="comment">#激活其他环境</span></span><br></pre></td></tr></table></figure>
+<p>按照以上方法，你便可以自由控制conda是否默认激活<code>base</code>环境了。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2025/04/09/取消conda终端默认激活base虚拟环境/" title="取消conda终端默认激活base虚拟环境" target="_blank" rel="external">https://www.silenceboy.com/2025/04/09/取消conda终端默认激活base虚拟环境/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">Backend Developer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
   
     
+  <section id="comments">
+  	
+           
     
-      
-      
-      <section class="panel panel-default b-no">
-        <div class="panel-heading" role="tab">
-          <h3 class="panel-title">
-            <a data-toggle="collapse" href="#collapse2022" aria-expanded="true">
-              <i class="icon icon-calendar-plus text-active"></i><i class="icon icon-calendar-minus text"></i>
-              2022
-            </a>
-            <!-- <a href="/archives/2022" class="archive-year">2022</a> -->
-          </h3>
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2025/04/09/python项目批量检查依赖并添加进requirements文件/" title="python项目批量检查依赖并添加进requirements文件"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div id="collapse2022" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading2022">
-        <div class="panel-body">
-          <div class="collection">
-    
-    
-<a href="/2022/07/12/go语言1-18-go-linkname-must-refer-to-declared-function-or-variable解决办法/" class="collection-item"  target="_blank"   itemprop="url">
-  <time datetime="2022-07-12T06:13:58.000Z" itemprop="datePublished">2022-07-12</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> go语言1.18 go:linkname must refer to declared function or variable解决办法
-</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 
-  
-    
-    
-    
-<a href="/2022/05/20/macbook如何卸载天空卫士/" class="collection-item"  target="_blank"   itemprop="url">
-  <time datetime="2022-05-20T06:07:27.000Z" itemprop="datePublished">2022-05-20</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> macbook如何卸载天空卫士
-</a>
 
-
-  
-    
-    
-    
-<a href="/2022/04/29/mac卸载jdk/" class="collection-item"  target="_blank"   itemprop="url">
-  <time datetime="2022-04-29T09:25:19.000Z" itemprop="datePublished">2022-04-29</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> mac卸载jdk
-</a>
-
-
-  
-    
-    
-    
-<a href="/2022/04/29/docker跨平台打包问题does-not-match-the-detected-host-platform/" class="collection-item"  target="_blank"   itemprop="url">
-  <time datetime="2022-04-29T03:44:40.000Z" itemprop="datePublished">2022-04-29</time>
-  <span>&nbsp;&nbsp;&nbsp;</span> docker跨平台打包问题does not match the detected host platform
-</a>
-
-
-  
-  
-    </div></div></div></section>
-  
-
-	    </div>
-  	</article>
-  	 	
 </main>
 
   <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
@@ -441,6 +588,35 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 
 
 
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
 
 
 
