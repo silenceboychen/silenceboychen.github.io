@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.silenceboy.com/"/>
-  <updated>2025-05-09T05:50:09.722Z</updated>
+  <updated>2025-08-27T05:59:07.894Z</updated>
   <id>https://www.silenceboy.com/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>SSE与Streamable HTTP：MCP 背后的传输技术</title>
+    <link href="https://www.silenceboy.com/2025/08/27/SSE%E4%B8%8EStreamable-HTTP%EF%BC%9AMCP-%E8%83%8C%E5%90%8E%E7%9A%84%E4%BC%A0%E8%BE%93%E6%8A%80%E6%9C%AF/"/>
+    <id>https://www.silenceboy.com/2025/08/27/SSE与Streamable-HTTP：MCP-背后的传输技术/</id>
+    <published>2025-08-27T03:06:46.000Z</published>
+    <updated>2025-08-27T05:59:07.894Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="MCP-使用的传输协议背后的历史"><a href="#MCP-使用的传输协议背后的历史" class="headerlink" title="MCP 使用的传输协议背后的历史"></a>MCP 使用的传输协议背后的历史</h1><p>MCP（模型上下文协议）是当今最流行、应用最广泛的人工智能协议之一，它从 2025-03-26 版本开始，用 <code>Streamable HTTP</code> 取代了 <code>HTTP+SSE</code> 传输机制。这标志着该协议架构的重大变革。</p><p>现在，在解释这两种传输机制的含义之前，让我们先更好地理解这一变化。</p><h2 id="为什么AI协议需要传输机制"><a href="#为什么AI协议需要传输机制" class="headerlink" title="为什么AI协议需要传输机制"></a>为什么AI协议需要传输机制</h2><p>像 MCP 这样的 AI 协议需要传输机制来促进协议架构中不同组件之间的信息交换。</p><p>具体来说，MCP 使用 <code>JSON-RPC 2.0</code> 作为客户端和服务器之间的连接格式。对于 <code>JSON-RPC</code> 消息的传输，它依赖于标准传输机制，如 <code>HTTP+SSE</code> 或 <code>Streamable HTTP</code>（在 stdio 中 - 用于通过本地服务器上的标准输入和标准输出进行通信）。</p><p>这些专用的传输层是必需的，因为传统 HTTP 的请求-响应模型对于实时 AI 通信来说效率低下。这是因为纯 HTTP 频繁建立连接会导致高开销和延迟。相比之下，MCP 需要连续、低延迟的数据流——<code>HTTP+SSE</code> 和 <code>Streamable HTTP</code> 正是为此而设计的。</p><h2 id="为什么从-SSE-转变到-Streamable-HTTP"><a href="#为什么从-SSE-转变到-Streamable-HTTP" class="headerlink" title="为什么从 SSE 转变到 Streamable HTTP"></a>为什么从 <code>SSE</code> 转变到 <code>Streamable HTTP</code></h2><p>MCP 最初使用 <code>HTTP+SSE</code> 来实现远程场景下的服务器到客户端的流式传输。然而，以下三个主要限制使得这一改变变得合理：</p><ul><li><strong>不支持可恢复流</strong>：无法从断开处恢复数据流。</li><li><strong>需要维护长连接</strong>：服务器需要维护长时间的、高可用的连接，消耗资源，尤其是在大 规模部署时。</li><li><strong>仅允许通过 SSE 传递服务器消息</strong>：客户端必须使用单独的 HTTP POST 请求发送消息， 无法在同一通道内双向通信。</li></ul><p><code>Streamable HTTP</code> 解决了这些问题。它支持无状态通信，甚至支持按需升级到 <code>SSE</code>。这提高了与现代基础设施的兼容性，并确保了更稳定、更高效的通信。同时，这一转变体现了 MCP 在追求以下目标：</p><ul><li><strong>提升可伸缩性</strong>：通过支持无状态服务器和减少长连接依赖，MCP 能够更好地应对大规模并发请求，为 AI 服务的爆发式增长提供坚实基础。</li><li><strong>增强鲁棒性</strong>：可恢复流的引入，使得 MCP 在面对不稳定的网络环境时，依然能够保证数据传输的可靠性，减少因网络问题导致的数据丢失或服务中断。</li><li><strong>优化资源利用</strong>：减少长连接的维护成本，使得服务器资源能够更高效地分配和利用，降低运营成本。</li><li><strong>拥抱未来趋势</strong>：Streamable HTTP 与现代 Web 技术栈和云原生架构更加契合，为 MCP 未来的发展和与其他技术的融合提供了更广阔的空间。</li></ul><h1 id="SSE"><a href="#SSE" class="headerlink" title="SSE"></a>SSE</h1><p><code>SSE</code>（Server-Sent Events）是一种允许 Web 客户端从服务器接收自动更新的机制。这些更新被称为“事件”，并通过单个长寿命 HTTP 连接发送。</p><p>与<code>WebSockets</code> 不同，<code>SSE</code> 是单向的，这意味着数据仅从服务器流向客户端。SSE 的工作原理是服务器通过此开放连接发送事件流，通常格式为<code>text/event-stream</code>MIME类型。</p><h2 id="在-MCP-中使用-HTTP-SSE"><a href="#在-MCP-中使用-HTTP-SSE" class="headerlink" title="在 MCP 中使用 HTTP+SSE"></a>在 <code>MCP</code> 中使用 <code>HTTP+SSE</code></h2><p><img src="../images/sse.png" alt="sse"></p><p>服务器必须提供两个端点：</p><ol><li>客户端用于建立连接并从服务器接收消息的 <code>SSE GET</code> 端点。</li><li>客户端向服务器发送 <code>JSON-RPC</code> 消息的常规 <code>HTTP POST</code> 端点。</li></ol><p>当客户端连接时，服务器必须发送一个端点事件，其中包含客户端将用于发送消息的 URI。所有客户端 <code>JSON-RPC</code> 消息都将作为 <code>HTTP POST</code> 请求发送到此 URI。</p><p>服务器通过打开的 <code>SSE</code> 连接发送流式事件来响应，模拟持久会话。具体来说，服务器消息以 <code>SSE</code> 消息事件的形式传递，其内容在事件数据中以 JSON 格式编码。</p><p>对于单个响应，服务器发送消息并关闭流。对于正在进行的通信，连接保持打开状态。</p><h2 id="优点和缺点"><a href="#优点和缺点" class="headerlink" title="优点和缺点"></a>优点和缺点</h2><p>优点：</p><ul><li>流式传输大量结果：允许立即发送部分结果，允许立即发送部分结果，避免 <code>MCP</code> 工具处理大量数据或等待外部 API 响应时的延迟。</li><li>事件驱动触发器：支持未经请求的服务器事件，通过警报或状态更新通知客户端有关更改。</li><li>简单：使用标准 HTTP，无需特殊协议或复杂设置。</li></ul><p>缺点：</p><ul><li>仅限单向：数据只能在 SSE 通道中从服务器流向客户端。客户端必须使用单独的 <code>HTTP POST</code> 请求来发送消息。</li><li>长连接资源使用：维护开放连接会消耗大量服务器资源，尤其是在大规模连接时。</li></ul><h1 id="Streamable-HTTP"><a href="#Streamable-HTTP" class="headerlink" title="Streamable HTTP"></a>Streamable HTTP</h1><p>在 <code>MCP</code> 的语境中，<code>Streamable HTTP</code> 是一种使用纯 HTTP 在客户端和服务器之间传输流式数据的方法。它为实时通信打开了大门，无需长连接。</p><p>虽然它仍然可以使用 <code>SSE</code> 来实现灵活性和向后兼容性，但不再需要该传输方式。这使得 MCP 能够支持无状态服务器，而无需维护高可用性持久连接的开销。</p><blockquote><p>为什么是Streamable HTTP + 可选 SSE 而不是 WebSockets？</p><ol><li>避免不必要的开销：对于简单的 RPC 调用或数据流，WebSocket 的全双工特性可能引入不必要的协议开销和复杂性。Streamable HTTP 在保持流式传输能力的同时，更加轻量。</li><li>更好的 HTTP 兼容性：WebSocket 的协议升级机制有时会与现有的 HTTP 基础设施（如代理、负载均衡器）产生兼容性问题，并且浏览器无法直接在 WebSocket 连接上附加 HTTP 头（如 Authorization）。Streamable HTTP 则完全兼容 HTTP，避免了这些问题。</li><li>POST 请求的灵活性：WebSocket 的升级握手主要基于 GET 请求，这使得基于 POST 的复杂交互流程实现起来较为繁琐。Streamable HTTP 则对 POST 和 GET 请求都提供了良好的支持。</li></ol></blockquote><h2 id="在-MCP-中使用-Streamable-HTTP"><a href="#在-MCP-中使用-Streamable-HTTP" class="headerlink" title="在 MCP 中使用 Streamable HTTP"></a>在 <code>MCP</code> 中使用 <code>Streamable HTTP</code></h2><p>在 <code>Streamable HTTP</code> 传输中，服务器作为一个独立进程，能够处理多个客户端连接。它使用标准的 HTTP <code>POST</code> 和 <code>GET</code> 请求进行通信。</p><p>服务器可以选择使用 <code>SSE</code> 将多条消息流式传输到客户端。这既适用于用于简单请求/响应工具的基本 MCP 服务器，也适用于提供更高级功能（例如流式传输和实时服务器到客户端通知）的服务器。</p><p>服务器必须公开一个支持 <code>POST</code> 和 <code>GET</code> 方法的 HTTP 端点（称为 “MCP 端点“）。</p><p>下图说明了使用 <code>Streamable HTTP</code> 的 MCP 客户端和服务器之间的通信流程：</p><p><img src="../images/streamable-http.png" alt></p><p>为了支持恢复断开的连接并重新传递可能丢失的消息，MCP 服务器会为每个流分配 ID。这些 ID 在每个流中充当游标。</p><h2 id="优点和缺点-1"><a href="#优点和缺点-1" class="headerlink" title="优点和缺点"></a>优点和缺点</h2><p>优点：</p><ul><li>支持无状态服务器：无需始终在线的长连接。</li><li>纯 HTTP：可以使用任何标准 HTTP 服务器实现，而无需 <code>SSE</code>。</li><li>基础设施友好：与常见的 HTTP 中间件、代理和托管平台兼容。</li><li>向后兼容：在以前的 <code>HTTP+SSE</code> 传输基础上逐步构建。</li><li>可选流式传输：服务器可在需要时升级为 <code>SSE</code>，以实现流式传输响应。</li><li>解决 SSE 局限性：支持可恢复流，无需维护长连接，且允许客户端和服务器在同一 HTTP 端点进行通信（通过 POST 和 GET）。</li><li>效率更高：对于大负载或自定义二进制协议，数据传输更高效，没有 SSE 的事件格式 开销。</li><li>更强的控制力：应用可以更精细地控制缓冲策略，可能减少内存开销。</li></ul><p>缺点：</p><ul><li>暂无</li></ul><h1 id="SSE-与Streamable-HTTP对比"><a href="#SSE-与Streamable-HTTP对比" class="headerlink" title="SSE 与Streamable HTTP对比"></a>SSE 与Streamable HTTP对比</h1><table><thead><tr><th>类型</th><th>HTTP+SSE</th><th>Streamable HTTP</th></tr></thead><tbody><tr><td>通信类型</td><td>单向（服务器→客户端）</td><td>双向（客户端通过 GET/POST ↔ 服务器）</td></tr><tr><td>HTTP 协议的使用</td><td>GET 用于流媒体，POST 用于客户端信息</td><td>从一个端点使用标准 HTTP POST 和 GET</td></tr><tr><td>状态性</td><td>有状态</td><td>有状态，但支持无状态服务器</td></tr><tr><td>需要长期 HTTP 连接</td><td>是</td><td>否</td></tr><tr><td>要求高可用性</td><td>是，用于连接持久性</td><td>否，适用于无状态或临时服务器</td></tr><tr><td>可扩展性</td><td>有限</td><td>高</td></tr><tr><td>流媒体支持</td><td>是（通过文本/事件流）</td><td>是（通过 SSE 作为可选增强功能）</td></tr><tr><td>身份验证支持</td><td>是</td><td>是</td></tr><tr><td>支持可恢复性和重新交付</td><td>没有</td><td>没有</td></tr><tr><td>客户数量</td><td>多个</td><td>多个</td></tr><tr><td>在 MCP 中的使用</td><td>自协议版本 2025-03-26 起已弃用</td><td>在 2025-03-26 版协议中引入</td></tr><tr><td>向后兼容性</td><td>-</td><td>完全向后兼容基于 SSE 的客户端</td></tr></tbody></table>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;MCP-使用的传输协议背后的历史&quot;&gt;&lt;a href=&quot;#MCP-使用的传输协议背后的历史&quot; class=&quot;headerlink&quot; title=&quot;MCP 使用的传输协议背后的历史&quot;&gt;&lt;/a&gt;MCP 使用的传输协议背后的历史&lt;/h1&gt;&lt;p&gt;MCP（模型上下文协议）是当
+      
+    
+    </summary>
+    
+      <category term="mcp" scheme="https://www.silenceboy.com/categories/mcp/"/>
+    
+    
+      <category term="mcp" scheme="https://www.silenceboy.com/tags/mcp/"/>
+    
+      <category term="AI" scheme="https://www.silenceboy.com/tags/AI/"/>
+    
+  </entry>
   
   <entry>
     <title>命令帮手：tldr 安装与中文配置指南</title>
@@ -534,31 +561,6 @@
     
     
       <category term="go" scheme="https://www.silenceboy.com/tags/go/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ubuntu20.04禁用搜狗输入法繁简体快捷键设置</title>
-    <link href="https://www.silenceboy.com/2023/06/14/ubuntu20-04%E7%A6%81%E7%94%A8%E6%90%9C%E7%8B%97%E8%BE%93%E5%85%A5%E6%B3%95%E7%B9%81%E7%AE%80%E4%BD%93%E5%BF%AB%E6%8D%B7%E9%94%AE%E8%AE%BE%E7%BD%AE/"/>
-    <id>https://www.silenceboy.com/2023/06/14/ubuntu20-04禁用搜狗输入法繁简体快捷键设置/</id>
-    <published>2023-06-14T03:00:52.000Z</published>
-    <updated>2023-07-21T05:36:57.831Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近在ubuntu20.04系统上安装了搜狗输入法之后，发现<code>vscode，idea，golang</code>等编辑器的全局搜索快捷键<code>Ctrl+Shift+F</code>无法使用了，经排查发现是因为搜狗输入法占用了该快捷键，是搜狗输入法的繁简体切换快捷键。打开搜狗输入法的设置页面可以在高级选项里看到。</p><p><img src="/../images/2023-06-14_11-07.png" alt></p><p>但是在设置里取消简繁切换快捷键的勾选保存之后发现无效果，快捷键依然被占用。</p><p>正确的解决方案是：</p><ol><li>修改搜狗输入法配置文件</li></ol><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ vim ~/.config/sogoupinyin/conf/env.ini</span><br></pre></td></tr></table></figure><p>找到<code>ShortCutFanJian</code>配置，将值改为0；默认1，等于开启；改为0表示关闭</p><ol start="2"><li>打开系统输入法配置</li></ol><p><img src="/../images/2023-06-14_13-23.png" alt></p><ol start="3"><li><p>附加组件中找到简繁转换，点击配置<br><img src="/../images/2023-06-14_13-25.png" alt></p></li><li><p>将默认快捷键设置为空, 保存即可。<br><img src="/../images/2023-06-14_13-26.png" alt></p></li></ol><p>如果发现未生效，需要重启电脑。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;最近在ubuntu20.04系统上安装了搜狗输入法之后，发现&lt;code&gt;vscode，idea，golang&lt;/code&gt;等编辑器的全局搜索快捷键&lt;code&gt;Ctrl+Shift+F&lt;/code&gt;无法使用了，经排查发现是因为搜狗输入法占用了该快捷键，是搜狗输入法的繁简体切换
-      
-    
-    </summary>
-    
-      <category term="linux" scheme="https://www.silenceboy.com/categories/linux/"/>
-    
-    
-      <category term="linux" scheme="https://www.silenceboy.com/tags/linux/"/>
     
   </entry>
   
