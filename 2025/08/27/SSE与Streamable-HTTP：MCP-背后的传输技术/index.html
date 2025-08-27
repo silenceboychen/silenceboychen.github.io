@@ -26,13 +26,13 @@
 <meta property="og:site_name" content="blog">
 <meta property="og:description" content="MCP 使用的传输协议背后的历史MCP（模型上下文协议）是当今最流行、应用最广泛的人工智能协议之一，它从 2025-03-26 版本开始，用 Streamable HTTP 取代了 HTTP+SSE 传输机制。这标志着该协议架构的重大变革。 现在，在解释这两种传输机制的含义之前，让我们先更好地理解这一变化。 为什么AI协议需要传输机制像 MCP 这样的 AI 协议需要传输机制来促进协议架构中不同组">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://www.silenceboy.com/2025/08/27/images/sse.png">
-<meta property="og:image" content="https://www.silenceboy.com/2025/08/27/images/streamable-http.png">
-<meta property="og:updated_time" content="2025-08-27T05:59:07.894Z">
+<meta property="og:image" content="https://www.silenceboy.com/images/sse.png">
+<meta property="og:image" content="https://www.silenceboy.com/images/streamable-http.png">
+<meta property="og:updated_time" content="2025-08-27T06:47:45.749Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SSE与Streamable HTTP：MCP 背后的传输技术">
 <meta name="twitter:description" content="MCP 使用的传输协议背后的历史MCP（模型上下文协议）是当今最流行、应用最广泛的人工智能协议之一，它从 2025-03-26 版本开始，用 Streamable HTTP 取代了 HTTP+SSE 传输机制。这标志着该协议架构的重大变革。 现在，在解释这两种传输机制的含义之前，让我们先更好地理解这一变化。 为什么AI协议需要传输机制像 MCP 这样的 AI 协议需要传输机制来促进协议架构中不同组">
-<meta name="twitter:image" content="https://www.silenceboy.com/2025/08/27/images/sse.png">
+<meta name="twitter:image" content="https://www.silenceboy.com/images/sse.png">
   <!-- Canonical links -->
   <link rel="canonical" href="https://www.silenceboy.com/2025/08/27/SSE与Streamable-HTTP：MCP-背后的传输技术/index.html">
   
@@ -408,7 +408,7 @@
 </ul>
 <h1 id="SSE"><a href="#SSE" class="headerlink" title="SSE"></a>SSE</h1><p><code>SSE</code>（Server-Sent Events）是一种允许 Web 客户端从服务器接收自动更新的机制。这些更新被称为“事件”，并通过单个长寿命 HTTP 连接发送。</p>
 <p>与<code>WebSockets</code> 不同，<code>SSE</code> 是单向的，这意味着数据仅从服务器流向客户端。SSE 的工作原理是服务器通过此开放连接发送事件流，通常格式为<code>text/event-stream</code>MIME类型。</p>
-<h2 id="在-MCP-中使用-HTTP-SSE"><a href="#在-MCP-中使用-HTTP-SSE" class="headerlink" title="在 MCP 中使用 HTTP+SSE"></a>在 <code>MCP</code> 中使用 <code>HTTP+SSE</code></h2><p><img src="../images/sse.png" alt="sse"></p>
+<h2 id="在-MCP-中使用-HTTP-SSE"><a href="#在-MCP-中使用-HTTP-SSE" class="headerlink" title="在 MCP 中使用 HTTP+SSE"></a>在 <code>MCP</code> 中使用 <code>HTTP+SSE</code></h2><p><img src="/../images/sse.png" alt="sse"></p>
 <p>服务器必须提供两个端点：</p>
 <ol>
 <li>客户端用于建立连接并从服务器接收消息的 <code>SSE GET</code> 端点。</li>
@@ -442,7 +442,7 @@
 <p>服务器可以选择使用 <code>SSE</code> 将多条消息流式传输到客户端。这既适用于用于简单请求/响应工具的基本 MCP 服务器，也适用于提供更高级功能（例如流式传输和实时服务器到客户端通知）的服务器。</p>
 <p>服务器必须公开一个支持 <code>POST</code> 和 <code>GET</code> 方法的 HTTP 端点（称为 “MCP 端点“）。</p>
 <p>下图说明了使用 <code>Streamable HTTP</code> 的 MCP 客户端和服务器之间的通信流程：</p>
-<p><img src="../images/streamable-http.png" alt></p>
+<p><img src="/../images/streamable-http.png" alt="streamable-http"></p>
 <p>为了支持恢复断开的连接并重新传递可能丢失的消息，MCP 服务器会为每个流分配 ID。这些 ID 在每个流中充当游标。</p>
 <h2 id="优点和缺点-1"><a href="#优点和缺点-1" class="headerlink" title="优点和缺点"></a>优点和缺点</h2><p>优点：</p>
 <ul>
