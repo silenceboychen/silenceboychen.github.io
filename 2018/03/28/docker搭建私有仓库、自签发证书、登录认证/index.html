@@ -1,53 +1,55 @@
 <!DOCTYPE html>
 <html lang=zh>
-<head><meta name="generator" content="Hexo 3.9.0">
+<head>
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
   <meta name="renderer" content="webkit">
-  <meta http-equiv="Cache-Control" content="no-transform">
-  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="format-detection" content="telephone=no,email=no,adress=no">
   <!-- Color theme for statusbar -->
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#000000" />
   <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
-  <meta http-equiv="window-target" content="_top">
+  <meta http-equiv="window-target" content="_top" />
   
   
   <title>docker搭建私有仓库、自签发证书、登录认证 | morty的个人博客</title>
-  <meta name="description" content="docker官方文档对如何搭建私有仓库说的已经很详细了，我在这里主要介绍一下使用自签发证书如何搭建私有仓库并认证成功。  假设registry的域名为：registry.domain.com。  生成自签发证书。12&amp;gt; mkdir -p certs&amp;gt; openssl req -newkey rsa:2048 -nodes -sha256 -keyout certs/domain.key">
-<meta name="keywords" content="docker">
+  <meta name="description" content="docker官方文档对如何搭建私有仓库说的已经很详细了，我在这里主要介绍一下使用自签发证书如何搭建私有仓库并认证成功。  假设registry的域名为：registry.domain.com。  生成自签发证书。12&gt; mkdir -p certs&gt; openssl req -newkey rsa:2048 -nodes -sha256 -keyout certs&#x2F;domain.key">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker搭建私有仓库、自签发证书、登录认证">
-<meta property="og:url" content="https://www.silenceboy.com/2018/03/28/docker搭建私有仓库、自签发证书、登录认证/index.html">
+<meta property="og:url" content="https://www.silenceboy.com/2018/03/28/docker%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E3%80%81%E8%87%AA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6%E3%80%81%E7%99%BB%E5%BD%95%E8%AE%A4%E8%AF%81/index.html">
 <meta property="og:site_name" content="blog">
-<meta property="og:description" content="docker官方文档对如何搭建私有仓库说的已经很详细了，我在这里主要介绍一下使用自签发证书如何搭建私有仓库并认证成功。  假设registry的域名为：registry.domain.com。  生成自签发证书。12&amp;gt; mkdir -p certs&amp;gt; openssl req -newkey rsa:2048 -nodes -sha256 -keyout certs/domain.key">
-<meta property="og:locale" content="zh-CN">
+<meta property="og:description" content="docker官方文档对如何搭建私有仓库说的已经很详细了，我在这里主要介绍一下使用自签发证书如何搭建私有仓库并认证成功。  假设registry的域名为：registry.domain.com。  生成自签发证书。12&gt; mkdir -p certs&gt; openssl req -newkey rsa:2048 -nodes -sha256 -keyout certs&#x2F;domain.key">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://www.silenceboy.com/images/openssl.png">
-<meta property="og:updated_time" content="2021-09-27T07:27:40.439Z">
+<meta property="article:published_time" content="2018-03-28T01:24:21.000Z">
+<meta property="article:modified_time" content="2021-09-27T07:27:40.000Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="docker">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="docker搭建私有仓库、自签发证书、登录认证">
-<meta name="twitter:description" content="docker官方文档对如何搭建私有仓库说的已经很详细了，我在这里主要介绍一下使用自签发证书如何搭建私有仓库并认证成功。  假设registry的域名为：registry.domain.com。  生成自签发证书。12&amp;gt; mkdir -p certs&amp;gt; openssl req -newkey rsa:2048 -nodes -sha256 -keyout certs/domain.key">
 <meta name="twitter:image" content="https://www.silenceboy.com/images/openssl.png">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://www.silenceboy.com/2018/03/28/docker搭建私有仓库、自签发证书、登录认证/index.html">
+  <link rel="canonical" href="https://www.silenceboy.com/2018/03/28/docker%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E3%80%81%E8%87%AA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6%E3%80%81%E7%99%BB%E5%BD%95%E8%AE%A4%E8%AF%81/index.html">
   
     <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
   
-  <link rel="stylesheet" href="/css/style.css">
+  
+<link rel="stylesheet" href="/css/style.css">
+
   
   
   
   
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
   
-</head>
+<meta name="generator" content="Hexo 7.2.0"></head>
 
 
 <body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
@@ -205,7 +207,7 @@
   <div class="widget">
     <h3 class="widget-title">分类</h3>
     <div class="widget-body">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/代码扫描/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a><span class="category-list-count">3</span></li></ul>
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
     </div>
   </div>
 
@@ -215,7 +217,7 @@
   <div class="widget">
     <h3 class="widget-title">标签</h3>
     <div class="widget-body">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/">AI</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码扫描/">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/天空卫士/">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/录音/">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/正则表达式/">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/语言识别/">语言识别</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -225,7 +227,7 @@
   <div class="widget">
     <h3 class="widget-title">标签云</h3>
     <div class="widget-body tagcloud">
-      <a href="/tags/AI/" style="font-size: 13.11px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/SoC/" style="font-size: 13.11px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.11px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.78px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.11px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.22px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.67px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.11px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.89px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.11px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.56px;">linux</a> <a href="/tags/mac/" style="font-size: 13.33px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.44px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.11px;">npm</a> <a href="/tags/php/" style="font-size: 13.33px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.44px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.22px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.22px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.11px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/代码扫描/" style="font-size: 13px;">代码扫描</a> <a href="/tags/天空卫士/" style="font-size: 13px;">天空卫士</a> <a href="/tags/录音/" style="font-size: 13px;">录音</a> <a href="/tags/正则表达式/" style="font-size: 13px;">正则表达式</a> <a href="/tags/算法/" style="font-size: 13.22px;">算法</a> <a href="/tags/语言识别/" style="font-size: 13px;">语言识别</a>
+      <a href="/tags/AI/" style="font-size: 13.11px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/SoC/" style="font-size: 13.11px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.11px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.78px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.11px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.22px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.67px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.11px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.89px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.11px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.56px;">linux</a> <a href="/tags/mac/" style="font-size: 13.33px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.44px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.11px;">npm</a> <a href="/tags/php/" style="font-size: 13.33px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.44px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.22px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.22px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.11px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.22px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
     </div>
   </div>
 
@@ -253,7 +255,7 @@
                 <a class="category-link" href="/categories/autosar/">autosar</a>
               </p>
               <p class="item-title">
-                <a href="/2025/09/05/fidl和arxml互转教程/" class="title">fidl和arxml互转教程</a>
+                <a href="/2025/09/05/fidl%E5%92%8Carxml%E4%BA%92%E8%BD%AC%E6%95%99%E7%A8%8B/" class="title">fidl和arxml互转教程</a>
               </p>
               <p class="item-date">
                 <time datetime="2025-09-05T09:56:31.000Z" itemprop="datePublished">2025-09-05</time>
@@ -268,7 +270,7 @@
                 <a class="category-link" href="/categories/AI/">AI</a>
               </p>
               <p class="item-title">
-                <a href="/2025/09/05/AI编码工具对比分析/" class="title">AI编码工具对比分析</a>
+                <a href="/2025/09/05/AI%E7%BC%96%E7%A0%81%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/" class="title">AI编码工具对比分析</a>
               </p>
               <p class="item-date">
                 <time datetime="2025-09-05T09:16:49.000Z" itemprop="datePublished">2025-09-05</time>
@@ -283,7 +285,7 @@
                 <a class="category-link" href="/categories/mcp/">mcp</a>
               </p>
               <p class="item-title">
-                <a href="/2025/08/27/SSE与Streamable-HTTP：MCP-背后的传输技术/" class="title">SSE与Streamable HTTP：MCP 背后的传输技术</a>
+                <a href="/2025/08/27/SSE%E4%B8%8EStreamable-HTTP%EF%BC%9AMCP-%E8%83%8C%E5%90%8E%E7%9A%84%E4%BC%A0%E8%BE%93%E6%8A%80%E6%9C%AF/" class="title">SSE与Streamable HTTP：MCP 背后的传输技术</a>
               </p>
               <p class="item-date">
                 <time datetime="2025-08-27T03:06:46.000Z" itemprop="datePublished">2025-08-27</time>
@@ -298,7 +300,7 @@
                 <a class="category-link" href="/categories/shell/">shell</a>
               </p>
               <p class="item-title">
-                <a href="/2025/05/09/命令帮手：tldr-安装与中文配置指南/" class="title">命令帮手：tldr 安装与中文配置指南</a>
+                <a href="/2025/05/09/%E5%91%BD%E4%BB%A4%E5%B8%AE%E6%89%8B%EF%BC%9Atldr-%E5%AE%89%E8%A3%85%E4%B8%8E%E4%B8%AD%E6%96%87%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97/" class="title">命令帮手：tldr 安装与中文配置指南</a>
               </p>
               <p class="item-date">
                 <time datetime="2025-05-09T05:39:38.000Z" itemprop="datePublished">2025-05-09</time>
@@ -313,7 +315,7 @@
                 <a class="category-link" href="/categories/python/">python</a>
               </p>
               <p class="item-title">
-                <a href="/2025/04/25/Python魔法方法介绍/" class="title">Python魔法方法介绍</a>
+                <a href="/2025/04/25/Python%E9%AD%94%E6%B3%95%E6%96%B9%E6%B3%95%E4%BB%8B%E7%BB%8D/" class="title">Python魔法方法介绍</a>
               </p>
               <p class="item-date">
                 <time datetime="2025-04-25T06:34:11.000Z" itemprop="datePublished">2025-04-25</time>
@@ -336,7 +338,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#生成自签发证书。"><span class="toc-number">1.</span> <span class="toc-text">生成自签发证书。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#生成鉴权密码文件"><span class="toc-number">2.</span> <span class="toc-text">生成鉴权密码文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动Registry"><span class="toc-number">3.</span> <span class="toc-text">启动Registry</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E8%87%AA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6%E3%80%82"><span class="toc-number">1.</span> <span class="toc-text">生成自签发证书。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E9%89%B4%E6%9D%83%E5%AF%86%E7%A0%81%E6%96%87%E4%BB%B6"><span class="toc-number">2.</span> <span class="toc-text">生成鉴权密码文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8Registry"><span class="toc-number">3.</span> <span class="toc-text">启动Registry</span></a></li></ol>
     </nav>
   </div>
 </aside>
@@ -358,7 +360,7 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2018/03/28/docker搭建私有仓库、自签发证书、登录认证/" class="article-date">
+	<a href="/2018/03/28/docker%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E3%80%81%E8%87%AA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6%E3%80%81%E7%99%BB%E5%BD%95%E8%AE%A4%E8%AF%81/" class="article-date">
 	  <time datetime="2018-03-28T01:24:21.000Z" itemprop="datePublished">2018-03-28</time>
 	</a>
 </span>
@@ -371,7 +373,7 @@
         
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link" href="/tags/docker/">docker</a>
+	<a class="article-tag-link-link" href="/tags/docker/" rel="tag">docker</a>
   </span>
 
 
@@ -384,10 +386,10 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/03/28/docker搭建私有仓库、自签发证书、登录认证/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2018/03/28/docker%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E3%80%81%E8%87%AA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6%E3%80%81%E7%99%BB%E5%BD%95%E8%AE%A4%E8%AF%81/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 722(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 724(字)</span>
 	
 	
 		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 3(分)</span>
@@ -401,21 +403,25 @@
 <blockquote>
 <p>假设registry的域名为：registry.domain.com。</p>
 </blockquote>
-<h3 id="生成自签发证书。"><a href="#生成自签发证书。" class="headerlink" title="生成自签发证书。"></a>生成自签发证书。</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; mkdir -p certs</span><br><span class="line">&gt; openssl req -newkey rsa:2048 -nodes -sha256 -keyout certs/domain.key -x509 -days 365 -out certs/domain.crt</span><br></pre></td></tr></table></figure>
+<h3 id="生成自签发证书。"><a href="#生成自签发证书。" class="headerlink" title="生成自签发证书。"></a>生成自签发证书。</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; mkdir -p certs</span><br><span class="line">&gt; openssl req -newkey rsa:2048 -nodes -sha256 -keyout certs/domain.key -x509 -days 365 -out certs/domain.crt</span><br></pre></td></tr></table></figure>
 <p>执行以上命令，生成证书，Common Name那里要输入我们registry的域名，生成的证书只对该域名有效。其他的可以任意填。生成后可以在certs目录下查看到证书。</p>
-<p><img src="/../images/openssl.png" alt></p>
+<p><img src="/../images/openssl.png"></p>
 <h3 id="生成鉴权密码文件"><a href="#生成鉴权密码文件" class="headerlink" title="生成鉴权密码文件"></a>生成鉴权密码文件</h3><blockquote>
-<p>注意使用时username替换为你自己的用户名，password替换为你自己的密码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir auth</span><br><span class="line">$ docker run --entrypoint htpasswd registry:2 -Bbn username password  &gt; auth/htpasswd</span><br><span class="line">$ ls auth</span><br></pre></td></tr></table></figure></p>
+<p>注意使用时username替换为你自己的用户名，password替换为你自己的密码。</p>
 </blockquote>
-<h3 id="启动Registry"><a href="#启动Registry" class="headerlink" title="启动Registry"></a>启动Registry</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5000:5000 --restart=always --name registry \</span><br><span class="line">   -v `pwd`/auth:/auth \</span><br><span class="line">   -e &quot;REGISTRY_AUTH=htpasswd&quot; \</span><br><span class="line">   -e &quot;REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm&quot; \</span><br><span class="line">   -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \</span><br><span class="line">   -v `pwd`/data:/var/lib/registry \</span><br><span class="line">   -v `pwd`/certs:/certs \</span><br><span class="line">   -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \</span><br><span class="line">   -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \</span><br><span class="line">   registry:2</span><br><span class="line">199ad0b3591fb9613b21b1c96f017267f3c39661a7025d30df636c6805e7ab50</span><br></pre></td></tr></table></figure>
-<p>如果没有registry镜像会自动下载然后启动，可以使用阿里云提供的加速器。<br>现在完成了registry服务器的搭建，可以尝试pull image到registry：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull busybox  // 从官方拉去镜像作为我们的测试镜像</span><br><span class="line">$ docker tag busybox:latest registry.domain.com:5000/busybox:latest // 为busybox打tag,tag的前缀一定要为我们registry服务器的域名。</span><br><span class="line">$ docker push registry.domain.com:5000/busybox:latest  // 将镜像推送到我们的registry服务器</span><br></pre></td></tr></table></figure></p>
-<p>如果直接这样去push，会失败，并且出现 <code>no basic auth credentials</code>的错误，这是因为我们没有进行登录认证。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ docker login registry.domain.com:5000</span><br><span class="line">$ Username: username</span><br><span class="line">$ Password: password</span><br><span class="line">WARNING: login credentials saved in ~/.docker/config.json</span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure></p>
-<p>登录成功后再次执行push操作，会出现<code>x509: certificate signed by unknown authority</code>的报错。这是因为docker client认为server传输过来的证书的签署方是一个unknown authority（未知的CA），因此验证失败。我们需要让docker client安装我们的CA证书：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir -p /etc/docker/certs.d/registry.domain.com:5000</span><br><span class="line">$ sudo cp certs/domain.crt /etc/docker/certs.d/registry.domain.com:5000/ca.crt</span><br><span class="line">$ sudo service docker restart //安装证书后，重启Docker Daemon</span><br></pre></td></tr></table></figure></p>
-<p>再次执行push操作，成功推送：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ docker push registry.domain.com:5000/busybox:latest</span><br><span class="line">The push refers to a repository [registry.domain.com:5000/busybox]</span><br><span class="line">0271b8eebde3: Pushed</span><br><span class="line">latest: digest: sha256:3571ca1b0e90e159de4fc07b3bf94ef189a0645314704f629204adb7035ecf45 size: 527</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir auth</span><br><span class="line">$ docker run --entrypoint htpasswd registry:2 -Bbn username password  &gt; auth/htpasswd</span><br><span class="line">$ ls auth</span><br></pre></td></tr></table></figure>
+<h3 id="启动Registry"><a href="#启动Registry" class="headerlink" title="启动Registry"></a>启动Registry</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5000:5000 --restart=always --name registry \</span><br><span class="line">   -v `pwd`/auth:/auth \</span><br><span class="line">   -e &quot;REGISTRY_AUTH=htpasswd&quot; \</span><br><span class="line">   -e &quot;REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm&quot; \</span><br><span class="line">   -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \</span><br><span class="line">   -v `pwd`/data:/var/lib/registry \</span><br><span class="line">   -v `pwd`/certs:/certs \</span><br><span class="line">   -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \</span><br><span class="line">   -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key \</span><br><span class="line">   registry:2</span><br><span class="line">199ad0b3591fb9613b21b1c96f017267f3c39661a7025d30df636c6805e7ab50</span><br></pre></td></tr></table></figure>
+<p>如果没有registry镜像会自动下载然后启动，可以使用阿里云提供的加速器。<br>现在完成了registry服务器的搭建，可以尝试pull image到registry：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker pull busybox  // 从官方拉去镜像作为我们的测试镜像</span><br><span class="line">$ docker tag busybox:latest registry.domain.com:5000/busybox:latest // 为busybox打tag,tag的前缀一定要为我们registry服务器的域名。</span><br><span class="line">$ docker push registry.domain.com:5000/busybox:latest  // 将镜像推送到我们的registry服务器</span><br></pre></td></tr></table></figure>
+<p>如果直接这样去push，会失败，并且出现 <code>no basic auth credentials</code>的错误，这是因为我们没有进行登录认证。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ docker login registry.domain.com:5000</span><br><span class="line">$ Username: username</span><br><span class="line">$ Password: password</span><br><span class="line">WARNING: login credentials saved in ~/.docker/config.json</span><br><span class="line">Login Succeeded</span><br></pre></td></tr></table></figure>
+<p>登录成功后再次执行push操作，会出现<code>x509: certificate signed by unknown authority</code>的报错。这是因为docker client认为server传输过来的证书的签署方是一个unknown authority（未知的CA），因此验证失败。我们需要让docker client安装我们的CA证书：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir -p /etc/docker/certs.d/registry.domain.com:5000</span><br><span class="line">$ sudo cp certs/domain.crt /etc/docker/certs.d/registry.domain.com:5000/ca.crt</span><br><span class="line">$ sudo service docker restart //安装证书后，重启Docker Daemon</span><br></pre></td></tr></table></figure>
+<p>再次执行push操作，成功推送：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ docker push registry.domain.com:5000/busybox:latest</span><br><span class="line">The push refers to a repository [registry.domain.com:5000/busybox]</span><br><span class="line">0271b8eebde3: Pushed</span><br><span class="line">latest: digest: sha256:3571ca1b0e90e159de4fc07b3bf94ef189a0645314704f629204adb7035ecf45 size: 527</span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>这里需要注意：如果使用自签署的证书，那么所有要与Registry交互的Docker主机都需要安装registry.domain.com的ca.crt(domain.crt)。但如果你使用知名CA，这一步也就可以忽略。如果是MacOS版的docker也是一样的操作，尽管它连/etc/docker都不存在,一样去创建目录就好了。只是macOS的用户想要认证生效需要执行额外的命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /etc/docker/certs.d/registry.domain.com:5000/ca.crt</span><br></pre></td></tr></table></figure></p>
-</blockquote>
-<blockquote>
+<p>这里需要注意：如果使用自签署的证书，那么所有要与Registry交互的Docker主机都需要安装registry.domain.com的ca.crt(domain.crt)。但如果你使用知名CA，这一步也就可以忽略。如果是MacOS版的docker也是一样的操作，尽管它连&#x2F;etc&#x2F;docker都不存在,一样去创建目录就好了。只是macOS的用户想要认证生效需要执行额外的命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /etc/docker/certs.d/registry.domain.com:5000/ca.crt</span><br></pre></td></tr></table></figure>
 <p>此时在mac上执行docker login才可成功。</p>
 </blockquote>
 
@@ -427,7 +433,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="https://www.silenceboy.com/2018/03/28/docker搭建私有仓库、自签发证书、登录认证/" title="docker搭建私有仓库、自签发证书、登录认证" target="_blank" rel="external">https://www.silenceboy.com/2018/03/28/docker搭建私有仓库、自签发证书、登录认证/</a>
+      <a href="https://www.silenceboy.com/2018/03/28/docker%E6%90%AD%E5%BB%BA%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E3%80%81%E8%87%AA%E7%AD%BE%E5%8F%91%E8%AF%81%E4%B9%A6%E3%80%81%E7%99%BB%E5%BD%95%E8%AE%A4%E8%AF%81/" title="docker搭建私有仓库、自签发证书、登录认证" target="_blank" rel="external">https://www.silenceboy.com/2018/03/28/docker搭建私有仓库、自签发证书、登录认证/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -474,12 +480,12 @@
   <ul class="pager pull-left">
     
     <li class="prev">
-      <a href="/2018/04/08/mysql，sql-server等数据库连接集成库/" title="mysql，sql server等数据库连接集成库"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+      <a href="/2018/04/08/mysql%EF%BC%8Csql-server%E7%AD%89%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E9%9B%86%E6%88%90%E5%BA%93/" title="mysql，sql server等数据库连接集成库"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
     </li>
     
     
     <li class="next">
-      <a href="/2018/01/28/容联云发送短信模块/" title="容联云发送短信模块"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/2018/01/28/%E5%AE%B9%E8%81%94%E4%BA%91%E5%8F%91%E9%80%81%E7%9F%AD%E4%BF%A1%E6%A8%A1%E5%9D%97/" title="容联云发送短信模块"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
@@ -579,8 +585,12 @@
 <script>
 window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
 </script>
+
 <script src="/js/plugin.min.js"></script>
+
+
 <script src="/js/application.js"></script>
+
 
     <script>
 (function (window) {
@@ -598,7 +608,9 @@ window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
     window.INSIGHT_CONFIG = INSIGHT_CONFIG;
 })(window);
 </script>
+
 <script src="/js/insight.js"></script>
+
 
 
 
