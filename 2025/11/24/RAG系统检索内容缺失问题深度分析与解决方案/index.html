@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>RAG系统检索内容缺失问题深度分析与解决方案 | morty的个人博客</title>
+  <meta name="description" content="在构建和部署RAG（Retrieval-Augmented Generation，检索增强生成）系统的过程中，内容缺失问题是最常见也最影响用户体验的核心挑战之一。当用户提出问题时，系统无法检索到相关内容或检索结果不完整，直接导致生成的答案不准确、不完整甚至完全错误。本文将深入分析RAG检索内容缺失的根本原因，并提供系统化的优化策略。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAG系统检索内容缺失问题深度分析与解决方案">
+<meta property="og:url" content="https://www.silenceboy.com/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="在构建和部署RAG（Retrieval-Augmented Generation，检索增强生成）系统的过程中，内容缺失问题是最常见也最影响用户体验的核心挑战之一。当用户提出问题时，系统无法检索到相关内容或检索结果不完整，直接导致生成的答案不准确、不完整甚至完全错误。本文将深入分析RAG检索内容缺失的根本原因，并提供系统化的优化策略。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-11-24T06:30:00.000Z">
+<meta property="article:modified_time" content="2025-11-24T06:24:30.403Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="RAG">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RAG/">RAG</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 13.11px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.11px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.11px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.11px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.78px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.11px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.22px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.67px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.11px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.89px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.11px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.56px;">linux</a> <a href="/tags/mac/" style="font-size: 13.33px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.44px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.11px;">npm</a> <a href="/tags/php/" style="font-size: 13.33px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.44px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.22px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.22px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.11px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.22px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RAG/">RAG</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="title">RAG系统检索内容缺失问题深度分析与解决方案</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-11-24T06:30:00.000Z" itemprop="datePublished">2025-11-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RAG/">RAG</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/11/07/%E4%BC%81%E4%B8%9A%E7%A7%81%E6%9C%89%E7%9F%A5%E8%AF%86%E5%BA%93RAG%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA%E6%8C%91%E6%88%98/" class="title">企业私有知识库RAG系统构建挑战</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-11-07T02:43:04.000Z" itemprop="datePublished">2025-11-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/autosar/">autosar</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/09/05/fidl%E5%92%8Carxml%E4%BA%92%E8%BD%AC%E6%95%99%E7%A8%8B/" class="title">fidl和arxml互转教程</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-09-05T09:56:31.000Z" itemprop="datePublished">2025-09-05</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/09/05/AI%E7%BC%96%E7%A0%81%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/" class="title">AI编码工具对比分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-09-05T09:16:49.000Z" itemprop="datePublished">2025-09-05</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/mcp/">mcp</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/08/27/SSE%E4%B8%8EStreamable-HTTP%EF%BC%9AMCP-%E8%83%8C%E5%90%8E%E7%9A%84%E4%BC%A0%E8%BE%93%E6%8A%80%E6%9C%AF/" class="title">SSE与Streamable HTTP：MCP 背后的传输技术</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-08-27T03:06:46.000Z" itemprop="datePublished">2025-08-27</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E7%9A%84%E8%A1%A8%E7%8E%B0%E5%BD%A2%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">内容缺失问题的表现形式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E5%85%A8%E6%A3%80%E7%B4%A2%E5%A4%B1%E8%B4%A5"><span class="toc-number">1.1.</span> <span class="toc-text">完全检索失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%83%A8%E5%88%86%E4%BF%A1%E6%81%AF%E7%BC%BA%E5%A4%B1"><span class="toc-number">1.2.</span> <span class="toc-text">部分信息缺失</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E5%89%B2%E8%A3%82"><span class="toc-number">1.3.</span> <span class="toc-text">上下文割裂</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E7%9A%84%E4%B8%89%E5%A4%A7%E6%A0%B9%E6%9C%AC%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.</span> <span class="toc-text">内容缺失的三大根本原因</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E7%89%87%E7%AD%96%E7%95%A5%E4%B8%8D%E5%90%88%E7%90%86"><span class="toc-number">2.1.</span> <span class="toc-text">切片策略不合理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%91%E9%87%8F%E5%8F%AC%E5%9B%9E%E7%8E%87%E4%BD%8E"><span class="toc-number">2.2.</span> <span class="toc-text">向量召回率低</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E8%A6%86%E7%9B%96%E4%B8%8D%E5%85%A8"><span class="toc-number">2.3.</span> <span class="toc-text">知识覆盖不全</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%8C%96%E7%9A%84%E4%BC%98%E5%8C%96%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">系统化的优化解决方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E7%89%87%E7%AD%96%E7%95%A5%E4%BC%98%E5%8C%96"><span class="toc-number">3.1.</span> <span class="toc-text">切片策略优化</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E6%96%87%E6%A1%A3%E7%BB%93%E6%9E%84%E6%99%BA%E8%83%BD%E5%88%87%E7%89%87"><span class="toc-number">3.1.1.</span> <span class="toc-text">根据文档结构智能切片</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E8%B0%83%E6%95%B4%E5%88%87%E7%89%87%E5%A4%A7%E5%B0%8F"><span class="toc-number">3.1.2.</span> <span class="toc-text">动态调整切片大小</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%EF%BC%88Contextual-Chunk%EF%BC%89"><span class="toc-number">3.1.3.</span> <span class="toc-text">增加上下文窗口（Contextual Chunk）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E5%90%91%E9%87%8F%E5%8F%AC%E5%9B%9E%E7%8E%87"><span class="toc-number">3.2.</span> <span class="toc-text">提升向量召回率</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%EF%BC%88Hybrid-Search%EF%BC%89"><span class="toc-number">3.2.1.</span> <span class="toc-text">多向量检索策略（Hybrid Search）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%94%B9%E5%86%99%E4%B8%8E%E6%89%A9%E5%B1%95%EF%BC%88Query-Rewriting%EF%BC%89"><span class="toc-number">3.2.2.</span> <span class="toc-text">查询改写与扩展（Query Rewriting）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B2%BE%E8%B0%83Embedding%E6%A8%A1%E5%9E%8B"><span class="toc-number">3.2.3.</span> <span class="toc-text">精调Embedding模型</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E5%96%84%E7%9F%A5%E8%AF%86%E8%A6%86%E7%9B%96"><span class="toc-number">3.3.</span> <span class="toc-text">完善知识覆盖</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8B%E7%B4%A2%E5%BC%95%E8%B4%A8%E9%87%8F%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB"><span class="toc-number">3.3.1.</span> <span class="toc-text">建立索引质量评估体系</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E5%BA%93%E5%A2%9E%E9%87%8F%E6%9B%B4%E6%96%B0%E6%9C%BA%E5%88%B6"><span class="toc-number">3.3.2.</span> <span class="toc-text">知识库增量更新机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA"><span class="toc-number">3.3.3.</span> <span class="toc-text">元数据增强</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%BC%E5%90%88%E4%BC%98%E5%8C%96%E5%AE%9E%E8%B7%B5%E6%A1%88%E4%BE%8B"><span class="toc-number">4.</span> <span class="toc-text">综合优化实践案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E7%9A%84%E4%BC%98%E5%8C%96Pipeline"><span class="toc-number">4.1.</span> <span class="toc-text">完整的优化Pipeline</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%91%E6%8E%A7%E5%92%8C%E6%8C%81%E7%BB%AD%E4%BC%98%E5%8C%96"><span class="toc-number">4.2.</span> <span class="toc-text">监控和持续优化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">最佳实践总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E7%89%87%E7%AD%96%E7%95%A5%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">5.1.</span> <span class="toc-text">切片策略最佳实践</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A3%80%E7%B4%A2%E4%BC%98%E5%8C%96%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">5.2.</span> <span class="toc-text">检索优化最佳实践</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E5%BA%93%E7%AE%A1%E7%90%86%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">5.3.</span> <span class="toc-text">知识库管理最佳实践</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-RAG系统检索内容缺失问题深度分析与解决方案" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      RAG系统检索内容缺失问题深度分析与解决方案
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="article-date">
+	  <time datetime="2025-11-24T06:30:00.000Z" itemprop="datePublished">2025-11-24</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/RAG/">RAG</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/RAG/" rel="tag">RAG</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 6.5k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 29(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>在构建和部署RAG（Retrieval-Augmented Generation，检索增强生成）系统的过程中，<strong>内容缺失问题</strong>是最常见也最影响用户体验的核心挑战之一。当用户提出问题时，系统无法检索到相关内容或检索结果不完整，直接导致生成的答案不准确、不完整甚至完全错误。本文将深入分析RAG检索内容缺失的根本原因，并提供系统化的优化策略。</p>
+<span id="more"></span>
+
+<h2 id="内容缺失问题的表现形式"><a href="#内容缺失问题的表现形式" class="headerlink" title="内容缺失问题的表现形式"></a>内容缺失问题的表现形式</h2><p>在实际应用中，RAG系统的内容缺失问题通常表现为以下几种典型场景：</p>
+<h3 id="完全检索失败"><a href="#完全检索失败" class="headerlink" title="完全检索失败"></a>完全检索失败</h3><p>系统对于知识库中明确存在的信息无法检索到任何相关内容，导致大模型只能基于其预训练知识回答，或者直接承认”我不知道”。</p>
+<p><strong>典型案例</strong>：</p>
+<ul>
+<li>用户询问：”公司2024年Q3的销售数据是多少？”</li>
+<li>知识库中存在相关财报文档</li>
+<li>但检索结果为空，系统回答：”抱歉，我没有找到相关信息”</li>
+</ul>
+<h3 id="部分信息缺失"><a href="#部分信息缺失" class="headerlink" title="部分信息缺失"></a>部分信息缺失</h3><p>系统能够检索到相关内容，但关键信息片段缺失，导致答案不完整或存在逻辑断层。</p>
+<p><strong>典型案例</strong>：</p>
+<ul>
+<li>用户询问：”如何配置产品的高级安全功能？”</li>
+<li>检索到配置步骤的前3步，但缺少关键的第4-6步</li>
+<li>生成的答案不完整，用户无法完成完整配置流程</li>
+</ul>
+<h3 id="上下文割裂"><a href="#上下文割裂" class="headerlink" title="上下文割裂"></a>上下文割裂</h3><p>检索到的多个内容片段之间缺乏必要的连接信息，导致语义不连贯或逻辑关系不清晰。</p>
+<p><strong>典型案例</strong>：</p>
+<ul>
+<li>检索到”概念定义”和”操作步骤”两个片段</li>
+<li>但缺少中间的”前置条件”和”注意事项”</li>
+<li>导致用户按照步骤操作时遇到未预期的问题</li>
+</ul>
+<h2 id="内容缺失的三大根本原因"><a href="#内容缺失的三大根本原因" class="headerlink" title="内容缺失的三大根本原因"></a>内容缺失的三大根本原因</h2><h3 id="切片策略不合理"><a href="#切片策略不合理" class="headerlink" title="切片策略不合理"></a>切片策略不合理</h3><p><strong>问题描述</strong>：</p>
+<p>切片（Chunking）是RAG系统中将长文档分割成小片段的关键步骤。不合理的切片策略是导致内容缺失的首要原因。</p>
+<p><strong>常见的切片问题</strong>：</p>
+<ol>
+<li><p><strong>固定长度切片导致语义割裂</strong></p>
+<ul>
+<li>简单按字符数或token数固定切片（如每512 tokens一个chunk）</li>
+<li>可能在句子中间、段落中间甚至词语中间切割</li>
+<li>破坏了语义的完整性，导致检索时上下文不完整</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不推荐的固定长度切片示例</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">simple_chunk</span>(<span class="params">text, chunk_size=<span class="number">512</span></span>):</span><br><span class="line">    <span class="keyword">return</span> [text[i:i+chunk_size] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(text), chunk_size)]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>切片粒度过大</strong></p>
+<ul>
+<li>每个chunk包含过多内容（如2000+ tokens）</li>
+<li>导致向量表示过于粗糙，相似度计算不准确</li>
+<li>检索时可能因为chunk中包含噪音信息而降低相关性得分</li>
+</ul>
+</li>
+<li><p><strong>切片粒度过小</strong></p>
+<ul>
+<li>每个chunk只包含一两句话（如100-200 tokens）</li>
+<li>缺乏足够的上下文信息</li>
+<li>即使检索到相关chunk，也无法提供完整的语义背景</li>
+</ul>
+</li>
+<li><p><strong>忽视文档结构</strong></p>
+<ul>
+<li>不考虑文档的章节、段落、列表等结构</li>
+<li>在表格、代码块、公式等特殊内容处随意切割</li>
+<li>导致结构化信息丢失或混乱</li>
+</ul>
+</li>
+</ol>
+<p><strong>影响</strong>：</p>
+<ul>
+<li><strong>语义不完整</strong>：检索到的片段缺少前因后果</li>
+<li><strong>关键信息丢失</strong>：重要内容被分割到不同chunk，检索时遗漏</li>
+<li><strong>噪音干扰</strong>：过大的chunk包含无关内容，降低检索精度</li>
+</ul>
+<h3 id="向量召回率低"><a href="#向量召回率低" class="headerlink" title="向量召回率低"></a>向量召回率低</h3><p><strong>问题描述</strong>：</p>
+<p>向量召回率是指系统能够从知识库中检索出所有相关内容的能力。低召回率意味着大量相关信息被遗漏。</p>
+<p><strong>导致召回率低的因素</strong>：</p>
+<ol>
+<li><p><strong>向量表示能力不足</strong></p>
+<ul>
+<li>使用的Embedding模型维度较低或质量不佳</li>
+<li>模型未针对特定领域进行fine-tuning</li>
+<li>对于专业术语、缩写、多语言混合等场景表现不佳</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例：选择合适的Embedding模型</span></span><br><span class="line"><span class="keyword">from</span> sentence_transformers <span class="keyword">import</span> SentenceTransformer</span><br><span class="line"></span><br><span class="line"><span class="comment"># 通用模型 - 可能不适合专业领域</span></span><br><span class="line">model_general = SentenceTransformer(<span class="string">&#x27;all-MiniLM-L6-v2&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 领域优化模型 - 在特定领域表现更好</span></span><br><span class="line">model_domain = SentenceTransformer(<span class="string">&#x27;specialized-model-for-legal&#x27;</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查询与文档的表述差异（Semantic Gap）</strong></p>
+<ul>
+<li>用户使用口语化表达：”怎么改密码？”</li>
+<li>文档使用正式表述：”密码重置流程”</li>
+<li>向量空间距离较大，导致检索失败</li>
+</ul>
+</li>
+<li><p><strong>检索参数配置不当</strong></p>
+<ul>
+<li>Top-K设置过小（如只检索前3个结果）</li>
+<li>相似度阈值设置过高（如只返回相似度&gt;0.8的结果）</li>
+<li>导致潜在的相关内容被过滤掉</li>
+</ul>
+</li>
+<li><p><strong>向量索引优化问题</strong></p>
+<ul>
+<li>使用近似最近邻算法（ANN）时精度损失过大</li>
+<li>索引参数（如HNSW的ef_construction、M参数）设置不合理</li>
+<li>为追求速度牺牲了召回精度</li>
+</ul>
+</li>
+</ol>
+<p><strong>影响</strong>：</p>
+<ul>
+<li><strong>漏检相关内容</strong>：知识库中存在的信息无法被检索到</li>
+<li><strong>答案不全面</strong>：只能基于部分信息生成回答</li>
+<li><strong>用户体验差</strong>：系统表现出”知识盲区”</li>
+</ul>
+<h3 id="知识覆盖不全"><a href="#知识覆盖不全" class="headerlink" title="知识覆盖不全"></a>知识覆盖不全</h3><p><strong>问题描述</strong>：</p>
+<p>即使检索系统工作正常，如果知识库本身存在覆盖盲区，也会导致内容缺失问题。</p>
+<p><strong>知识覆盖不全的表现</strong>：</p>
+<ol>
+<li><p><strong>原始文档质量问题</strong></p>
+<ul>
+<li>文档内容不完整、过时或错误</li>
+<li>关键信息以图片、附件等形式存在，未被索引</li>
+<li>隐式知识未被显式化（如依赖经验判断的决策逻辑）</li>
+</ul>
+</li>
+<li><p><strong>文档预处理不充分</strong></p>
+<ul>
+<li>PDF、Word等格式解析不完整</li>
+<li>表格、图表信息丢失或转换错误</li>
+<li>OCR识别错误导致文本内容不准确</li>
+</ul>
+</li>
+<li><p><strong>知识更新不及时</strong></p>
+<ul>
+<li>新增文档未及时索引</li>
+<li>已更新的文档仍保留旧版本</li>
+<li>过期信息未被删除，造成混淆</li>
+</ul>
+</li>
+<li><p><strong>元数据缺失</strong></p>
+<ul>
+<li>缺少文档创建时间、作者、版本等元数据</li>
+<li>缺少章节、标题等结构化信息</li>
+<li>无法进行基于元数据的过滤和排序</li>
+</ul>
+</li>
+</ol>
+<p><strong>影响</strong>：</p>
+<ul>
+<li><strong>知识库存在结构性盲区</strong>：某些主题完全没有覆盖</li>
+<li><strong>信息时效性问题</strong>：返回过时或错误信息</li>
+<li><strong>无法进行精确定位</strong>：缺少元数据辅助检索</li>
+</ul>
+<h2 id="系统化的优化解决方案"><a href="#系统化的优化解决方案" class="headerlink" title="系统化的优化解决方案"></a>系统化的优化解决方案</h2><h3 id="切片策略优化"><a href="#切片策略优化" class="headerlink" title="切片策略优化"></a>切片策略优化</h3><h4 id="根据文档结构智能切片"><a href="#根据文档结构智能切片" class="headerlink" title="根据文档结构智能切片"></a>根据文档结构智能切片</h4><p><strong>语义感知切片（Semantic Chunking）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">semantic_chunking</span>(<span class="params">document, max_chunk_size=<span class="number">512</span>, overlap=<span class="number">50</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    基于语义边界进行智能切片</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        document: 原始文档文本</span></span><br><span class="line"><span class="string">        max_chunk_size: 最大chunk大小（tokens）</span></span><br><span class="line"><span class="string">        overlap: chunk之间的重叠大小（tokens）</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        List of chunks with semantic coherence</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">from</span> langchain.text_splitter <span class="keyword">import</span> RecursiveCharacterTextSplitter</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 定义分割层级：段落 -&gt; 句子 -&gt; 短语</span></span><br><span class="line">    text_splitter = RecursiveCharacterTextSplitter(</span><br><span class="line">        chunk_size=max_chunk_size,</span><br><span class="line">        chunk_overlap=overlap,</span><br><span class="line">        length_function=<span class="built_in">len</span>,</span><br><span class="line">        separators=[</span><br><span class="line">            <span class="string">&quot;\n\n&quot;</span>,      <span class="comment"># 段落分隔</span></span><br><span class="line">            <span class="string">&quot;\n&quot;</span>,        <span class="comment"># 行分隔</span></span><br><span class="line">            <span class="string">&quot;。&quot;</span>,        <span class="comment"># 句子分隔（中文）</span></span><br><span class="line">            <span class="string">&quot;.&quot;</span>,         <span class="comment"># 句子分隔（英文）</span></span><br><span class="line">            <span class="string">&quot;;&quot;</span>,         <span class="comment"># 分号</span></span><br><span class="line">            <span class="string">&quot;,&quot;</span>,         <span class="comment"># 逗号</span></span><br><span class="line">            <span class="string">&quot; &quot;</span>,         <span class="comment"># 空格</span></span><br><span class="line">            <span class="string">&quot;&quot;</span>           <span class="comment"># 字符级别（最后手段）</span></span><br><span class="line">        ]</span><br><span class="line">    )</span><br><span class="line">    </span><br><span class="line">    chunks = text_splitter.split_text(document)</span><br><span class="line">    <span class="keyword">return</span> chunks</span><br></pre></td></tr></table></figure>
+
+<p><strong>结构化内容特殊处理</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">structure_aware_chunking</span>(<span class="params">document</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    针对不同内容类型采用不同切片策略</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    chunks = []</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 1. 识别文档结构</span></span><br><span class="line">    sections = extract_sections(document)  <span class="comment"># 章节提取</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> section <span class="keyword">in</span> sections:</span><br><span class="line">        content_type = detect_content_type(section)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> content_type == <span class="string">&quot;table&quot;</span>:</span><br><span class="line">            <span class="comment"># 表格完整保留，不切割</span></span><br><span class="line">            chunk = &#123;</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: section,</span><br><span class="line">                <span class="string">&quot;type&quot;</span>: <span class="string">&quot;table&quot;</span>,</span><br><span class="line">                <span class="string">&quot;metadata&quot;</span>: &#123;<span class="string">&quot;format&quot;</span>: <span class="string">&quot;structured&quot;</span>&#125;</span><br><span class="line">            &#125;</span><br><span class="line">            chunks.append(chunk)</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">elif</span> content_type == <span class="string">&quot;code&quot;</span>:</span><br><span class="line">            <span class="comment"># 代码块完整保留</span></span><br><span class="line">            chunk = &#123;</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: section,</span><br><span class="line">                <span class="string">&quot;type&quot;</span>: <span class="string">&quot;code&quot;</span>,</span><br><span class="line">                <span class="string">&quot;metadata&quot;</span>: &#123;<span class="string">&quot;language&quot;</span>: detect_language(section)&#125;</span><br><span class="line">            &#125;</span><br><span class="line">            chunks.append(chunk)</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">elif</span> content_type == <span class="string">&quot;list&quot;</span>:</span><br><span class="line">            <span class="comment"># 列表项可以分组但保持完整性</span></span><br><span class="line">            chunks.extend(chunk_list_items(section))</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 普通文本采用语义切片</span></span><br><span class="line">            chunks.extend(semantic_chunking(section))</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> chunks</span><br></pre></td></tr></table></figure>
+
+<h4 id="动态调整切片大小"><a href="#动态调整切片大小" class="headerlink" title="动态调整切片大小"></a>动态调整切片大小</h4><p>根据内容复杂度和查询场景动态调整：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">adaptive_chunking</span>(<span class="params">document, complexity_score</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    根据内容复杂度动态调整chunk大小</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        document: 文档内容</span></span><br><span class="line"><span class="string">        complexity_score: 内容复杂度评分 (0-1)</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        Optimized chunks</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 复杂内容需要更大的chunk保持上下文</span></span><br><span class="line">    <span class="keyword">if</span> complexity_score &gt; <span class="number">0.7</span>:</span><br><span class="line">        chunk_size = <span class="number">800</span>  <span class="comment"># 技术文档、法律文本等</span></span><br><span class="line">    <span class="keyword">elif</span> complexity_score &gt; <span class="number">0.4</span>:</span><br><span class="line">        chunk_size = <span class="number">512</span>  <span class="comment"># 标准业务文档</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        chunk_size = <span class="number">256</span>  <span class="comment"># 简单问答、FAQ等</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 重叠比例也根据复杂度调整</span></span><br><span class="line">    overlap_ratio = <span class="number">0.1</span> + (complexity_score * <span class="number">0.1</span>)  <span class="comment"># 10%-20%</span></span><br><span class="line">    overlap = <span class="built_in">int</span>(chunk_size * overlap_ratio)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> semantic_chunking(document, chunk_size, overlap)</span><br></pre></td></tr></table></figure>
+
+<h4 id="增加上下文窗口（Contextual-Chunk）"><a href="#增加上下文窗口（Contextual-Chunk）" class="headerlink" title="增加上下文窗口（Contextual Chunk）"></a>增加上下文窗口（Contextual Chunk）</h4><p>为每个chunk添加上下文信息：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">create_contextual_chunks</span>(<span class="params">document</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    为每个chunk添加上下文信息</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    chunks = []</span><br><span class="line">    base_chunks = semantic_chunking(document)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 提取文档级元信息</span></span><br><span class="line">    doc_title = extract_title(document)</span><br><span class="line">    doc_summary = extract_summary(document)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i, chunk <span class="keyword">in</span> <span class="built_in">enumerate</span>(base_chunks):</span><br><span class="line">        <span class="comment"># 添加前置上下文（前一个chunk的末尾）</span></span><br><span class="line">        prefix_context = <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">if</span> i &gt; <span class="number">0</span>:</span><br><span class="line">            prefix_context = base_chunks[i-<span class="number">1</span>][-<span class="number">100</span>:]  <span class="comment"># 前100字符</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 添加后续上下文（下一个chunk的开头）</span></span><br><span class="line">        suffix_context = <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">if</span> i &lt; <span class="built_in">len</span>(base_chunks) - <span class="number">1</span>:</span><br><span class="line">            suffix_context = base_chunks[i+<span class="number">1</span>][:<span class="number">100</span>]  <span class="comment"># 后100字符</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 构建增强chunk</span></span><br><span class="line">        contextual_chunk = &#123;</span><br><span class="line">            <span class="string">&quot;core_content&quot;</span>: chunk,</span><br><span class="line">            <span class="string">&quot;prefix_context&quot;</span>: prefix_context,</span><br><span class="line">            <span class="string">&quot;suffix_context&quot;</span>: suffix_context,</span><br><span class="line">            <span class="string">&quot;metadata&quot;</span>: &#123;</span><br><span class="line">                <span class="string">&quot;doc_title&quot;</span>: doc_title,</span><br><span class="line">                <span class="string">&quot;doc_summary&quot;</span>: doc_summary,</span><br><span class="line">                <span class="string">&quot;section&quot;</span>: extract_section_title(chunk),</span><br><span class="line">                <span class="string">&quot;chunk_index&quot;</span>: i,</span><br><span class="line">                <span class="string">&quot;total_chunks&quot;</span>: <span class="built_in">len</span>(base_chunks)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 用于向量化的完整内容</span></span><br><span class="line">        contextual_chunk[<span class="string">&quot;full_content&quot;</span>] = (</span><br><span class="line">            <span class="string">f&quot;文档：<span class="subst">&#123;doc_title&#125;</span>\n&quot;</span></span><br><span class="line">            <span class="string">f&quot;章节：<span class="subst">&#123;contextual_chunk[<span class="string">&#x27;metadata&#x27;</span>][<span class="string">&#x27;section&#x27;</span>]&#125;</span>\n&quot;</span></span><br><span class="line">            <span class="string">f&quot;<span class="subst">&#123;prefix_context&#125;</span>\n&quot;</span></span><br><span class="line">            <span class="string">f&quot;<span class="subst">&#123;chunk&#125;</span>\n&quot;</span></span><br><span class="line">            <span class="string">f&quot;<span class="subst">&#123;suffix_context&#125;</span>&quot;</span></span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        chunks.append(contextual_chunk)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> chunks</span><br></pre></td></tr></table></figure>
+
+<h3 id="提升向量召回率"><a href="#提升向量召回率" class="headerlink" title="提升向量召回率"></a>提升向量召回率</h3><h4 id="多向量检索策略（Hybrid-Search）"><a href="#多向量检索策略（Hybrid-Search）" class="headerlink" title="多向量检索策略（Hybrid Search）"></a>多向量检索策略（Hybrid Search）</h4><p>结合多种检索方法提升召回率：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">List</span>, <span class="type">Dict</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HybridRetriever</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    混合检索器：结合密集向量、稀疏向量和关键词检索</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, dense_model, sparse_model, keyword_index</span>):</span><br><span class="line">        <span class="variable language_">self</span>.dense_model = dense_model      <span class="comment"># 密集向量模型（如BERT）</span></span><br><span class="line">        <span class="variable language_">self</span>.sparse_model = sparse_model    <span class="comment"># 稀疏向量模型（如BM25）</span></span><br><span class="line">        <span class="variable language_">self</span>.keyword_index = keyword_index  <span class="comment"># 关键词索引（如Elasticsearch）</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">retrieve</span>(<span class="params">self, query: <span class="built_in">str</span>, top_k: <span class="built_in">int</span> = <span class="number">10</span></span>) -&gt; <span class="type">List</span>[<span class="type">Dict</span>]:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        混合检索流程</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            query: 用户查询</span></span><br><span class="line"><span class="string">            top_k: 返回结果数量</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            检索结果列表</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 1. 密集向量检索（语义相似度）</span></span><br><span class="line">        dense_results = <span class="variable language_">self</span>.dense_search(query, top_k=top_k*<span class="number">2</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 稀疏向量检索（词汇匹配）</span></span><br><span class="line">        sparse_results = <span class="variable language_">self</span>.sparse_search(query, top_k=top_k*<span class="number">2</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 关键词检索（精确匹配）</span></span><br><span class="line">        keyword_results = <span class="variable language_">self</span>.keyword_search(query, top_k=top_k*<span class="number">2</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 结果融合与重排序</span></span><br><span class="line">        merged_results = <span class="variable language_">self</span>.merge_and_rerank(</span><br><span class="line">            dense_results,</span><br><span class="line">            sparse_results,</span><br><span class="line">            keyword_results,</span><br><span class="line">            weights=&#123;<span class="string">&#x27;dense&#x27;</span>: <span class="number">0.5</span>, <span class="string">&#x27;sparse&#x27;</span>: <span class="number">0.3</span>, <span class="string">&#x27;keyword&#x27;</span>: <span class="number">0.2</span>&#125;</span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> merged_results[:top_k]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">merge_and_rerank</span>(<span class="params">self, dense_results, sparse_results, </span></span><br><span class="line"><span class="params">                         keyword_results, weights</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        结果融合和重排序（Reciprocal Rank Fusion）</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 使用RRF算法融合多个检索结果</span></span><br><span class="line">        score_dict = &#123;&#125;</span><br><span class="line">        k = <span class="number">60</span>  <span class="comment"># RRF参数</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 计算每个结果的融合得分</span></span><br><span class="line">        <span class="keyword">for</span> rank, result <span class="keyword">in</span> <span class="built_in">enumerate</span>(dense_results, <span class="number">1</span>):</span><br><span class="line">            doc_id = result[<span class="string">&#x27;id&#x27;</span>]</span><br><span class="line">            <span class="keyword">if</span> doc_id <span class="keyword">not</span> <span class="keyword">in</span> score_dict:</span><br><span class="line">                score_dict[doc_id] = &#123;<span class="string">&#x27;doc&#x27;</span>: result, <span class="string">&#x27;score&#x27;</span>: <span class="number">0</span>&#125;</span><br><span class="line">            score_dict[doc_id][<span class="string">&#x27;score&#x27;</span>] += weights[<span class="string">&#x27;dense&#x27;</span>] / (k + rank)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> rank, result <span class="keyword">in</span> <span class="built_in">enumerate</span>(sparse_results, <span class="number">1</span>):</span><br><span class="line">            doc_id = result[<span class="string">&#x27;id&#x27;</span>]</span><br><span class="line">            <span class="keyword">if</span> doc_id <span class="keyword">not</span> <span class="keyword">in</span> score_dict:</span><br><span class="line">                score_dict[doc_id] = &#123;<span class="string">&#x27;doc&#x27;</span>: result, <span class="string">&#x27;score&#x27;</span>: <span class="number">0</span>&#125;</span><br><span class="line">            score_dict[doc_id][<span class="string">&#x27;score&#x27;</span>] += weights[<span class="string">&#x27;sparse&#x27;</span>] / (k + rank)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> rank, result <span class="keyword">in</span> <span class="built_in">enumerate</span>(keyword_results, <span class="number">1</span>):</span><br><span class="line">            doc_id = result[<span class="string">&#x27;id&#x27;</span>]</span><br><span class="line">            <span class="keyword">if</span> doc_id <span class="keyword">not</span> <span class="keyword">in</span> score_dict:</span><br><span class="line">                score_dict[doc_id] = &#123;<span class="string">&#x27;doc&#x27;</span>: result, <span class="string">&#x27;score&#x27;</span>: <span class="number">0</span>&#125;</span><br><span class="line">            score_dict[doc_id][<span class="string">&#x27;score&#x27;</span>] += weights[<span class="string">&#x27;keyword&#x27;</span>] / (k + rank)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 按融合得分排序</span></span><br><span class="line">        ranked_results = <span class="built_in">sorted</span>(</span><br><span class="line">            score_dict.values(),</span><br><span class="line">            key=<span class="keyword">lambda</span> x: x[<span class="string">&#x27;score&#x27;</span>],</span><br><span class="line">            reverse=<span class="literal">True</span></span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> [item[<span class="string">&#x27;doc&#x27;</span>] <span class="keyword">for</span> item <span class="keyword">in</span> ranked_results]</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询改写与扩展（Query-Rewriting）"><a href="#查询改写与扩展（Query-Rewriting）" class="headerlink" title="查询改写与扩展（Query Rewriting）"></a>查询改写与扩展（Query Rewriting）</h4><p>通过改写和扩展查询提升召回率：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">QueryExpander</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    查询扩展器：通过多种策略扩展原始查询</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, llm_client, synonym_dict</span>):</span><br><span class="line">        <span class="variable language_">self</span>.llm_client = llm_client</span><br><span class="line">        <span class="variable language_">self</span>.synonym_dict = synonym_dict</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">expand_query</span>(<span class="params">self, original_query: <span class="built_in">str</span></span>) -&gt; <span class="type">List</span>[<span class="built_in">str</span>]:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        生成多个查询变体</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            包含原始查询和多个扩展查询的列表</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        expanded_queries = [original_query]</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 1. 同义词扩展</span></span><br><span class="line">        synonym_query = <span class="variable language_">self</span>.add_synonyms(original_query)</span><br><span class="line">        <span class="keyword">if</span> synonym_query != original_query:</span><br><span class="line">            expanded_queries.append(synonym_query)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. LLM改写（生成更正式/专业的表达）</span></span><br><span class="line">        rewritten_query = <span class="variable language_">self</span>.llm_rewrite(original_query)</span><br><span class="line">        expanded_queries.append(rewritten_query)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 子查询拆解（针对复杂问题）</span></span><br><span class="line">        <span class="keyword">if</span> <span class="variable language_">self</span>.is_complex_query(original_query):</span><br><span class="line">            sub_queries = <span class="variable language_">self</span>.decompose_query(original_query)</span><br><span class="line">            expanded_queries.extend(sub_queries)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 假设性文档生成（HyDE）</span></span><br><span class="line">        hypothetical_doc = <span class="variable language_">self</span>.generate_hypothetical_document(original_query)</span><br><span class="line">        expanded_queries.append(hypothetical_doc)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> expanded_queries</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">llm_rewrite</span>(<span class="params">self, query: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        使用LLM改写查询为更专业的表达</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        prompt = <span class="string">f&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        将以下用户问题改写为更专业、准确的技术查询：</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        原始问题：<span class="subst">&#123;query&#125;</span></span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        改写后的查询（只返回改写结果，不要其他说明）：</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        </span><br><span class="line">        rewritten = <span class="variable language_">self</span>.llm_client.generate(prompt)</span><br><span class="line">        <span class="keyword">return</span> rewritten.strip()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">generate_hypothetical_document</span>(<span class="params">self, query: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        HyDE策略：生成假设性文档片段用于检索</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        prompt = <span class="string">f&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        假设你要回答这个问题：<span class="subst">&#123;query&#125;</span></span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        请生成一段包含答案的文档片段（2-3句话，包含关键术语）：</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        </span><br><span class="line">        hypothetical_doc = <span class="variable language_">self</span>.llm_client.generate(prompt)</span><br><span class="line">        <span class="keyword">return</span> hypothetical_doc.strip()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">decompose_query</span>(<span class="params">self, query: <span class="built_in">str</span></span>) -&gt; <span class="type">List</span>[<span class="built_in">str</span>]:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        将复杂查询拆解为多个子查询</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        prompt = <span class="string">f&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        将以下复杂问题拆解为2-4个简单的子问题：</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        原始问题：<span class="subst">&#123;query&#125;</span></span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        子问题列表（每行一个）：</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        </span><br><span class="line">        response = <span class="variable language_">self</span>.llm_client.generate(prompt)</span><br><span class="line">        sub_queries = [q.strip() <span class="keyword">for</span> q <span class="keyword">in</span> response.split(<span class="string">&#x27;\n&#x27;</span>) <span class="keyword">if</span> q.strip()]</span><br><span class="line">        <span class="keyword">return</span> sub_queries</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用查询扩展进行检索</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">multi_query_retrieval</span>(<span class="params">query: <span class="built_in">str</span>, retriever, query_expander, top_k: <span class="built_in">int</span> = <span class="number">10</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    使用多个查询变体进行检索，提升召回率</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 生成查询变体</span></span><br><span class="line">    expanded_queries = query_expander.expand_query(query)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 对每个查询变体分别检索</span></span><br><span class="line">    all_results = []</span><br><span class="line">    <span class="keyword">for</span> exp_query <span class="keyword">in</span> expanded_queries:</span><br><span class="line">        results = retriever.retrieve(exp_query, top_k=top_k)</span><br><span class="line">        all_results.extend(results)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 去重和重排序</span></span><br><span class="line">    unique_results = deduplicate_results(all_results)</span><br><span class="line">    reranked_results = rerank_by_relevance(query, unique_results)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> reranked_results[:top_k]</span><br></pre></td></tr></table></figure>
+
+<h4 id="精调Embedding模型"><a href="#精调Embedding模型" class="headerlink" title="精调Embedding模型"></a>精调Embedding模型</h4><p>针对特定领域fine-tune embedding模型：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sentence_transformers <span class="keyword">import</span> SentenceTransformer, InputExample, losses</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">fine_tune_embedding_model</span>(<span class="params">base_model_name: <span class="built_in">str</span>, </span></span><br><span class="line"><span class="params">                              training_data: <span class="type">List</span>[<span class="type">Dict</span>],</span></span><br><span class="line"><span class="params">                              output_path: <span class="built_in">str</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Fine-tune embedding模型以提升领域适配性</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        base_model_name: 基础模型名称</span></span><br><span class="line"><span class="string">        training_data: 训练数据，格式为 [&#123;&#x27;query&#x27;: &#x27;...&#x27;, &#x27;positive&#x27;: &#x27;...&#x27;, &#x27;negative&#x27;: &#x27;...&#x27;&#125;]</span></span><br><span class="line"><span class="string">        output_path: 模型保存路径</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 加载基础模型</span></span><br><span class="line">    model = SentenceTransformer(base_model_name)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 准备训练样本（三元组：query, positive, negative）</span></span><br><span class="line">    train_examples = []</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> training_data:</span><br><span class="line">        train_examples.append(InputExample(</span><br><span class="line">            texts=[item[<span class="string">&#x27;query&#x27;</span>], item[<span class="string">&#x27;positive&#x27;</span>], item[<span class="string">&#x27;negative&#x27;</span>]]</span><br><span class="line">        ))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 创建DataLoader</span></span><br><span class="line">    train_dataloader = DataLoader(train_examples, shuffle=<span class="literal">True</span>, batch_size=<span class="number">16</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 4. 定义损失函数（MultipleNegativesRankingLoss）</span></span><br><span class="line">    train_loss = losses.MultipleNegativesRankingLoss(model)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 5. 训练模型</span></span><br><span class="line">    model.fit(</span><br><span class="line">        train_objectives=[(train_dataloader, train_loss)],</span><br><span class="line">        epochs=<span class="number">3</span>,</span><br><span class="line">        warmup_steps=<span class="number">100</span>,</span><br><span class="line">        output_path=output_path,</span><br><span class="line">        show_progress_bar=<span class="literal">True</span></span><br><span class="line">    )</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> model</span><br></pre></td></tr></table></figure>
+
+<p><strong>构建训练数据集</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">build_training_dataset</span>(<span class="params">knowledge_base, queries</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    从知识库和查询日志构建训练数据</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    training_data = []</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> query <span class="keyword">in</span> queries:</span><br><span class="line">        <span class="comment"># 获取人工标注的正样本（相关文档）</span></span><br><span class="line">        positive_docs = get_relevant_docs(query, knowledge_base)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 负采样：从知识库中随机选择不相关文档</span></span><br><span class="line">        negative_docs = random_sample_negatives(knowledge_base, positive_docs)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> pos_doc <span class="keyword">in</span> positive_docs:</span><br><span class="line">            <span class="keyword">for</span> neg_doc <span class="keyword">in</span> negative_docs:</span><br><span class="line">                training_data.append(&#123;</span><br><span class="line">                    <span class="string">&#x27;query&#x27;</span>: query,</span><br><span class="line">                    <span class="string">&#x27;positive&#x27;</span>: pos_doc,</span><br><span class="line">                    <span class="string">&#x27;negative&#x27;</span>: neg_doc</span><br><span class="line">                &#125;)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> training_data</span><br></pre></td></tr></table></figure>
+
+<h3 id="完善知识覆盖"><a href="#完善知识覆盖" class="headerlink" title="完善知识覆盖"></a>完善知识覆盖</h3><h4 id="建立索引质量评估体系"><a href="#建立索引质量评估体系" class="headerlink" title="建立索引质量评估体系"></a>建立索引质量评估体系</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">IndexQualityAnalyzer</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    索引质量分析器</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vector_db, embedding_model</span>):</span><br><span class="line">        <span class="variable language_">self</span>.vector_db = vector_db</span><br><span class="line">        <span class="variable language_">self</span>.embedding_model = embedding_model</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">analyze_coverage</span>(<span class="params">self, test_queries: <span class="type">List</span>[<span class="built_in">str</span>]</span>) -&gt; <span class="type">Dict</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        分析知识覆盖度</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            test_queries: 测试查询集（应涵盖业务关键场景）</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            覆盖度分析报告</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        results = &#123;</span><br><span class="line">            <span class="string">&#x27;total_queries&#x27;</span>: <span class="built_in">len</span>(test_queries),</span><br><span class="line">            <span class="string">&#x27;failed_queries&#x27;</span>: [],</span><br><span class="line">            <span class="string">&#x27;low_confidence_queries&#x27;</span>: [],</span><br><span class="line">            <span class="string">&#x27;coverage_score&#x27;</span>: <span class="number">0</span>,</span><br><span class="line">            <span class="string">&#x27;missing_topics&#x27;</span>: []</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        successful_retrievals = <span class="number">0</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> query <span class="keyword">in</span> test_queries:</span><br><span class="line">            <span class="comment"># 执行检索</span></span><br><span class="line">            retrieved_docs = <span class="variable language_">self</span>.vector_db.search(query, top_k=<span class="number">5</span>)</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> retrieved_docs:</span><br><span class="line">                results[<span class="string">&#x27;failed_queries&#x27;</span>].append(query)</span><br><span class="line">            <span class="keyword">elif</span> <span class="built_in">max</span>([doc[<span class="string">&#x27;score&#x27;</span>] <span class="keyword">for</span> doc <span class="keyword">in</span> retrieved_docs]) &lt; <span class="number">0.6</span>:</span><br><span class="line">                results[<span class="string">&#x27;low_confidence_queries&#x27;</span>].append(&#123;</span><br><span class="line">                    <span class="string">&#x27;query&#x27;</span>: query,</span><br><span class="line">                    <span class="string">&#x27;max_score&#x27;</span>: <span class="built_in">max</span>([doc[<span class="string">&#x27;score&#x27;</span>] <span class="keyword">for</span> doc <span class="keyword">in</span> retrieved_docs])</span><br><span class="line">                &#125;)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                successful_retrievals += <span class="number">1</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 计算覆盖度得分</span></span><br><span class="line">        results[<span class="string">&#x27;coverage_score&#x27;</span>] = successful_retrievals / <span class="built_in">len</span>(test_queries)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 分析缺失主题</span></span><br><span class="line">        results[<span class="string">&#x27;missing_topics&#x27;</span>] = <span class="variable language_">self</span>.identify_missing_topics(</span><br><span class="line">            results[<span class="string">&#x27;failed_queries&#x27;</span>]</span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> results</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">analyze_chunk_quality</span>(<span class="params">self</span>) -&gt; <span class="type">Dict</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        分析chunk质量</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        all_chunks = <span class="variable language_">self</span>.vector_db.get_all_chunks()</span><br><span class="line">        </span><br><span class="line">        quality_metrics = &#123;</span><br><span class="line">            <span class="string">&#x27;avg_chunk_length&#x27;</span>: <span class="number">0</span>,</span><br><span class="line">            <span class="string">&#x27;chunks_too_short&#x27;</span>: <span class="number">0</span>,</span><br><span class="line">            <span class="string">&#x27;chunks_too_long&#x27;</span>: <span class="number">0</span>,</span><br><span class="line">            <span class="string">&#x27;incomplete_chunks&#x27;</span>: [],</span><br><span class="line">            <span class="string">&#x27;duplicate_chunks&#x27;</span>: []</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        chunk_lengths = []</span><br><span class="line">        chunk_hashes = &#123;&#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> chunk <span class="keyword">in</span> all_chunks:</span><br><span class="line">            content = chunk[<span class="string">&#x27;content&#x27;</span>]</span><br><span class="line">            length = <span class="built_in">len</span>(content)</span><br><span class="line">            chunk_lengths.append(length)</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 检测过短chunk</span></span><br><span class="line">            <span class="keyword">if</span> length &lt; <span class="number">50</span>:</span><br><span class="line">                quality_metrics[<span class="string">&#x27;chunks_too_short&#x27;</span>] += <span class="number">1</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 检测过长chunk</span></span><br><span class="line">            <span class="keyword">if</span> length &gt; <span class="number">2000</span>:</span><br><span class="line">                quality_metrics[<span class="string">&#x27;chunks_too_long&#x27;</span>] += <span class="number">1</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 检测不完整chunk（以标点符号结尾判断）</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> content.rstrip().endswith((<span class="string">&#x27;.&#x27;</span>, <span class="string">&#x27;。&#x27;</span>, <span class="string">&#x27;!&#x27;</span>, <span class="string">&#x27;！&#x27;</span>, <span class="string">&#x27;?&#x27;</span>, <span class="string">&#x27;？&#x27;</span>)):</span><br><span class="line">                quality_metrics[<span class="string">&#x27;incomplete_chunks&#x27;</span>].append(chunk[<span class="string">&#x27;id&#x27;</span>])</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 检测重复chunk</span></span><br><span class="line">            content_hash = <span class="built_in">hash</span>(content)</span><br><span class="line">            <span class="keyword">if</span> content_hash <span class="keyword">in</span> chunk_hashes:</span><br><span class="line">                quality_metrics[<span class="string">&#x27;duplicate_chunks&#x27;</span>].append(&#123;</span><br><span class="line">                    <span class="string">&#x27;chunk1&#x27;</span>: chunk_hashes[content_hash],</span><br><span class="line">                    <span class="string">&#x27;chunk2&#x27;</span>: chunk[<span class="string">&#x27;id&#x27;</span>]</span><br><span class="line">                &#125;)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                chunk_hashes[content_hash] = chunk[<span class="string">&#x27;id&#x27;</span>]</span><br><span class="line">        </span><br><span class="line">        quality_metrics[<span class="string">&#x27;avg_chunk_length&#x27;</span>] = <span class="built_in">sum</span>(chunk_lengths) / <span class="built_in">len</span>(chunk_lengths)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> quality_metrics</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">generate_quality_report</span>(<span class="params">self, test_queries: <span class="type">List</span>[<span class="built_in">str</span>]</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        生成完整的质量报告</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        coverage_analysis = <span class="variable language_">self</span>.analyze_coverage(test_queries)</span><br><span class="line">        chunk_analysis = <span class="variable language_">self</span>.analyze_chunk_quality()</span><br><span class="line">        </span><br><span class="line">        report = <span class="string">f&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        ===== RAG索引质量报告 =====</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        【覆盖度分析】</span></span><br><span class="line"><span class="string">        - 总查询数: <span class="subst">&#123;coverage_analysis[<span class="string">&#x27;total_queries&#x27;</span>]&#125;</span></span></span><br><span class="line"><span class="string">        - 覆盖度得分: <span class="subst">&#123;coverage_analysis[<span class="string">&#x27;coverage_score&#x27;</span>]:<span class="number">.2</span>%&#125;</span></span></span><br><span class="line"><span class="string">        - 检索失败查询数: <span class="subst">&#123;<span class="built_in">len</span>(coverage_analysis[<span class="string">&#x27;failed_queries&#x27;</span>])&#125;</span></span></span><br><span class="line"><span class="string">        - 低置信度查询数: <span class="subst">&#123;<span class="built_in">len</span>(coverage_analysis[<span class="string">&#x27;low_confidence_queries&#x27;</span>])&#125;</span></span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        【缺失主题】</span></span><br><span class="line"><span class="string">        <span class="subst">&#123;<span class="string">&#x27;, &#x27;</span>.join(coverage_analysis[<span class="string">&#x27;missing_topics&#x27;</span>])&#125;</span></span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        【Chunk质量分析】</span></span><br><span class="line"><span class="string">        - 平均chunk长度: <span class="subst">&#123;chunk_analysis[<span class="string">&#x27;avg_chunk_length&#x27;</span>]:<span class="number">.0</span>f&#125;</span> 字符</span></span><br><span class="line"><span class="string">        - 过短chunk数: <span class="subst">&#123;chunk_analysis[<span class="string">&#x27;chunks_too_short&#x27;</span>]&#125;</span></span></span><br><span class="line"><span class="string">        - 过长chunk数: <span class="subst">&#123;chunk_analysis[<span class="string">&#x27;chunks_too_long&#x27;</span>]&#125;</span></span></span><br><span class="line"><span class="string">        - 不完整chunk数: <span class="subst">&#123;<span class="built_in">len</span>(chunk_analysis[<span class="string">&#x27;incomplete_chunks&#x27;</span>])&#125;</span></span></span><br><span class="line"><span class="string">        - 重复chunk数: <span class="subst">&#123;<span class="built_in">len</span>(chunk_analysis[<span class="string">&#x27;duplicate_chunks&#x27;</span>])&#125;</span></span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        【改进建议】</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 生成改进建议</span></span><br><span class="line">        <span class="keyword">if</span> coverage_analysis[<span class="string">&#x27;coverage_score&#x27;</span>] &lt; <span class="number">0.7</span>:</span><br><span class="line">            report += <span class="string">&quot;\n⚠️ 覆盖度较低，建议补充知识库内容&quot;</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> chunk_analysis[<span class="string">&#x27;chunks_too_short&#x27;</span>] &gt; <span class="built_in">len</span>(chunk_analysis) * <span class="number">0.1</span>:</span><br><span class="line">            report += <span class="string">&quot;\n⚠️ 过短chunk较多，建议调整切片策略&quot;</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(chunk_analysis[<span class="string">&#x27;duplicate_chunks&#x27;</span>]) &gt; <span class="number">0</span>:</span><br><span class="line">            report += <span class="string">&quot;\n⚠️ 存在重复chunk，建议进行去重处理&quot;</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> report</span><br></pre></td></tr></table></figure>
+
+<h4 id="知识库增量更新机制"><a href="#知识库增量更新机制" class="headerlink" title="知识库增量更新机制"></a>知识库增量更新机制</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">IncrementalIndexUpdater</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    知识库增量更新管理器</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vector_db, doc_processor, change_detector</span>):</span><br><span class="line">        <span class="variable language_">self</span>.vector_db = vector_db</span><br><span class="line">        <span class="variable language_">self</span>.doc_processor = doc_processor</span><br><span class="line">        <span class="variable language_">self</span>.change_detector = change_detector</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">detect_changes</span>(<span class="params">self, doc_source_path: <span class="built_in">str</span></span>) -&gt; <span class="type">Dict</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        检测文档变更</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            &#123;&#x27;added&#x27;: [], &#x27;modified&#x27;: [], &#x27;deleted&#x27;: []&#125;</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.change_detector.detect(doc_source_path)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">incremental_update</span>(<span class="params">self, changes: <span class="type">Dict</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        增量更新索引</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 1. 处理新增文档</span></span><br><span class="line">        <span class="keyword">for</span> new_doc <span class="keyword">in</span> changes[<span class="string">&#x27;added&#x27;</span>]:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;处理新增文档: <span class="subst">&#123;new_doc[<span class="string">&#x27;path&#x27;</span>]&#125;</span>&quot;</span>)</span><br><span class="line">            chunks = <span class="variable language_">self</span>.doc_processor.process_document(new_doc)</span><br><span class="line">            <span class="variable language_">self</span>.vector_db.add_chunks(chunks)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 处理修改文档</span></span><br><span class="line">        <span class="keyword">for</span> modified_doc <span class="keyword">in</span> changes[<span class="string">&#x27;modified&#x27;</span>]:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;处理修改文档: <span class="subst">&#123;modified_doc[<span class="string">&#x27;path&#x27;</span>]&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="comment"># 删除旧版本</span></span><br><span class="line">            <span class="variable language_">self</span>.vector_db.delete_by_doc_id(modified_doc[<span class="string">&#x27;id&#x27;</span>])</span><br><span class="line">            <span class="comment"># 添加新版本</span></span><br><span class="line">            chunks = <span class="variable language_">self</span>.doc_processor.process_document(modified_doc)</span><br><span class="line">            <span class="variable language_">self</span>.vector_db.add_chunks(chunks)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 处理删除文档</span></span><br><span class="line">        <span class="keyword">for</span> deleted_doc <span class="keyword">in</span> changes[<span class="string">&#x27;deleted&#x27;</span>]:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;处理删除文档: <span class="subst">&#123;deleted_doc[<span class="string">&#x27;path&#x27;</span>]&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="variable language_">self</span>.vector_db.delete_by_doc_id(deleted_doc[<span class="string">&#x27;id&#x27;</span>])</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 更新元数据</span></span><br><span class="line">        <span class="variable language_">self</span>.vector_db.update_metadata(&#123;</span><br><span class="line">            <span class="string">&#x27;last_update&#x27;</span>: datetime.now().isoformat(),</span><br><span class="line">            <span class="string">&#x27;total_documents&#x27;</span>: <span class="variable language_">self</span>.vector_db.count_documents(),</span><br><span class="line">            <span class="string">&#x27;total_chunks&#x27;</span>: <span class="variable language_">self</span>.vector_db.count_chunks()</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="元数据增强"><a href="#元数据增强" class="headerlink" title="元数据增强"></a>元数据增强</h4><p>为每个chunk添加丰富的元数据：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">create_enhanced_chunk_with_metadata</span>(<span class="params">chunk_content: <span class="built_in">str</span>, </span></span><br><span class="line"><span class="params">                                       document: <span class="type">Dict</span>,</span></span><br><span class="line"><span class="params">                                       chunk_index: <span class="built_in">int</span></span>) -&gt; <span class="type">Dict</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    创建包含丰富元数据的chunk</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="comment"># 核心内容</span></span><br><span class="line">        <span class="string">&#x27;content&#x27;</span>: chunk_content,</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 文档元数据</span></span><br><span class="line">        <span class="string">&#x27;doc_metadata&#x27;</span>: &#123;</span><br><span class="line">            <span class="string">&#x27;doc_id&#x27;</span>: document[<span class="string">&#x27;id&#x27;</span>],</span><br><span class="line">            <span class="string">&#x27;doc_title&#x27;</span>: document[<span class="string">&#x27;title&#x27;</span>],</span><br><span class="line">            <span class="string">&#x27;doc_path&#x27;</span>: document[<span class="string">&#x27;path&#x27;</span>],</span><br><span class="line">            <span class="string">&#x27;doc_type&#x27;</span>: document[<span class="string">&#x27;type&#x27;</span>],  <span class="comment"># PDF, DOCX, etc.</span></span><br><span class="line">            <span class="string">&#x27;doc_author&#x27;</span>: document.get(<span class="string">&#x27;author&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;doc_created_date&#x27;</span>: document.get(<span class="string">&#x27;created_date&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;doc_modified_date&#x27;</span>: document.get(<span class="string">&#x27;modified_date&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;doc_version&#x27;</span>: document.get(<span class="string">&#x27;version&#x27;</span>),</span><br><span class="line">            <span class="string">&#x27;doc_category&#x27;</span>: document.get(<span class="string">&#x27;category&#x27;</span>),  <span class="comment"># 产品文档、技术规范、FAQ等</span></span><br><span class="line">            <span class="string">&#x27;doc_tags&#x27;</span>: document.get(<span class="string">&#x27;tags&#x27;</span>, [])</span><br><span class="line">        &#125;,</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Chunk元数据</span></span><br><span class="line">        <span class="string">&#x27;chunk_metadata&#x27;</span>: &#123;</span><br><span class="line">            <span class="string">&#x27;chunk_id&#x27;</span>: generate_chunk_id(document[<span class="string">&#x27;id&#x27;</span>], chunk_index),</span><br><span class="line">            <span class="string">&#x27;chunk_index&#x27;</span>: chunk_index,</span><br><span class="line">            <span class="string">&#x27;chunk_type&#x27;</span>: detect_chunk_type(chunk_content),  <span class="comment"># text, table, code, list</span></span><br><span class="line">            <span class="string">&#x27;section_title&#x27;</span>: extract_section_title(chunk_content),</span><br><span class="line">            <span class="string">&#x27;section_level&#x27;</span>: extract_section_level(chunk_content),</span><br><span class="line">            <span class="string">&#x27;page_number&#x27;</span>: extract_page_number(chunk_content, document),</span><br><span class="line">            <span class="string">&#x27;keywords&#x27;</span>: extract_keywords(chunk_content),</span><br><span class="line">            <span class="string">&#x27;entities&#x27;</span>: extract_entities(chunk_content),  <span class="comment"># NER提取的实体</span></span><br><span class="line">        &#125;,</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 关系元数据</span></span><br><span class="line">        <span class="string">&#x27;relationship&#x27;</span>: &#123;</span><br><span class="line">            <span class="string">&#x27;previous_chunk_id&#x27;</span>: get_previous_chunk_id(chunk_index) <span class="keyword">if</span> chunk_index &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="literal">None</span>,</span><br><span class="line">            <span class="string">&#x27;next_chunk_id&#x27;</span>: get_next_chunk_id(chunk_index),</span><br><span class="line">            <span class="string">&#x27;related_chunks&#x27;</span>: find_related_chunks(chunk_content),  <span class="comment"># 语义相关的其他chunks</span></span><br><span class="line">            <span class="string">&#x27;parent_section&#x27;</span>: extract_parent_section(chunk_content),</span><br><span class="line">        &#125;,</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 质量元数据</span></span><br><span class="line">        <span class="string">&#x27;quality&#x27;</span>: &#123;</span><br><span class="line">            <span class="string">&#x27;completeness_score&#x27;</span>: calculate_completeness(chunk_content),</span><br><span class="line">            <span class="string">&#x27;readability_score&#x27;</span>: calculate_readability(chunk_content),</span><br><span class="line">            <span class="string">&#x27;information_density&#x27;</span>: calculate_info_density(chunk_content),</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>利用元数据进行精准过滤</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">metadata_filtered_retrieval</span>(<span class="params">query: <span class="built_in">str</span>, </span></span><br><span class="line"><span class="params">                               vector_db,</span></span><br><span class="line"><span class="params">                               filters: <span class="type">Dict</span> = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">                               top_k: <span class="built_in">int</span> = <span class="number">10</span></span>) -&gt; <span class="type">List</span>[<span class="type">Dict</span>]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    结合元数据过滤的检索</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        query: 用户查询</span></span><br><span class="line"><span class="string">        vector_db: 向量数据库</span></span><br><span class="line"><span class="string">        filters: 元数据过滤条件</span></span><br><span class="line"><span class="string">        top_k: 返回结果数</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        过滤后的检索结果</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 向量检索（先召回更多候选）</span></span><br><span class="line">    candidates = vector_db.search(query, top_k=top_k*<span class="number">3</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 2. 应用元数据过滤</span></span><br><span class="line">    <span class="keyword">if</span> filters:</span><br><span class="line">        filtered_candidates = []</span><br><span class="line">        <span class="keyword">for</span> candidate <span class="keyword">in</span> candidates:</span><br><span class="line">            <span class="keyword">if</span> match_filters(candidate[<span class="string">&#x27;metadata&#x27;</span>], filters):</span><br><span class="line">                filtered_candidates.append(candidate)</span><br><span class="line">        candidates = filtered_candidates</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 返回top_k结果</span></span><br><span class="line">    <span class="keyword">return</span> candidates[:top_k]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">match_filters</span>(<span class="params">metadata: <span class="type">Dict</span>, filters: <span class="type">Dict</span></span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    检查元数据是否匹配过滤条件</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> key, value <span class="keyword">in</span> filters.items():</span><br><span class="line">        <span class="keyword">if</span> key == <span class="string">&#x27;doc_type&#x27;</span> <span class="keyword">and</span> metadata[<span class="string">&#x27;doc_metadata&#x27;</span>][<span class="string">&#x27;doc_type&#x27;</span>] != value:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> key == <span class="string">&#x27;date_after&#x27;</span> <span class="keyword">and</span> metadata[<span class="string">&#x27;doc_metadata&#x27;</span>][<span class="string">&#x27;doc_created_date&#x27;</span>] &lt; value:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> key == <span class="string">&#x27;date_before&#x27;</span> <span class="keyword">and</span> metadata[<span class="string">&#x27;doc_metadata&#x27;</span>][<span class="string">&#x27;doc_created_date&#x27;</span>] &gt; value:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> key == <span class="string">&#x27;category&#x27;</span> <span class="keyword">and</span> metadata[<span class="string">&#x27;doc_metadata&#x27;</span>][<span class="string">&#x27;doc_category&#x27;</span>] != value:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> key == <span class="string">&#x27;tags&#x27;</span> <span class="keyword">and</span> <span class="keyword">not</span> <span class="built_in">any</span>(tag <span class="keyword">in</span> metadata[<span class="string">&#x27;doc_metadata&#x27;</span>][<span class="string">&#x27;doc_tags&#x27;</span>] <span class="keyword">for</span> tag <span class="keyword">in</span> value):</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用示例</span></span><br><span class="line">results = metadata_filtered_retrieval(</span><br><span class="line">    query=<span class="string">&quot;如何配置SSL证书？&quot;</span>,</span><br><span class="line">    vector_db=vector_db,</span><br><span class="line">    filters=&#123;</span><br><span class="line">        <span class="string">&#x27;doc_type&#x27;</span>: <span class="string">&#x27;PDF&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;category&#x27;</span>: <span class="string">&#x27;技术文档&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;date_after&#x27;</span>: <span class="string">&#x27;2024-01-01&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;tags&#x27;</span>: [<span class="string">&#x27;安全&#x27;</span>, <span class="string">&#x27;配置&#x27;</span>]</span><br><span class="line">    &#125;,</span><br><span class="line">    top_k=<span class="number">10</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="综合优化实践案例"><a href="#综合优化实践案例" class="headerlink" title="综合优化实践案例"></a>综合优化实践案例</h2><h3 id="完整的优化Pipeline"><a href="#完整的优化Pipeline" class="headerlink" title="完整的优化Pipeline"></a>完整的优化Pipeline</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">OptimizedRAGPipeline</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    优化的RAG检索Pipeline</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 初始化各个组件</span></span><br><span class="line">        <span class="variable language_">self</span>.doc_processor = DocumentProcessor()</span><br><span class="line">        <span class="variable language_">self</span>.query_expander = QueryExpander()</span><br><span class="line">        <span class="variable language_">self</span>.hybrid_retriever = HybridRetriever()</span><br><span class="line">        <span class="variable language_">self</span>.reranker = CrossEncoderReranker()</span><br><span class="line">        <span class="variable language_">self</span>.quality_analyzer = IndexQualityAnalyzer()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">process_documents</span>(<span class="params">self, documents: <span class="type">List</span>[<span class="type">Dict</span>]</span>) -&gt; <span class="type">List</span>[<span class="type">Dict</span>]:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        文档处理流程</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        all_chunks = []</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> doc <span class="keyword">in</span> documents:</span><br><span class="line">            <span class="comment"># 1. 解析文档</span></span><br><span class="line">            parsed_content = <span class="variable language_">self</span>.doc_processor.parse(doc)</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 2. 智能切片</span></span><br><span class="line">            chunks = <span class="variable language_">self</span>.doc_processor.adaptive_chunking(</span><br><span class="line">                parsed_content,</span><br><span class="line">                complexity_score=calculate_complexity(parsed_content)</span><br><span class="line">            )</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 3. 添加上下文和元数据</span></span><br><span class="line">            enhanced_chunks = [</span><br><span class="line">                create_enhanced_chunk_with_metadata(chunk, doc, idx)</span><br><span class="line">                <span class="keyword">for</span> idx, chunk <span class="keyword">in</span> <span class="built_in">enumerate</span>(chunks)</span><br><span class="line">            ]</span><br><span class="line">            </span><br><span class="line">            all_chunks.extend(enhanced_chunks)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> all_chunks</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">retrieve</span>(<span class="params">self, query: <span class="built_in">str</span>, top_k: <span class="built_in">int</span> = <span class="number">10</span></span>) -&gt; <span class="type">List</span>[<span class="type">Dict</span>]:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        优化的检索流程</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 1. 查询扩展</span></span><br><span class="line">        expanded_queries = <span class="variable language_">self</span>.query_expander.expand_query(query)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 多向量混合检索</span></span><br><span class="line">        all_results = []</span><br><span class="line">        <span class="keyword">for</span> exp_query <span class="keyword">in</span> expanded_queries:</span><br><span class="line">            results = <span class="variable language_">self</span>.hybrid_retriever.retrieve(exp_query, top_k=top_k*<span class="number">2</span>)</span><br><span class="line">            all_results.extend(results)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 去重</span></span><br><span class="line">        unique_results = deduplicate_results(all_results)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 重排序（使用Cross-Encoder）</span></span><br><span class="line">        reranked_results = <span class="variable language_">self</span>.reranker.rerank(query, unique_results)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 5. 补充相关chunk（基于元数据关系）</span></span><br><span class="line">        final_results = <span class="variable language_">self</span>.supplement_related_chunks(</span><br><span class="line">            reranked_results[:top_k]</span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> final_results</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">supplement_related_chunks</span>(<span class="params">self, results: <span class="type">List</span>[<span class="type">Dict</span>]</span>) -&gt; <span class="type">List</span>[<span class="type">Dict</span>]:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        补充相关chunk，解决上下文割裂问题</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        supplemented = []</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> result <span class="keyword">in</span> results:</span><br><span class="line">            supplemented.append(result)</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 如果chunk不完整，补充前后chunk</span></span><br><span class="line">            <span class="keyword">if</span> result[<span class="string">&#x27;metadata&#x27;</span>][<span class="string">&#x27;chunk_metadata&#x27;</span>][<span class="string">&#x27;section_level&#x27;</span>] &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="comment"># 获取前一个chunk</span></span><br><span class="line">                prev_chunk_id = result[<span class="string">&#x27;metadata&#x27;</span>][<span class="string">&#x27;relationship&#x27;</span>][<span class="string">&#x27;previous_chunk_id&#x27;</span>]</span><br><span class="line">                <span class="keyword">if</span> prev_chunk_id:</span><br><span class="line">                    prev_chunk = <span class="variable language_">self</span>.vector_db.get_by_id(prev_chunk_id)</span><br><span class="line">                    supplemented.insert(-<span class="number">1</span>, prev_chunk)</span><br><span class="line">                </span><br><span class="line">                <span class="comment"># 获取后一个chunk</span></span><br><span class="line">                next_chunk_id = result[<span class="string">&#x27;metadata&#x27;</span>][<span class="string">&#x27;relationship&#x27;</span>][<span class="string">&#x27;next_chunk_id&#x27;</span>]</span><br><span class="line">                <span class="keyword">if</span> next_chunk_id:</span><br><span class="line">                    next_chunk = <span class="variable language_">self</span>.vector_db.get_by_id(next_chunk_id)</span><br><span class="line">                    supplemented.append(next_chunk)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> supplemented</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">evaluate_and_improve</span>(<span class="params">self, test_queries: <span class="type">List</span>[<span class="built_in">str</span>]</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        评估和持续改进</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 1. 生成质量报告</span></span><br><span class="line">        report = <span class="variable language_">self</span>.quality_analyzer.generate_quality_report(test_queries)</span><br><span class="line">        <span class="built_in">print</span>(report)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 识别问题查询</span></span><br><span class="line">        failed_queries = <span class="variable language_">self</span>.quality_analyzer.get_failed_queries()</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 分析失败原因</span></span><br><span class="line">        <span class="keyword">for</span> query <span class="keyword">in</span> failed_queries:</span><br><span class="line">            analysis = <span class="variable language_">self</span>.analyze_failure(query)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;查询: <span class="subst">&#123;query&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;失败原因: <span class="subst">&#123;analysis[<span class="string">&#x27;reason&#x27;</span>]&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;建议措施: <span class="subst">&#123;analysis[<span class="string">&#x27;recommendation&#x27;</span>]&#125;</span>&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 自动优化建议</span></span><br><span class="line">        optimization_plan = <span class="variable language_">self</span>.generate_optimization_plan(report)</span><br><span class="line">        <span class="keyword">return</span> optimization_plan</span><br></pre></td></tr></table></figure>
+
+<h3 id="监控和持续优化"><a href="#监控和持续优化" class="headerlink" title="监控和持续优化"></a>监控和持续优化</h3><p>建立监控体系，持续追踪系统表现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">RAGMonitor</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    RAG系统监控器</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vector_db, logging_db</span>):</span><br><span class="line">        <span class="variable language_">self</span>.vector_db = vector_db</span><br><span class="line">        <span class="variable language_">self</span>.logging_db = logging_db</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">log_retrieval</span>(<span class="params">self, query: <span class="built_in">str</span>, results: <span class="type">List</span>[<span class="type">Dict</span>], </span></span><br><span class="line"><span class="params">                     user_feedback: <span class="built_in">str</span> = <span class="literal">None</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        记录每次检索</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        log_entry = &#123;</span><br><span class="line">            <span class="string">&#x27;timestamp&#x27;</span>: datetime.now().isoformat(),</span><br><span class="line">            <span class="string">&#x27;query&#x27;</span>: query,</span><br><span class="line">            <span class="string">&#x27;results_count&#x27;</span>: <span class="built_in">len</span>(results),</span><br><span class="line">            <span class="string">&#x27;top_scores&#x27;</span>: [r[<span class="string">&#x27;score&#x27;</span>] <span class="keyword">for</span> r <span class="keyword">in</span> results[:<span class="number">3</span>]],</span><br><span class="line">            <span class="string">&#x27;user_feedback&#x27;</span>: user_feedback,</span><br><span class="line">            <span class="string">&#x27;latency_ms&#x27;</span>: results[<span class="number">0</span>].get(<span class="string">&#x27;latency_ms&#x27;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="variable language_">self</span>.logging_db.insert(log_entry)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">generate_daily_report</span>(<span class="params">self</span>) -&gt; <span class="type">Dict</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        生成每日监控报告</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        today_logs = <span class="variable language_">self</span>.logging_db.get_today_logs()</span><br><span class="line">        </span><br><span class="line">        report = &#123;</span><br><span class="line">            <span class="string">&#x27;date&#x27;</span>: datetime.now().date().isoformat(),</span><br><span class="line">            <span class="string">&#x27;total_queries&#x27;</span>: <span class="built_in">len</span>(today_logs),</span><br><span class="line">            <span class="string">&#x27;avg_latency&#x27;</span>: np.mean([log[<span class="string">&#x27;latency_ms&#x27;</span>] <span class="keyword">for</span> log <span class="keyword">in</span> today_logs]),</span><br><span class="line">            <span class="string">&#x27;zero_result_rate&#x27;</span>: <span class="built_in">len</span>([log <span class="keyword">for</span> log <span class="keyword">in</span> today_logs <span class="keyword">if</span> log[<span class="string">&#x27;results_count&#x27;</span>] == <span class="number">0</span>]) / <span class="built_in">len</span>(today_logs),</span><br><span class="line">            <span class="string">&#x27;low_confidence_rate&#x27;</span>: <span class="built_in">len</span>([log <span class="keyword">for</span> log <span class="keyword">in</span> today_logs <span class="keyword">if</span> <span class="built_in">max</span>(log[<span class="string">&#x27;top_scores&#x27;</span>]) &lt; <span class="number">0.6</span>]) / <span class="built_in">len</span>(today_logs),</span><br><span class="line">            <span class="string">&#x27;negative_feedback_rate&#x27;</span>: <span class="built_in">len</span>([log <span class="keyword">for</span> log <span class="keyword">in</span> today_logs <span class="keyword">if</span> log[<span class="string">&#x27;user_feedback&#x27;</span>] == <span class="string">&#x27;negative&#x27;</span>]) / <span class="built_in">len</span>(today_logs),</span><br><span class="line">            <span class="string">&#x27;top_failed_queries&#x27;</span>: <span class="variable language_">self</span>.get_top_failed_queries(today_logs)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 告警</span></span><br><span class="line">        <span class="keyword">if</span> report[<span class="string">&#x27;zero_result_rate&#x27;</span>] &gt; <span class="number">0.1</span>:</span><br><span class="line">            <span class="variable language_">self</span>.send_alert(<span class="string">&quot;零结果率过高&quot;</span>, report)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> report[<span class="string">&#x27;negative_feedback_rate&#x27;</span>] &gt; <span class="number">0.2</span>:</span><br><span class="line">            <span class="variable language_">self</span>.send_alert(<span class="string">&quot;负面反馈率过高&quot;</span>, report)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> report</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">identify_knowledge_gaps</span>(<span class="params">self, time_window_days: <span class="built_in">int</span> = <span class="number">7</span></span>) -&gt; <span class="type">List</span>[<span class="built_in">str</span>]:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        识别知识盲区</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        recent_logs = <span class="variable language_">self</span>.logging_db.get_recent_logs(time_window_days)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 找出经常检索失败的查询</span></span><br><span class="line">        failed_queries = [</span><br><span class="line">            log[<span class="string">&#x27;query&#x27;</span>] <span class="keyword">for</span> log <span class="keyword">in</span> recent_logs</span><br><span class="line">            <span class="keyword">if</span> log[<span class="string">&#x27;results_count&#x27;</span>] == <span class="number">0</span> <span class="keyword">or</span> <span class="built_in">max</span>(log[<span class="string">&#x27;top_scores&#x27;</span>]) &lt; <span class="number">0.5</span></span><br><span class="line">        ]</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 聚类相似查询，识别知识盲区主题</span></span><br><span class="line">        knowledge_gaps = <span class="variable language_">self</span>.cluster_queries(failed_queries)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> knowledge_gaps</span><br></pre></td></tr></table></figure>
+
+<h2 id="最佳实践总结"><a href="#最佳实践总结" class="headerlink" title="最佳实践总结"></a>最佳实践总结</h2><h3 id="切片策略最佳实践"><a href="#切片策略最佳实践" class="headerlink" title="切片策略最佳实践"></a>切片策略最佳实践</h3><ol>
+<li><p><strong>根据内容类型选择策略</strong></p>
+<ul>
+<li>技术文档：500-800 tokens，20% overlap</li>
+<li>FAQ：100-200 tokens，10% overlap</li>
+<li>长篇报告：800-1000 tokens，15% overlap</li>
+</ul>
+</li>
+<li><p><strong>保持语义完整性</strong></p>
+<ul>
+<li>优先在段落、章节等自然边界切分</li>
+<li>对表格、代码、列表等结构化内容保持完整性</li>
+<li>添加上下文窗口（前后各50-100 tokens）</li>
+</ul>
+</li>
+<li><p><strong>添加元数据</strong></p>
+<ul>
+<li>文档标题、章节标题、页码</li>
+<li>文档类型、创建日期、作者</li>
+<li>前后chunk的引用关系</li>
+</ul>
+</li>
+</ol>
+<h3 id="检索优化最佳实践"><a href="#检索优化最佳实践" class="headerlink" title="检索优化最佳实践"></a>检索优化最佳实践</h3><ol>
+<li><p><strong>采用混合检索</strong></p>
+<ul>
+<li>密集向量检索（语义相似度）</li>
+<li>稀疏向量检索（关键词匹配）</li>
+<li>元数据过滤（时间、类型、标签）</li>
+</ul>
+</li>
+<li><p><strong>查询优化</strong></p>
+<ul>
+<li>同义词扩展</li>
+<li>LLM查询改写</li>
+<li>复杂查询拆解</li>
+<li>HyDE假设性文档生成</li>
+</ul>
+</li>
+<li><p><strong>两阶段检索+重排序</strong></p>
+<ul>
+<li>第一阶段：广召回（top_k × 3）</li>
+<li>第二阶段：Cross-Encoder精确重排序</li>
+</ul>
+</li>
+</ol>
+<h3 id="知识库管理最佳实践"><a href="#知识库管理最佳实践" class="headerlink" title="知识库管理最佳实践"></a>知识库管理最佳实践</h3><ol>
+<li><p><strong>建立质量评估体系</strong></p>
+<ul>
+<li>定期运行覆盖度测试</li>
+<li>监控chunk质量指标</li>
+<li>追踪用户反馈和失败查询</li>
+</ul>
+</li>
+<li><p><strong>持续更新机制</strong></p>
+<ul>
+<li>增量更新而非全量重建</li>
+<li>版本控制和回滚能力</li>
+<li>自动检测文档变更</li>
+</ul>
+</li>
+<li><p><strong>监控和优化</strong></p>
+<ul>
+<li>实时监控检索性能</li>
+<li>分析失败查询，识别知识盲区</li>
+<li>A&#x2F;B测试不同优化策略的效果</li>
+</ul>
+</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>RAG系统的内容缺失问题是一个系统性工程，需要从<strong>切片策略、检索算法、知识库管理</strong>三个维度综合优化：</p>
+<ol>
+<li><strong>切片优化</strong>：采用语义感知的智能切片，保持内容完整性，添加上下文信息</li>
+<li><strong>检索优化</strong>：使用混合检索策略，结合查询扩展和重排序，提升召回率和准确率</li>
+<li><strong>知识库优化</strong>：建立质量评估体系，完善元数据，实现增量更新和持续监控</li>
+</ol>
+<p>只有将这三个方面结合起来，构建完整的优化pipeline，才能从根本上解决RAG系统的内容缺失问题，为用户提供准确、完整、可靠的检索结果。</p>
+<p>在实际应用中，需要根据具体业务场景和数据特点，不断迭代和调整优化策略，通过A&#x2F;B测试和用户反馈持续改进系统性能。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="RAG系统检索内容缺失问题深度分析与解决方案" target="_blank" rel="external">https://www.silenceboy.com/2025/11/24/RAG系统检索内容缺失问题深度分析与解决方案/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2025/11/07/%E4%BC%81%E4%B8%9A%E7%A7%81%E6%9C%89%E7%9F%A5%E8%AF%86%E5%BA%93RAG%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA%E6%8C%91%E6%88%98/" title="企业私有知识库RAG系统构建挑战"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+</body>
+</html>
