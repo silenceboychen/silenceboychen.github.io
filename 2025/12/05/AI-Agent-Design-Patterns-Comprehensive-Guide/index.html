@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>深度解析 AI Agent 设计模式：从 CoT 到多智能体协同 | morty的个人博客</title>
+  <meta name="description" content="在 LLM（大语言模型）应用开发的演进过程中，我们正在经历从单纯的 Prompt Engineering（提示词工程） 向 Agent Engineering（智能体工程） 的范式转变。如果说 Prompt Engineering 是在教模型”如何说话”，那么 Agent Engineering 则是在教模型”如何做事”。 作为一名在 AI 领域深耕多年的开发者，我见证了 Agent 从简单的”工">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度解析 AI Agent 设计模式：从 CoT 到多智能体协同">
+<meta property="og:url" content="https://www.silenceboy.com/2025/12/05/AI-Agent-Design-Patterns-Comprehensive-Guide/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="在 LLM（大语言模型）应用开发的演进过程中，我们正在经历从单纯的 Prompt Engineering（提示词工程） 向 Agent Engineering（智能体工程） 的范式转变。如果说 Prompt Engineering 是在教模型”如何说话”，那么 Agent Engineering 则是在教模型”如何做事”。 作为一名在 AI 领域深耕多年的开发者，我见证了 Agent 从简单的”工">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-12-05T02:00:00.000Z">
+<meta property="article:modified_time" content="2025-12-05T09:08:13.405Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2025/12/05/AI-Agent-Design-Patterns-Comprehensive-Guide/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RAG/">RAG</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 13.22px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.11px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.11px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.11px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.78px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.11px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.22px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.67px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.11px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.89px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.11px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.56px;">linux</a> <a href="/tags/mac/" style="font-size: 13.33px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.44px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.11px;">npm</a> <a href="/tags/php/" style="font-size: 13.33px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.44px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.22px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.22px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.11px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.22px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/12/05/AI-Agent-Design-Patterns-Comprehensive-Guide/" class="title">深度解析 AI Agent 设计模式：从 CoT 到多智能体协同</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-12-05T02:00:00.000Z" itemprop="datePublished">2025-12-05</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RAG/">RAG</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="title">RAG系统检索内容缺失问题深度分析与解决方案</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-11-24T06:30:00.000Z" itemprop="datePublished">2025-11-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/RAG/">RAG</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/11/07/%E4%BC%81%E4%B8%9A%E7%A7%81%E6%9C%89%E7%9F%A5%E8%AF%86%E5%BA%93RAG%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA%E6%8C%91%E6%88%98/" class="title">企业私有知识库RAG系统构建挑战</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-11-07T02:43:04.000Z" itemprop="datePublished">2025-11-07</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/autosar/">autosar</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/09/05/fidl%E5%92%8Carxml%E4%BA%92%E8%BD%AC%E6%95%99%E7%A8%8B/" class="title">fidl和arxml互转教程</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-09-05T09:56:31.000Z" itemprop="datePublished">2025-09-05</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/09/05/AI%E7%BC%96%E7%A0%81%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/" class="title">AI编码工具对比分析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-09-05T09:16:49.000Z" itemprop="datePublished">2025-09-05</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E6%A8%A1%E5%BC%8F"><span class="toc-number">1.</span> <span class="toc-text">基础模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Chain-of-Thought-CoT-%E6%80%9D%E7%BB%B4%E9%93%BE"><span class="toc-number">1.1.</span> <span class="toc-text">Chain-of-Thought (CoT) - 思维链</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6"><span class="toc-number">1.1.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A6%E6%9C%AF%E6%9D%A5%E6%BA%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">学术来源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-number">1.1.3.</span> <span class="toc-text">特点分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.1.4.</span> <span class="toc-text">最佳实践</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tool-Use-Function-Calling-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8"><span class="toc-number">1.2.</span> <span class="toc-text">Tool-Use &#x2F; Function Calling - 工具调用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A6%E6%9C%AF%E6%9D%A5%E6%BA%90-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">学术来源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90-1"><span class="toc-number">1.2.3.</span> <span class="toc-text">特点分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81"><span class="toc-number">1.2.4.</span> <span class="toc-text">示例代码</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ReAct-Reasoning-Acting"><span class="toc-number">1.3.</span> <span class="toc-text">ReAct (Reasoning + Acting)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6-2"><span class="toc-number">1.3.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A6%E6%9C%AF%E6%9D%A5%E6%BA%90-2"><span class="toc-number">1.3.2.</span> <span class="toc-text">学术来源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90-2"><span class="toc-number">1.3.3.</span> <span class="toc-text">特点分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E7%A4%BA%E4%BE%8B"><span class="toc-number">1.3.4.</span> <span class="toc-text">实际示例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E9%98%B6%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.</span> <span class="toc-text">进阶模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Plan-and-Execute-%E8%A7%84%E5%88%92%E4%B8%8E%E6%89%A7%E8%A1%8C"><span class="toc-number">2.1.</span> <span class="toc-text">Plan-and-Execute (规划与执行)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6-3"><span class="toc-number">2.1.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A6%E6%9C%AF%E6%9D%A5%E6%BA%90-3"><span class="toc-number">2.1.2.</span> <span class="toc-text">学术来源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%A1%E5%88%92%E8%A1%A8%E7%A4%BA%E6%96%B9%E5%BC%8F"><span class="toc-number">2.1.3.</span> <span class="toc-text">计划表示方式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E6%80%81-Replanning-%E7%AD%96%E7%95%A5"><span class="toc-number">2.1.4.</span> <span class="toc-text">动态 Replanning 策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90-3"><span class="toc-number">2.1.5.</span> <span class="toc-text">特点分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Reflection-Self-Correction-%E5%8F%8D%E6%80%9D%E4%B8%8E%E8%87%AA%E4%BF%AE%E6%AD%A3"><span class="toc-number">2.2.</span> <span class="toc-text">Reflection &#x2F; Self-Correction (反思与自修正)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6-4"><span class="toc-number">2.2.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A6%E6%9C%AF%E6%9D%A5%E6%BA%90-4"><span class="toc-number">2.2.2.</span> <span class="toc-text">学术来源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%8D%E6%80%9D%E6%9C%BA%E5%88%B6%E7%B1%BB%E5%9E%8B"><span class="toc-number">2.2.3.</span> <span class="toc-text">反思机制类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%AD%E4%BB%A3%E7%BB%88%E6%AD%A2%E6%9D%A1%E4%BB%B6"><span class="toc-number">2.2.4.</span> <span class="toc-text">迭代终止条件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90-4"><span class="toc-number">2.2.5.</span> <span class="toc-text">特点分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tree-of-Thoughts-ToT-%E6%80%9D%E7%BB%B4%E6%A0%91"><span class="toc-number">2.3.</span> <span class="toc-text">Tree-of-Thoughts (ToT) - 思维树</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6-5"><span class="toc-number">2.3.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%A6%E6%9C%AF%E6%9D%A5%E6%BA%90-5"><span class="toc-number">2.3.2.</span> <span class="toc-text">学术来源</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%90%9C%E7%B4%A2%E7%AD%96%E7%95%A5"><span class="toc-number">2.3.3.</span> <span class="toc-text">搜索策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90-5"><span class="toc-number">2.3.4.</span> <span class="toc-text">特点分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9AGame-of-24"><span class="toc-number">2.3.5.</span> <span class="toc-text">示例：Game of 24</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%8F%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">协作模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Hierarchical-Agents-%E5%B1%82%E7%BA%A7%E5%BC%8F%E6%99%BA%E8%83%BD%E4%BD%93"><span class="toc-number">3.1.</span> <span class="toc-text">Hierarchical Agents (层级式智能体)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6-6"><span class="toc-number">3.1.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE"><span class="toc-number">3.1.2.</span> <span class="toc-text">通信协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B9%B6%E8%A1%8C%E6%89%A7%E8%A1%8C%E4%B8%8E%E5%A4%B1%E8%B4%A5%E5%A4%84%E7%90%86"><span class="toc-number">3.1.3.</span> <span class="toc-text">并行执行与失败处理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B1%82%E7%BA%A7%E6%B7%B1%E5%BA%A6"><span class="toc-number">3.1.4.</span> <span class="toc-text">层级深度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90-6"><span class="toc-number">3.1.5.</span> <span class="toc-text">特点分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Multi-Agent-Collaboration-%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%8D%8F%E5%90%8C"><span class="toc-number">3.2.</span> <span class="toc-text">Multi-Agent Collaboration (多智能体协同)</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6-7"><span class="toc-number">3.2.1.</span> <span class="toc-text">核心机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.2.2.</span> <span class="toc-text">通信模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%88%E6%AD%A2%E6%9D%A1%E4%BB%B6"><span class="toc-number">3.2.3.</span> <span class="toc-text">终止条件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%86%B2%E7%AA%81%E8%A7%A3%E5%86%B3%E6%9C%BA%E5%88%B6"><span class="toc-number">3.2.4.</span> <span class="toc-text">冲突解决机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90-7"><span class="toc-number">3.2.5.</span> <span class="toc-text">特点分析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A8%A1%E5%BC%8F%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E5%9E%8B%E6%8C%87%E5%8D%97"><span class="toc-number">4.</span> <span class="toc-text">模式对比与选型指南</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%89%E5%9E%8B%E5%BB%BA%E8%AE%AE"><span class="toc-number">4.1.</span> <span class="toc-text">选型建议</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%BB%8E%E7%AE%80%E5%8E%9F%E5%88%99%EF%BC%88%E7%94%B1%E7%AE%80%E5%88%B0%E7%B9%81%EF%BC%89"><span class="toc-number">4.1.1.</span> <span class="toc-text">1. 从简原则（由简到繁）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%A0%B9%E6%8D%AE%E7%93%B6%E9%A2%88%E9%80%89%E6%8B%A9%E6%A8%A1%E5%BC%8F"><span class="toc-number">4.1.2.</span> <span class="toc-text">2. 根据瓶颈选择模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%B7%B7%E5%90%88%E4%BD%BF%E7%94%A8"><span class="toc-number">4.1.3.</span> <span class="toc-text">3. 混合使用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E6%A1%86%E6%9E%B6%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE"><span class="toc-number">4.1.4.</span> <span class="toc-text">4. 框架选择建议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E6%88%90%E6%9C%AC%E4%B8%8E%E6%80%A7%E8%83%BD%E6%9D%83%E8%A1%A1"><span class="toc-number">4.1.5.</span> <span class="toc-text">5. 成本与性能权衡</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">5.</span> <span class="toc-text">结语</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AA%E6%9D%A5%E8%B6%8B%E5%8A%BF"><span class="toc-number">5.1.</span> <span class="toc-text">未来趋势</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E8%B7%AF%E5%BE%84%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.2.</span> <span class="toc-text">学习路径建议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A8%E8%8D%90%E8%B5%84%E6%BA%90"><span class="toc-number">5.3.</span> <span class="toc-text">推荐资源</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-AI-Agent-Design-Patterns-Comprehensive-Guide" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      深度解析 AI Agent 设计模式：从 CoT 到多智能体协同
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2025/12/05/AI-Agent-Design-Patterns-Comprehensive-Guide/" class="article-date">
+	  <time datetime="2025-12-05T02:00:00.000Z" itemprop="datePublished">2025-12-05</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>, <a class="article-tag-link-link" href="/tags/Agent/" rel="tag">Agent</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2025/12/05/AI-Agent-Design-Patterns-Comprehensive-Guide/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 5.6k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 22(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>在 LLM（大语言模型）应用开发的演进过程中，我们正在经历从单纯的 <strong>Prompt Engineering（提示词工程）</strong> 向 <strong>Agent Engineering（智能体工程）</strong> 的范式转变。如果说 Prompt Engineering 是在教模型”如何说话”，那么 Agent Engineering 则是在教模型”如何做事”。</p>
+<p>作为一名在 AI 领域深耕多年的开发者，我见证了 Agent 从简单的”工具调用”发展为如今复杂的”多智能体协作系统”。选择合适的 Agent 模式（Agentic Patterns）对于构建鲁棒、高效的 AI 应用至关重要。</p>
+<p>本文将详细介绍 8 种核心的 Agent 设计模式，从基础到高级，从单体到协作，帮助你构建完整的 Agent 知识体系。</p>
+<hr>
+<h2 id="基础模式"><a href="#基础模式" class="headerlink" title="基础模式"></a>基础模式</h2><h3 id="Chain-of-Thought-CoT-思维链"><a href="#Chain-of-Thought-CoT-思维链" class="headerlink" title="Chain-of-Thought (CoT) - 思维链"></a>Chain-of-Thought (CoT) - 思维链</h3><p><strong>Chain-of-Thought</strong> 是所有推理模式的基石，也是最简单有效的 Prompt Engineering 技术。它通过引导模型”逐步思考”来提升复杂问题的解决能力。</p>
+<h4 id="核心机制"><a href="#核心机制" class="headerlink" title="核心机制"></a>核心机制</h4><p>通过在 Prompt 中添加 <code>&quot;Let&#39;s think step by step&quot;</code> 或提供少样本推理示例（Few-shot CoT），引导 LLM 将复杂问题分解为中间推理步骤，而非直接给出答案。</p>
+<pre class="mermaid">graph LR
+    Input[问题] --> Step1[推理步骤 1]
+    Step1 --> Step2[推理步骤 2]
+    Step2 --> Step3[推理步骤 3]
+    Step3 --> Answer[最终答案]</pre>
+
+<h4 id="学术来源"><a href="#学术来源" class="headerlink" title="学术来源"></a>学术来源</h4><ul>
+<li><strong>论文</strong>: Wei et al., 2022, <a href="https://arxiv.org/abs/2201.11903">“Chain-of-Thought Prompting Elicits Reasoning in Large Language Models”</a></li>
+<li><strong>核心发现</strong>: CoT 在数学、常识推理、符号操作等任务上显著提升准确率（GPT-3 从 17.7% 提升到 58.1%）</li>
+</ul>
+<h4 id="特点分析"><a href="#特点分析" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>零成本</strong>: 无需外部工具或额外 API 调用</li>
+<li><strong>高度可控</strong>: 推理过程完全在模型内部</li>
+<li><strong>广泛适用</strong>: 适用于几乎所有需要推理的任务</li>
+<li><strong>可解释性强</strong>: 中间步骤清晰可见</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>无法获取外部信息</strong>: 只能基于模型的知识储备</li>
+<li><strong>幻觉风险</strong>: 推理步骤可能看似合理但实际错误</li>
+<li><strong>长文本消耗</strong>: 推理步骤会占用 token</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li>数学问题求解</li>
+<li>逻辑推理题</li>
+<li>常识推理</li>
+<li>不需要外部信息的复杂问题</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li>原生 Prompt Engineering（OpenAI, Anthropic, Google）</li>
+<li><strong>LangChain</strong>: <code>LLMChain</code> 配合 CoT prompt</li>
+</ul>
+</li>
+</ul>
+<h4 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Zero-shot CoT</span></span><br><span class="line">prompt = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">问题：一个书架有 3 层，每层有 8 本书。如果我拿走了 5 本书，还剩多少本？</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">让我们一步步思考：</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Few-shot CoT</span></span><br><span class="line">prompt = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">问题：咖啡厅有 23 个顾客，中午来了 52 个，下午走了 15 个，现在有多少人？</span></span><br><span class="line"><span class="string">思考：开始有 23 人，来了 52 人，所以是 23+52=75 人。然后走了 15 人，75-15=60 人。</span></span><br><span class="line"><span class="string">答案：60 人</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">问题：一个书架有 3 层，每层有 8 本书。如果我拿走了 5 本书，还剩多少本？</span></span><br><span class="line"><span class="string">思考：</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="Tool-Use-Function-Calling-工具调用"><a href="#Tool-Use-Function-Calling-工具调用" class="headerlink" title="Tool-Use &#x2F; Function Calling - 工具调用"></a>Tool-Use &#x2F; Function Calling - 工具调用</h3><p><strong>Tool-Use</strong> 是最基础的 Agent 模式，让 LLM 能够调用外部工具来完成无法靠自身完成的任务。它是 ReAct 的简化版，通常只进行一次工具调用。</p>
+<h4 id="核心机制-1"><a href="#核心机制-1" class="headerlink" title="核心机制"></a>核心机制</h4><ol>
+<li>LLM 分析用户请求，判断是否需要调用工具</li>
+<li>如果需要，选择合适的工具并生成调用参数</li>
+<li>执行工具调用，获取结果</li>
+<li>基于工具返回结果生成最终答案</li>
+</ol>
+<pre class="mermaid">graph LR
+    User[用户请求] --> LLM
+    LLM --> Decision{需要工具?}
+    Decision -- Yes --> ToolCall[调用工具]
+    Decision -- No --> DirectAnswer[直接回答]
+    ToolCall --> ToolResult[工具结果]
+    ToolResult --> FinalAnswer[基于结果回答]</pre>
+
+<h4 id="学术来源-1"><a href="#学术来源-1" class="headerlink" title="学术来源"></a>学术来源</h4><ul>
+<li><strong>OpenAI Function Calling</strong> (<a href="https://platform.openai.com/docs/guides/function-calling">官方文档</a>, 2023)</li>
+<li><strong>Toolformer</strong> (Schick et al., 2023): <a href="https://arxiv.org/abs/2302.04761">自学习使用工具的语言模型</a></li>
+</ul>
+<h4 id="特点分析-1"><a href="#特点分析-1" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>简单直接</strong>: 最容易实现的 Agent 模式</li>
+<li><strong>低延迟</strong>: 通常只需要 2 次 LLM 调用</li>
+<li><strong>成本低</strong>: Token 消耗少</li>
+<li><strong>可靠性高</strong>: 错误路径少</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>单步限制</strong>: 不适合需要多步推理的复杂任务</li>
+<li><strong>无法纠错</strong>: 工具调用失败后难以恢复</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li>简单的 API 查询（天气、汇率、股价）</li>
+<li>计算器、单位转换</li>
+<li>数据库单次查询</li>
+<li>翻译、OCR 等单一功能</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li><strong>OpenAI</strong>: <code>functions</code> &#x2F; <code>tools</code> 参数</li>
+<li><strong>Anthropic</strong>: <code>tool_use</code> (Claude 3+)</li>
+<li><strong>Google</strong>: Gemini Function Calling</li>
+<li><strong>LangChain</strong>: <code>create_tool_calling_agent</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line"></span><br><span class="line">tools = [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">&quot;type&quot;</span>: <span class="string">&quot;function&quot;</span>,</span><br><span class="line">        <span class="string">&quot;function&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;name&quot;</span>: <span class="string">&quot;get_weather&quot;</span>,</span><br><span class="line">            <span class="string">&quot;description&quot;</span>: <span class="string">&quot;获取指定城市的天气&quot;</span>,</span><br><span class="line">            <span class="string">&quot;parameters&quot;</span>: &#123;</span><br><span class="line">                <span class="string">&quot;type&quot;</span>: <span class="string">&quot;object&quot;</span>,</span><br><span class="line">                <span class="string">&quot;properties&quot;</span>: &#123;</span><br><span class="line">                    <span class="string">&quot;city&quot;</span>: &#123;<span class="string">&quot;type&quot;</span>: <span class="string">&quot;string&quot;</span>, <span class="string">&quot;description&quot;</span>: <span class="string">&quot;城市名称&quot;</span>&#125;</span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="string">&quot;required&quot;</span>: [<span class="string">&quot;city&quot;</span>]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">&quot;gpt-4&quot;</span>,</span><br><span class="line">    messages=[&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;北京今天天气如何?&quot;</span>&#125;],</span><br><span class="line">    tools=tools</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># LLM 会返回: &#123;&quot;name&quot;: &quot;get_weather&quot;, &quot;arguments&quot;: &#123;&quot;city&quot;: &quot;北京&quot;&#125;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="ReAct-Reasoning-Acting"><a href="#ReAct-Reasoning-Acting" class="headerlink" title="ReAct (Reasoning + Acting)"></a>ReAct (Reasoning + Acting)</h3><p><strong>ReAct</strong> 是目前最经典、应用最广泛的 Agent 模式。它将 CoT 的推理能力与 Tool-Use 的行动能力结合，形成”思考-行动-观察”的循环。</p>
+<h4 id="核心机制-2"><a href="#核心机制-2" class="headerlink" title="核心机制"></a>核心机制</h4><p>Agent 不再直接给出答案，而是遵循一个循环：</p>
+<ol>
+<li><strong>Thought（思考）</strong>：根据当前情况，思考下一步该做什么</li>
+<li><strong>Action（行动）</strong>：调用具体的工具（如搜索、计算器、数据库查询）</li>
+<li><strong>Observation（观察）</strong>：获取工具执行的结果</li>
+<li><strong>Repeat（重复）</strong>：根据观察结果再次思考，直到满足终止条件</li>
+</ol>
+<pre class="mermaid">graph LR
+    Input --> Thought
+    Thought --> Decision{是否结束?}
+    Decision -- No --> Action
+    Action --> Tool[External Tools]
+    Tool --> Observation
+    Observation --> Thought
+    Decision -- Yes --> Answer[Final Answer]</pre>
+
+<h4 id="学术来源-2"><a href="#学术来源-2" class="headerlink" title="学术来源"></a>学术来源</h4><ul>
+<li><strong>论文</strong>: Yao et al., 2022, <a href="https://arxiv.org/abs/2210.03629">“ReAct: Synergizing Reasoning and Acting in Language Models”</a></li>
+<li><strong>核心贡献</strong>: 将推理轨迹和任务特定行动交织，在 HotpotQA、Fever 等基准上超越 CoT</li>
+</ul>
+<h4 id="特点分析-2"><a href="#特点分析-2" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>减少幻觉</strong>：通过引入外部真实数据（Observation）来支撑推理</li>
+<li><strong>可解释性强</strong>：用户可以看到 Agent 的思考路径</li>
+<li><strong>灵活性</strong>：能够处理需要多步推导的问题</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>上下文消耗</strong>：中间步骤会占用大量 Context Window</li>
+<li><strong>错误传播</strong>：中间某一步错了，后续可能无法挽回</li>
+<li><strong>延迟较高</strong>：串行执行，每一步都需要 LLM 推理</li>
+</ul>
+</li>
+<li><strong>终止条件</strong>：<ul>
+<li>Agent 输出 <code>&quot;Final Answer:&quot;</code> 前缀</li>
+<li>达到 <code>max_iterations</code>（通常 5-10 次）</li>
+<li>连续失败超过阈值</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li>需要实时数据查询的任务（如”查询昨天的股价并计算涨幅”）</li>
+<li>中等复杂度的多步任务</li>
+<li>需要组合多个工具的场景</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li><strong>LangChain</strong>: <code>AgentExecutor</code> (最基础的实现)</li>
+<li><strong>LlamaIndex</strong>: <code>ReActAgent</code></li>
+<li><strong>LangGraph</strong>: <code>create_react_agent</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="实际示例"><a href="#实际示例" class="headerlink" title="实际示例"></a>实际示例</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">用户: 比较一下特斯拉和比亚迪昨天的股价涨幅</span><br><span class="line"></span><br><span class="line">Thought 1: 我需要先查询特斯拉昨天的股价</span><br><span class="line">Action 1: stock_price(symbol=&quot;TSLA&quot;, date=&quot;2024-01-10&quot;)</span><br><span class="line">Observation 1: 开盘 $238.45, 收盘 $242.84</span><br><span class="line"></span><br><span class="line">Thought 2: 然后查询比亚迪的股价</span><br><span class="line">Action 2: stock_price(symbol=&quot;BYDDY&quot;, date=&quot;2024-01-10&quot;)</span><br><span class="line">Observation 2: 开盘 $52.30, 收盘 $53.12</span><br><span class="line"></span><br><span class="line">Thought 3: 现在计算涨幅并比较</span><br><span class="line">Action 3: calculate((242.84-238.45)/238.45 * 100)</span><br><span class="line">Observation 3: 1.84%</span><br><span class="line"></span><br><span class="line">Action 4: calculate((53.12-52.30)/52.30 * 100)</span><br><span class="line">Observation 4: 1.57%</span><br><span class="line"></span><br><span class="line">Thought 4: 我已经得到了所有信息，可以给出答案了</span><br><span class="line">Final Answer: 特斯拉昨天涨幅为 1.84%，比亚迪为 1.57%，特斯拉涨幅更大。</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="进阶模式"><a href="#进阶模式" class="headerlink" title="进阶模式"></a>进阶模式</h2><h3 id="Plan-and-Execute-规划与执行"><a href="#Plan-and-Execute-规划与执行" class="headerlink" title="Plan-and-Execute (规划与执行)"></a>Plan-and-Execute (规划与执行)</h3><p>对于更复杂的任务，ReAct 模式容易迷失在细节中。<strong>Plan-and-Execute</strong> 模式将过程拆解为”规划师（Planner）”和”执行者（Executor）”两个阶段。</p>
+<h4 id="核心机制-3"><a href="#核心机制-3" class="headerlink" title="核心机制"></a>核心机制</h4><ol>
+<li><strong>Planning</strong>：Planner Agent 接收用户指令，生成一个包含多个步骤的计划列表</li>
+<li><strong>Execution</strong>：Executor Agent 依次执行这些步骤</li>
+<li><strong>Replanning (可选)</strong>：根据执行结果，动态调整剩余的计划</li>
+</ol>
+<pre class="mermaid">graph TD
+    User[User Input] --> Planner
+    Planner --> Plan[Step-by-Step Plan]
+    Plan --> Executor
+    Executor --> Tool[Tools]
+    Tool --> Result
+    Result --> Check{是否需要 Replan?}
+    Check -- Yes --> Planner
+    Check -- No --> NextStep[下一步]
+    NextStep --> Executor
+    Executor --> Final[完成]</pre>
+
+<h4 id="学术来源-3"><a href="#学术来源-3" class="headerlink" title="学术来源"></a>学术来源</h4><ul>
+<li><strong>LLM+P</strong> (Liu et al., 2023): <a href="https://arxiv.org/abs/2304.11477">使用 LLM 进行规划的框架</a></li>
+<li><strong>AutoGPT</strong> (<a href="https://github.com/Significant-Gravitas/AutoGPT">GitHub</a>) &#x2F; <strong>BabyAGI</strong> (<a href="https://github.com/yoheinakajima/babyagi">GitHub</a>): 早期的自主 Agent 实现 (2023)</li>
+</ul>
+<h4 id="计划表示方式"><a href="#计划表示方式" class="headerlink" title="计划表示方式"></a>计划表示方式</h4><ol>
+<li><p><strong>自然语言列表</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. 搜索特斯拉 2023 年财报</span><br><span class="line">2. 提取营收和利润数据</span><br><span class="line">3. 搜索比亚迪 2023 年财报</span><br><span class="line">4. 提取营收和利润数据</span><br><span class="line">5. 对比分析并生成报告</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>结构化 JSON</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;steps&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span> <span class="attr">&quot;action&quot;</span><span class="punctuation">:</span> <span class="string">&quot;search&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;params&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;query&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Tesla 2023 financial report&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span> <span class="attr">&quot;action&quot;</span><span class="punctuation">:</span> <span class="string">&quot;extract&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;params&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;fields&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;revenue&quot;</span><span class="punctuation">,</span> <span class="string">&quot;profit&quot;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="attr">&quot;depends_on&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="动态-Replanning-策略"><a href="#动态-Replanning-策略" class="headerlink" title="动态 Replanning 策略"></a>动态 Replanning 策略</h4><ul>
+<li><strong>触发条件</strong>：<ul>
+<li>执行失败（工具调用报错）</li>
+<li>发现新信息（与原计划假设不符）</li>
+<li>用户中途修改需求</li>
+</ul>
+</li>
+<li><strong>调整策略</strong>：<ul>
+<li><strong>局部修正</strong>：只调整后续步骤</li>
+<li><strong>全局重规划</strong>：重新生成整个计划</li>
+</ul>
+</li>
+</ul>
+<h4 id="特点分析-3"><a href="#特点分析-3" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>长程规划能力</strong>：适合处理步骤繁多、跨度大的任务</li>
+<li><strong>关注点分离</strong>：Planner 专注大局，Executor 专注细节，可以使用不同能力的模型（如 GPT-4 用于规划，GPT-3.5 用于执行）</li>
+<li><strong>并行潜力</strong>：独立的步骤可以并行执行</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>盲目执行</strong>：如果初始计划有误且缺乏 Replanning 机制，执行者会”一条道走到黑”</li>
+<li><strong>开销</strong>：需要更多的 API 调用</li>
+<li><strong>计划幻觉</strong>：LLM 可能生成不可行的计划</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li>生成长篇报告（调研 → 大纲 → 撰写 → 审阅）</li>
+<li>复杂的编码任务（需求分析 → 架构设计 → 编码 → 测试）</li>
+<li>数据分析工作流</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li><strong>LangGraph</strong>: <code>Plan-and-Execute</code> 模板</li>
+<li><strong>TaskWeaver</strong> (Microsoft, 2024): 面向数据分析的规划型 Agent</li>
+<li><strong>OpenAI Swarm</strong> (2024): 轻量级多 Agent 编排</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="Reflection-Self-Correction-反思与自修正"><a href="#Reflection-Self-Correction-反思与自修正" class="headerlink" title="Reflection &#x2F; Self-Correction (反思与自修正)"></a>Reflection &#x2F; Self-Correction (反思与自修正)</h3><p>在人类的工作流中，我们写完东西通常会检查一遍。<strong>Reflection</strong> 模式赋予了 Agent 这种”自我反思”的能力。</p>
+<h4 id="核心机制-4"><a href="#核心机制-4" class="headerlink" title="核心机制"></a>核心机制</h4><p>Agent 在生成结果后，会有一个”批评者（Critique）”角色对其进行评估，如果发现错误或不足，会提出修改建议，Agent 再进行修正。这是一种典型的”System 2”慢思考模式。</p>
+<pre class="mermaid">graph TD
+    Input --> Generator
+    Generator --> Output
+    Output --> Evaluator[Evaluator / Critique]
+    Evaluator --> Check{质量是否满足?}
+    Check -- No --> Feedback[反馈建议]
+    Feedback --> Generator
+    Check -- Yes --> Final[Final Answer]</pre>
+
+<h4 id="学术来源-4"><a href="#学术来源-4" class="headerlink" title="学术来源"></a>学术来源</h4><ul>
+<li><strong>Reflexion</strong> (Shinn et al., 2023): <a href="https://arxiv.org/abs/2303.11366">通过语言反馈进行自我反思</a></li>
+<li><strong>Self-Refine</strong> (Madaan et al., 2023): <a href="https://arxiv.org/abs/2303.17651">迭代式自我改进框架</a></li>
+</ul>
+<h4 id="反思机制类型"><a href="#反思机制类型" class="headerlink" title="反思机制类型"></a>反思机制类型</h4><ol>
+<li><p><strong>Self-Critique</strong>: Agent 自己评价自己（单模型）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Generator: [生成代码]</span><br><span class="line">Evaluator (同一个 LLM): &quot;这段代码没有处理边界情况...&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>External Critique</strong>: 独立的 Evaluator Agent（双模型）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Generator (GPT-3.5): [生成内容]</span><br><span class="line">Evaluator (GPT-4): &quot;论证不够充分，需要补充数据支持...&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Tool-Based Verification</strong>: 使用工具验证（如运行代码）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Generator: [生成 Python 代码]</span><br><span class="line">Executor: [运行代码] --&gt; Error: &quot;NameError: &#x27;x&#x27; is not defined&quot;</span><br><span class="line">Reflection: &quot;发现未定义的变量 x，需要在函数开头初始化&quot;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="迭代终止条件"><a href="#迭代终止条件" class="headerlink" title="迭代终止条件"></a>迭代终止条件</h4><ul>
+<li>达到质量阈值（如测试通过、语法正确）</li>
+<li>最大迭代次数（通常 3-5 次）</li>
+<li>连续两次输出无显著改进（相似度 &gt; 95%）</li>
+<li>Token 预算耗尽</li>
+</ul>
+<h4 id="特点分析-4"><a href="#特点分析-4" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>高质量输出</strong>：显著提升代码生成、写作的准确性和质量</li>
+<li><strong>自我修复</strong>：能纠正一些明显的幻觉或逻辑错误</li>
+<li><strong>持续改进</strong>：每次迭代都基于上次的不足</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>高延迟</strong>：需要多轮对话才能产出结果</li>
+<li><strong>成本高</strong>：Token 消耗成倍增加（3 轮迭代 ≈ 6x tokens）</li>
+<li><strong>可能陷入局部最优</strong>：反复修改同一个小问题</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li><strong>代码生成</strong>：生成代码 → 运行报错 → 反思错误 → 修正代码</li>
+<li><strong>高质量内容创作</strong>：起草 → 审阅 → 修改</li>
+<li><strong>需要严格正确性的任务</strong>（如数学证明、法律文书）</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li><strong>LangGraph</strong>: 支持构建带有循环和条件判断的反思流</li>
+<li><strong>Reflexion</strong>: 开源实现</li>
+<li><strong>AutoGPT</strong>: 内置 self-critique 机制</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="Tree-of-Thoughts-ToT-思维树"><a href="#Tree-of-Thoughts-ToT-思维树" class="headerlink" title="Tree-of-Thoughts (ToT) - 思维树"></a>Tree-of-Thoughts (ToT) - 思维树</h3><p><strong>Tree-of-Thoughts</strong> 将推理过程建模为树形结构，探索多条候选路径，并通过评估选择最优路径。它适合需要”试错”和”回溯”的复杂推理任务。</p>
+<h4 id="核心机制-5"><a href="#核心机制-5" class="headerlink" title="核心机制"></a>核心机制</h4><ol>
+<li><strong>生成多个候选思考路径</strong>：对于每个问题，生成 N 个可能的下一步思考（branches）</li>
+<li><strong>评估每条路径</strong>：使用 LLM 或启发式函数评估每条路径的”前景”</li>
+<li><strong>选择与扩展</strong>：选择得分最高的路径继续扩展</li>
+<li><strong>回溯</strong>：如果某条路径走不通，回退到上一节点尝试其他分支</li>
+</ol>
+<pre class="mermaid">graph TD
+    Input --> T1[Thought 1]
+    Input --> T2[Thought 2]
+    Input --> T3[Thought 3]
+    T1 --> Eval1[Evaluate: 7分]
+    T2 --> Eval2[Evaluate: 9分]
+    T3 --> Eval3[Evaluate: 4分]
+    Eval2 --> Best[选择最佳: T2]
+    Best --> T2_1[T2 → Thought 2.1]
+    Best --> T2_2[T2 → Thought 2.2]
+    T2_1 --> Final[继续扩展...]</pre>
+
+<h4 id="学术来源-5"><a href="#学术来源-5" class="headerlink" title="学术来源"></a>学术来源</h4><ul>
+<li><strong>论文</strong>: Yao et al., 2023, <a href="https://arxiv.org/abs/2305.10601">“Tree of Thoughts: Deliberate Problem Solving with Large Language Models”</a></li>
+<li><strong>官方实现</strong>: <a href="https://github.com/princeton-nlp/tree-of-thought-llm">princeton-nlp&#x2F;tree-of-thought-llm</a></li>
+<li><strong>核心贡献</strong>: 在 Game of 24、创意写作、迷你纵横字谜等任务上显著超越 CoT</li>
+</ul>
+<h4 id="搜索策略"><a href="#搜索策略" class="headerlink" title="搜索策略"></a>搜索策略</h4><ol>
+<li><strong>广度优先搜索 (BFS)</strong>：逐层扩展，保证找到最优解</li>
+<li><strong>深度优先搜索 (DFS)</strong>：快速探索深层，适合有明确目标的任务</li>
+<li><strong>束搜索 (Beam Search)</strong>：每层只保留 Top-K 候选，平衡质量与效率</li>
+</ol>
+<h4 id="特点分析-5"><a href="#特点分析-5" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>探索多条路径</strong>：不会因为第一步错误而导致全盘皆输</li>
+<li><strong>支持回溯</strong>：可以撤销错误决策</li>
+<li><strong>适合创意任务</strong>：可以生成多个方案供选择</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>成本极高</strong>：需要生成和评估大量候选（N^D，N&#x3D;分支数，D&#x3D;深度）</li>
+<li><strong>延迟高</strong>：需要多次 LLM 调用</li>
+<li><strong>实现复杂</strong>：需要管理树结构和搜索状态</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li><strong>Game of 24</strong>：给定 4 个数字，通过加减乘除得到 24</li>
+<li><strong>创意写作</strong>：探索多个开头、多个情节发展</li>
+<li><strong>策略游戏</strong>：下棋、走迷宫</li>
+<li><strong>数学证明</strong>：尝试多种证明路径</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li><strong>Princeton NLP</strong>: ToT 官方实现</li>
+<li><strong>LangChain</strong>: <code>ToT</code> 实验性支持</li>
+<li><strong>Tree-of-Thought-Prompting</strong>: 纯 Prompt 版本</li>
+</ul>
+</li>
+</ul>
+<h4 id="示例：Game-of-24"><a href="#示例：Game-of-24" class="headerlink" title="示例：Game of 24"></a>示例：Game of 24</h4><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Input: 使用 4, 9, 10, 13 得到 24</span><br><span class="line"></span><br><span class="line">Step 1 - 生成 3 个候选思考:</span><br><span class="line">T1: (13 - 9) * (10 - 4) = 4 * 6 = 24 ✓</span><br><span class="line">T2: (13 - 4) * 9 / 10 = ?</span><br><span class="line">T3: (10 - 4) * 13 / 9 = ?</span><br><span class="line"></span><br><span class="line">Step 2 - 评估:</span><br><span class="line">Eval(T1): 10分 (已得到 24)</span><br><span class="line">Eval(T2): 6分 (可能性一般)</span><br><span class="line">Eval(T3): 5分 (可能性较低)</span><br><span class="line"></span><br><span class="line">Step 3 - 选择 T1，验证正确，输出答案</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="协作模式"><a href="#协作模式" class="headerlink" title="协作模式"></a>协作模式</h2><h3 id="Hierarchical-Agents-层级式智能体"><a href="#Hierarchical-Agents-层级式智能体" class="headerlink" title="Hierarchical Agents (层级式智能体)"></a>Hierarchical Agents (层级式智能体)</h3><p>当任务复杂到单个 Agent 无法胜任时，我们需要组织架构。<strong>Hierarchical</strong> 模式采用了类似公司的”经理-员工”结构。</p>
+<h4 id="核心机制-6"><a href="#核心机制-6" class="headerlink" title="核心机制"></a>核心机制</h4><ul>
+<li><strong>Manager &#x2F; Router</strong>：负责理解高层目标，将任务拆解并分发给下层的专家 Agent</li>
+<li><strong>Workers &#x2F; Sub-Agents</strong>：专注于特定领域的任务（如一个负责写 SQL，一个负责做图表，一个负责写文案）</li>
+</ul>
+<pre class="mermaid">graph TD
+    User[User Input] --> Manager[Manager Agent]
+    Manager -- "Delegation" --> WorkerA[Worker A: SQL专家]
+    Manager -- "Delegation" --> WorkerB[Worker B: 可视化专家]
+    Manager -- "Delegation" --> WorkerC[Worker C: 文案专家]
+    WorkerA -- "Result" --> Manager
+    WorkerB -- "Result" --> Manager
+    WorkerC -- "Result" --> Manager
+    Manager --> Synthesize[综合结果]
+    Synthesize --> Final[Final Output]</pre>
+
+<h4 id="通信协议"><a href="#通信协议" class="headerlink" title="通信协议"></a>通信协议</h4><ul>
+<li><p><strong>Manager → Worker (任务下发)</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;task&quot;</span><span class="punctuation">:</span> <span class="string">&quot;查询 2023 年销售数据&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;context&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;database&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sales_db&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;year&quot;</span><span class="punctuation">:</span> <span class="number">2023</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;expected_output&quot;</span><span class="punctuation">:</span> <span class="string">&quot;JSON格式的销售统计&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Worker → Manager (结果上报)</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;success&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;result&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;total_sales&quot;</span><span class="punctuation">:</span> <span class="number">1000000</span><span class="punctuation">,</span> <span class="attr">&quot;top_product&quot;</span><span class="punctuation">:</span> <span class="string">&quot;iPhone&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;metadata&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;query_time&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.5s&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="并行执行与失败处理"><a href="#并行执行与失败处理" class="headerlink" title="并行执行与失败处理"></a>并行执行与失败处理</h4><ul>
+<li><p><strong>并行执行</strong>：独立的 Workers 可以同时工作，提升效率</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 并行调用</span></span><br><span class="line">results = <span class="keyword">await</span> asyncio.gather(</span><br><span class="line">    worker_sql.run(task_sql),</span><br><span class="line">    worker_viz.run(task_viz),</span><br><span class="line">    worker_writer.run(task_writer)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>失败处理</strong>：</p>
+<ul>
+<li>重试机制（最多 3 次）</li>
+<li>降级策略（使用备用 Worker）</li>
+<li>上报 Manager 重新分配</li>
+</ul>
+</li>
+</ul>
+<h4 id="层级深度"><a href="#层级深度" class="headerlink" title="层级深度"></a>层级深度</h4><ul>
+<li><strong>推荐 2-3 层</strong>：Manager → Workers → Sub-Workers</li>
+<li><strong>过深的问题</strong>：信息失真、延迟累积、调试困难</li>
+</ul>
+<h4 id="特点分析-6"><a href="#特点分析-6" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>专业化</strong>：每个 Sub-Agent 可以挂载不同的 Prompt 和 Tools，更加专注</li>
+<li><strong>上下文隔离</strong>：Sub-Agent 的繁琐执行过程不需要完全暴露给 Manager，节省上层 Context</li>
+<li><strong>可扩展</strong>：添加新功能只需增加新的 Worker</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>协调难度</strong>：上下级之间的通信和指令传递容易失真</li>
+<li><strong>单点故障</strong>：Manager 失败会导致整个系统失败</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li>企业级复杂的客服系统（分流到 售前、售后、技术支持）</li>
+<li>全栈软件开发（产品经理 → 架构师 → 工程师）</li>
+<li>数据分析报告（数据采集 → 数据清洗 → 可视化 → 撰写）</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li><strong>LangChain</strong>: 传统的 <code>RouterChain</code></li>
+<li><strong>Semantic Kernel</strong>: 它的 Plugin 架构天然适合这种嵌套调用</li>
+<li><strong>AutoGen</strong>: 支持 hierarchical chat</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="Multi-Agent-Collaboration-多智能体协同"><a href="#Multi-Agent-Collaboration-多智能体协同" class="headerlink" title="Multi-Agent Collaboration (多智能体协同)"></a>Multi-Agent Collaboration (多智能体协同)</h3><p>这是目前最前沿的模式。与层级式不同，<strong>Multi-Agent</strong> 更强调智能体之间的<strong>平等交互</strong>、<strong>讨论</strong>甚至<strong>辩论</strong>。</p>
+<h4 id="核心机制-7"><a href="#核心机制-7" class="headerlink" title="核心机制"></a>核心机制</h4><p>多个拥有不同角色（Persona）的 Agent 共享一个环境或对话历史。它们像在一个聊天群组里一样，互相发送消息。</p>
+<ul>
+<li><strong>Role-Playing</strong>：例如一个扮演”用户”，一个扮演”开发”，一个扮演”测试”</li>
+<li><strong>Debate</strong>：通过不同观点的碰撞来消除偏见</li>
+</ul>
+<pre class="mermaid">graph TD
+    User --> Environment
+    subgraph "Multi-Agent Environment"
+    Environment((Shared Context)) <--> AgentA[Agent A: PM]
+    Environment <--> AgentB[Agent B: Engineer]
+    Environment <--> AgentC[Agent C: QA]
+    AgentA -.消息.-> AgentB
+    AgentB -.消息.-> AgentC
+    AgentC -.消息.-> AgentA
+    end
+    Environment --> Output[最终产出]</pre>
+
+<h4 id="通信模式"><a href="#通信模式" class="headerlink" title="通信模式"></a>通信模式</h4><ol>
+<li><p><strong>Broadcast（广播）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">agent_a.send(message=<span class="string">&quot;需求已确认&quot;</span>, recipients=<span class="string">&quot;all&quot;</span>)</span><br><span class="line"><span class="comment"># 所有 Agent 都能看到这条消息</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Point-to-Point（点对点）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">agent_pm.send(message=<span class="string">&quot;请实现登录功能&quot;</span>, recipient=agent_engineer)</span><br><span class="line"><span class="comment"># 只有 agent_engineer 收到</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Publish-Subscribe（发布订阅）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">agent_a.subscribe(topic=<span class="string">&quot;code_review&quot;</span>)</span><br><span class="line">agent_b.publish(topic=<span class="string">&quot;code_review&quot;</span>, message=<span class="string">&quot;请审查我的 PR&quot;</span>)</span><br><span class="line"><span class="comment"># 所有订阅 code_review 的 Agent 都会收到</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="终止条件"><a href="#终止条件" class="headerlink" title="终止条件"></a>终止条件</h4><ul>
+<li><p><strong>达成共识</strong>：所有 Agent 同意当前结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Agent A: &quot;我认为这个方案可行&quot;</span><br><span class="line">Agent B: &quot;我同意&quot;</span><br><span class="line">Agent C: &quot;我也同意&quot; → 终止</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>最大轮次限制</strong>：防止无休止的争论（通常 10-20 轮）</p>
+</li>
+<li><p><strong>人工介入</strong>：无法自动解决时，升级给人类</p>
+</li>
+</ul>
+<h4 id="冲突解决机制"><a href="#冲突解决机制" class="headerlink" title="冲突解决机制"></a>冲突解决机制</h4><ul>
+<li><strong>投票</strong>：多数 Agent 支持的方案获胜</li>
+<li><strong>权重加权</strong>：根据 Agent 的专业度赋予不同权重</li>
+<li><strong>人工仲裁</strong>：复杂冲突由人类决策</li>
+</ul>
+<h4 id="特点分析-7"><a href="#特点分析-7" class="headerlink" title="特点分析"></a>特点分析</h4><ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>涌现能力</strong>：多个较弱的模型通过协作可能完成强模型都做不到的任务</li>
+<li><strong>解耦</strong>：添加新功能只需增加一个新的 Agent 角色</li>
+<li><strong>多样性</strong>：不同 Agent 带来不同视角，减少偏见</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>死循环</strong>：Agent 之间可能陷入无休止的客套或争论</li>
+<li><strong>不可控</strong>：交互路径难以预测，调试困难</li>
+<li><strong>成本极高</strong>：每个 Agent 都需要独立的 LLM 调用</li>
+</ul>
+</li>
+<li><strong>适用场景</strong>：<ul>
+<li>模拟社会行为（如斯坦福的小镇实验）</li>
+<li>复杂的创意工坊（头脑风暴）</li>
+<li>全流程软件开发（如 MetaGPT）</li>
+<li>辩论与决策（如政策制定模拟）</li>
+</ul>
+</li>
+<li><strong>代表框架</strong>：<ul>
+<li><strong>AutoGen (Microsoft)</strong>：目前最流行的多智能体框架，支持灵活的对话流</li>
+<li><strong>CrewAI</strong>：基于 LangChain，更强调角色的扮演和任务编排</li>
+<li><strong>MetaGPT</strong>：将 SOP（标准作业程序）编码到 Agent 协作中</li>
+<li><strong>ChatDev</strong>: 模拟软件公司的 Agent 协作</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="模式对比与选型指南"><a href="#模式对比与选型指南" class="headerlink" title="模式对比与选型指南"></a>模式对比与选型指南</h2><p>为了帮助大家更直观地选择，我整理了以下对比图表：</p>
+<table>
+<thead>
+<tr>
+<th align="left">模式 (Pattern)</th>
+<th align="center">复杂度</th>
+<th align="center">延迟</th>
+<th align="center">成本</th>
+<th align="center">鲁棒性</th>
+<th align="center">可调试性</th>
+<th align="left">最佳适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Chain-of-Thought</strong></td>
+<td align="center">⭐</td>
+<td align="center">⭐</td>
+<td align="center">⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐⭐</td>
+<td align="left">数学推理、逻辑问题、无需外部信息的任务</td>
+</tr>
+<tr>
+<td align="left"><strong>Tool-Use</strong></td>
+<td align="center">⭐</td>
+<td align="center">⭐</td>
+<td align="center">⭐</td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐⭐</td>
+<td align="left">单次API调用、计算器、简单查询</td>
+</tr>
+<tr>
+<td align="left"><strong>ReAct</strong></td>
+<td align="center">⭐⭐</td>
+<td align="center">⭐⭐</td>
+<td align="center">⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="left">需要调用工具的实时问答、中等复杂度多步任务</td>
+</tr>
+<tr>
+<td align="left"><strong>Plan-and-Execute</strong></td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="left">长流程任务、需要事先规划的复杂操作</td>
+</tr>
+<tr>
+<td align="left"><strong>Reflection</strong></td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="left">代码生成、高质量写作、需要严格正确性的任务</td>
+</tr>
+<tr>
+<td align="left"><strong>Tree-of-Thoughts</strong></td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐</td>
+<td align="left">创意任务、策略游戏、需要探索多条路径的问题</td>
+</tr>
+<tr>
+<td align="left"><strong>Hierarchical</strong></td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="left">任务领域跨度大、需要专业分工的场景</td>
+</tr>
+<tr>
+<td align="left"><strong>Multi-Agent</strong></td>
+<td align="center">⭐⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐⭐⭐</td>
+<td align="center">⭐⭐⭐</td>
+<td align="center">⭐</td>
+<td align="left">模拟人类团队协作、极高复杂度的开放性问题</td>
+</tr>
+</tbody></table>
+<h3 id="选型建议"><a href="#选型建议" class="headerlink" title="选型建议"></a>选型建议</h3><h4 id="1-从简原则（由简到繁）"><a href="#1-从简原则（由简到繁）" class="headerlink" title="1. 从简原则（由简到繁）"></a>1. 从简原则（由简到繁）</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Prompt → CoT → Tool-Use → ReAct → Plan-Execute → Reflection → ToT → Multi-Agent</span><br></pre></td></tr></table></figure>
+<p>永远先从最简单的方案开始，只有在遇到瓶颈时才升级到更复杂的模式。</p>
+<h4 id="2-根据瓶颈选择模式"><a href="#2-根据瓶颈选择模式" class="headerlink" title="2. 根据瓶颈选择模式"></a>2. 根据瓶颈选择模式</h4><table>
+<thead>
+<tr>
+<th>遇到的问题</th>
+<th>推荐模式</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Agent 推理不够严谨</td>
+<td><strong>CoT</strong></td>
+<td>引导逐步思考</td>
+</tr>
+<tr>
+<td>需要实时数据</td>
+<td><strong>Tool-Use</strong> 或 <strong>ReAct</strong></td>
+<td>调用外部工具</td>
+</tr>
+<tr>
+<td>Agent 经常”乱跑”</td>
+<td><strong>Plan-and-Execute</strong></td>
+<td>事先规划，约束行为</td>
+</tr>
+<tr>
+<td>输出质量不稳定</td>
+<td><strong>Reflection</strong></td>
+<td>自我检查与改进</td>
+</tr>
+<tr>
+<td>第一步就错了导致全盘皆输</td>
+<td><strong>ToT</strong></td>
+<td>探索多条路径</td>
+</tr>
+<tr>
+<td>任务领域跨度大</td>
+<td><strong>Hierarchical</strong></td>
+<td>专业分工</td>
+</tr>
+<tr>
+<td>需要多角度思考</td>
+<td><strong>Multi-Agent</strong></td>
+<td>不同角色辩论</td>
+</tr>
+</tbody></table>
+<h4 id="3-混合使用"><a href="#3-混合使用" class="headerlink" title="3. 混合使用"></a>3. 混合使用</h4><p>在实际生产中，往往需要组合多种模式：</p>
+<ul>
+<li><strong>ReAct + Reflection</strong>: Agent 执行 ReAct 循环，每次 Action 后进行 Self-Critique</li>
+<li><strong>Plan-Execute + Hierarchical</strong>: Planner 生成计划，多个 Worker 并行执行</li>
+<li><strong>Multi-Agent + Tool-Use</strong>: 每个 Agent 都可以调用工具</li>
+<li><strong>ToT + ReAct</strong>: 在 ToT 的每个节点内部运行 ReAct 循环</li>
+</ul>
+<h4 id="4-框架选择建议"><a href="#4-框架选择建议" class="headerlink" title="4. 框架选择建议"></a>4. 框架选择建议</h4><ul>
+<li><strong>初学者</strong>: LangChain（生态完善、文档丰富）</li>
+<li><strong>生产级应用</strong>: LangGraph（更灵活、可控性强）</li>
+<li><strong>多智能体</strong>: AutoGen（最成熟的多智能体框架）</li>
+<li><strong>代码生成</strong>: Reflexion + LangGraph（支持反思循环）</li>
+<li><strong>轻量级</strong>: 直接使用 OpenAI &#x2F; Anthropic API + 自定义逻辑</li>
+</ul>
+<h4 id="5-成本与性能权衡"><a href="#5-成本与性能权衡" class="headerlink" title="5. 成本与性能权衡"></a>5. 成本与性能权衡</h4><ul>
+<li><strong>成本敏感</strong>: CoT &gt; Tool-Use &gt; ReAct</li>
+<li><strong>延迟敏感</strong>: Tool-Use &gt; ReAct &gt; Plan-Execute</li>
+<li><strong>质量优先</strong>: Reflection &gt; ToT &gt; Multi-Agent</li>
+<li><strong>可控性优先</strong>: Plan-Execute &gt; Hierarchical &gt; ReAct</li>
+</ul>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Agent 模式并非非此即彼，在实际的生产级应用中，我们往往会<strong>混合使用</strong>。例如，在一个 Multi-Agent 系统中，某个单独的 Agent 内部可能运行着 ReAct 循环，并在输出前进行 Reflection。</p>
+<h3 id="未来趋势"><a href="#未来趋势" class="headerlink" title="未来趋势"></a>未来趋势</h3><ol>
+<li><strong>Compound AI Systems</strong>：将多种模式组合成精密系统</li>
+<li><strong>Agentic RAG</strong>：结合检索增强和 Agent 推理</li>
+<li><strong>Human-in-the-Loop</strong>：Agent 在关键决策点请求人类确认</li>
+<li><strong>可观测性</strong>：LangSmith、Weights &amp; Biases 等工具帮助监控和调试</li>
+<li><strong>Agent-as-a-Service</strong>：云端托管的 Agent 服务（如 OpenAI Assistants API）</li>
+</ol>
+<h3 id="学习路径建议"><a href="#学习路径建议" class="headerlink" title="学习路径建议"></a>学习路径建议</h3><ol>
+<li><strong>Week 1-2</strong>: 掌握 CoT 和 Tool-Use，理解基础推理和工具调用</li>
+<li><strong>Week 3-4</strong>: 实践 ReAct，构建能调用多个工具的 Agent</li>
+<li><strong>Week 5-6</strong>: 学习 Plan-Execute 和 Reflection，处理复杂任务</li>
+<li><strong>Week 7-8</strong>: 探索 ToT 和 Hierarchical，理解高级推理和分工协作</li>
+<li><strong>Week 9+</strong>: 深入 Multi-Agent，构建协同系统</li>
+</ol>
+<h3 id="推荐资源"><a href="#推荐资源" class="headerlink" title="推荐资源"></a>推荐资源</h3><ul>
+<li><strong>论文集</strong>: <a href="https://github.com/AGI-Edgerunners/LLM-Agents-Papers">Awesome LLM Agents Papers</a></li>
+<li><strong>框架</strong>: LangChain, LangGraph, AutoGen, CrewAI</li>
+<li><strong>课程</strong>: DeepLearning.AI 的 “AI Agents in LangGraph”</li>
+<li><strong>社区</strong>: LangChain Discord, AutoGen GitHub Discussions</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2025/12/05/AI-Agent-Design-Patterns-Comprehensive-Guide/" title="深度解析 AI Agent 设计模式：从 CoT 到多智能体协同" target="_blank" rel="external">https://www.silenceboy.com/2025/12/05/AI-Agent-Design-Patterns-Comprehensive-Guide/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2025/11/24/RAG%E7%B3%BB%E7%BB%9F%E6%A3%80%E7%B4%A2%E5%86%85%E5%AE%B9%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="RAG系统检索内容缺失问题深度分析与解决方案"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2025 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
