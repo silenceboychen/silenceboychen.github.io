@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Tokenizer 和 Embedding 的区别 | morty的个人博客</title>
+  <meta name="description" content="在接触大语言模型（LLM）或自然语言处理（NLP）时，Tokenizer（分词器） 和 Embedding（嵌入） 是两个出现频率极高，却常被初学者混淆的概念。它们似乎都在做“把文字变成数字”的工作，但它们在模型中的角色、原理和目的却截然不同。 简单来说：Tokenizer 负责“认字”（将文本切分为离散的符号），而 Embedding 负责“理解”（将符号转化为包含语义的数学向量）。  Toke">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tokenizer 和 Embedding 的区别">
+<meta property="og:url" content="https://www.silenceboy.com/2026/01/21/Tokenizer-%E5%92%8C-Embedding-%E7%9A%84%E5%8C%BA%E5%88%AB/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="在接触大语言模型（LLM）或自然语言处理（NLP）时，Tokenizer（分词器） 和 Embedding（嵌入） 是两个出现频率极高，却常被初学者混淆的概念。它们似乎都在做“把文字变成数字”的工作，但它们在模型中的角色、原理和目的却截然不同。 简单来说：Tokenizer 负责“认字”（将文本切分为离散的符号），而 Embedding 负责“理解”（将符号转化为包含语义的数学向量）。  Toke">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-21T09:29:34.000Z">
+<meta property="article:modified_time" content="2026-01-21T10:04:00.680Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/01/21/Tokenizer-%E5%92%8C-Embedding-%E7%9A%84%E5%8C%BA%E5%88%AB/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/RAG/">RAG</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 13.44px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.11px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.11px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.11px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.78px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.11px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.22px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.67px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.11px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.89px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.11px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.56px;">linux</a> <a href="/tags/mac/" style="font-size: 13.33px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.44px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.11px;">npm</a> <a href="/tags/php/" style="font-size: 13.33px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.44px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.22px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.22px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.11px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.11px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.22px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/21/Tokenizer-%E5%92%8C-Embedding-%E7%9A%84%E5%8C%BA%E5%88%AB/" class="title">Tokenizer 和 Embedding 的区别</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-21T09:29:34.000Z" itemprop="datePublished">2026-01-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/14/E-I-O-S-%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86%E6%96%B9%E6%B3%95%E8%AE%BA/" class="title">E.I.O.S.知识管理方法论</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-14T07:33:21.000Z" itemprop="datePublished">2026-01-14</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/14/%E7%AC%AC%E4%BA%8C%E5%A4%A7%E8%84%91%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86%E6%96%B9%E6%B3%95%E8%AE%BA/" class="title">第二大脑知识管理方法论</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-14T07:15:32.000Z" itemprop="datePublished">2026-01-14</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/12/11/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%E8%87%AA%E6%88%91%E6%94%B9%E8%BF%9B%E6%99%BA%E8%83%BD%E4%BD%93%EF%BC%88Self-Improving-Agents%EF%BC%89%E4%B8%8E-Reflexion-%E6%9E%B6%E6%9E%84/" class="title">深度解析自我改进智能体（Self-Improving Agents）与 Reflexion 架构</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-12-11T07:23:42.000Z" itemprop="datePublished">2025-12-11</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2025/12/10/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90%EF%BC%9A%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C-Function-Call-%E5%BE%AE%E8%B0%83%EF%BC%9F%E5%AE%83%E5%88%B0%E5%BA%95%E9%9A%BE%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F/" class="title">深度解析：如何进行 Function Call 微调？它到底难在哪里？</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2025-12-10T09:30:39.000Z" itemprop="datePublished">2025-12-10</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Tokenizer%EF%BC%88%E5%88%86%E8%AF%8D%E5%99%A8%EF%BC%89%EF%BC%9ALLM-%E7%9A%84%E2%80%9C%E5%AD%97%E5%85%B8%E2%80%9D"><span class="toc-number">1.</span> <span class="toc-text">Tokenizer（分词器）：LLM 的“字典”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%BB%E5%8A%A1"><span class="toc-number">1.1.</span> <span class="toc-text">核心任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">工作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BE%E4%B8%AA%E4%BE%8B%E5%AD%90"><span class="toc-number">1.3.</span> <span class="toc-text">举个例子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E7%89%B9%E5%BE%81"><span class="toc-number">1.4.</span> <span class="toc-text">关键特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="toc-number">1.5.</span> <span class="toc-text">工作流程可视化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84Tokenizer%E7%AE%97%E6%B3%95"><span class="toc-number">1.6.</span> <span class="toc-text">常见的Tokenizer算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%AE%8AToken%E8%AF%B4%E6%98%8E"><span class="toc-number">1.7.</span> <span class="toc-text">特殊Token说明</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Embedding%EF%BC%88%E5%B5%8C%E5%85%A5%E5%B1%82%EF%BC%89%EF%BC%9ALLM-%E7%9A%84%E2%80%9C%E5%A4%A7%E8%84%91%E8%BF%9E%E6%8E%A5%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">Embedding（嵌入层）：LLM 的“大脑连接”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%BB%E5%8A%A1-1"><span class="toc-number">2.1.</span> <span class="toc-text">核心任务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B-1"><span class="toc-number">2.2.</span> <span class="toc-text">工作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BE%E4%B8%AA%E4%BE%8B%E5%AD%90-1"><span class="toc-number">2.3.</span> <span class="toc-text">举个例子</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E7%89%B9%E5%BE%81-1"><span class="toc-number">2.4.</span> <span class="toc-text">关键特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E4%B9%89%E7%A9%BA%E9%97%B4%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="toc-number">2.5.</span> <span class="toc-text">语义空间可视化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Embedding-%E7%BB%B4%E5%BA%A6%E7%9A%84%E9%80%89%E6%8B%A9"><span class="toc-number">2.6.</span> <span class="toc-text">Embedding 维度的选择</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Position-Embedding"><span class="toc-number">2.7.</span> <span class="toc-text">Position Embedding</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8C%BA%E5%88%AB%E5%AF%B9%E6%AF%94%E8%A1%A8"><span class="toc-number">3.</span> <span class="toc-text">核心区别对比表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%83%E4%BB%AC%E6%98%AF%E5%A6%82%E4%BD%95%E5%8D%8F%E4%BD%9C%E7%9A%84%EF%BC%9F%EF%BC%88Pipeline%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">它们是如何协作的？（Pipeline）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E6%95%B0%E6%8D%AE%E6%B5%81%E8%BD%AC%E8%BF%87%E7%A8%8B"><span class="toc-number">4.1.</span> <span class="toc-text">完整数据流转过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BD%A2%E7%8A%B6%E5%8F%98%E5%8C%96"><span class="toc-number">4.2.</span> <span class="toc-text">数据形状变化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E6%98%93%E6%B7%B7%E6%B7%86%E7%82%B9"><span class="toc-number">5.</span> <span class="toc-text">常见误区与易混淆点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%8C-%E8%AF%AF%E5%8C%BA1%EF%BC%9A%E8%AE%A4%E4%B8%BA-Tokenizer-%E7%9A%84%E8%BE%93%E5%87%BA%E5%B7%B2%E7%BB%8F%E5%8C%85%E5%90%AB%E8%AF%AD%E4%B9%89"><span class="toc-number">5.1.</span> <span class="toc-text">❌ 误区1：认为 Tokenizer 的输出已经包含语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%8C-%E8%AF%AF%E5%8C%BA2%EF%BC%9A%E6%B7%B7%E6%B7%86-Token-ID-%E5%92%8C-Embedding-%E5%90%91%E9%87%8F"><span class="toc-number">5.2.</span> <span class="toc-text">❌ 误区2：混淆 Token ID 和 Embedding 向量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%8C-%E8%AF%AF%E5%8C%BA3%EF%BC%9A%E8%AE%A4%E4%B8%BA-Embedding-%E6%98%AF%E5%9B%BA%E5%AE%9A%E4%B8%8D%E5%8F%98%E7%9A%84"><span class="toc-number">5.3.</span> <span class="toc-text">❌ 误区3：认为 Embedding 是固定不变的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%8C-%E8%AF%AF%E5%8C%BA4%EF%BC%9A%E8%AE%A4%E4%B8%BA-Tokenizer-%E5%92%8C-Embedding-%E5%8F%AF%E4%BB%A5%E4%BA%92%E6%8D%A2"><span class="toc-number">5.4.</span> <span class="toc-text">❌ 误区4：认为 Tokenizer 和 Embedding 可以互换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9C%85-%E6%AD%A3%E7%A1%AE%E7%9A%84%E7%90%86%E8%A7%A3%E6%A1%86%E6%9E%B6"><span class="toc-number">5.5.</span> <span class="toc-text">✅ 正确的理解框架</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%EF%BC%9A%E7%94%A8%E4%BB%A3%E7%A0%81%E7%9C%8B%E6%B8%85%E4%B8%A4%E8%80%85"><span class="toc-number">7.</span> <span class="toc-text">实践：用代码看清两者</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-Transformers-%E5%BA%93%E6%BC%94%E7%A4%BA%EF%BC%9A"><span class="toc-number">7.1.</span> <span class="toc-text">使用 Transformers 库演示：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E8%A7%82%E5%AF%9F"><span class="toc-number">7.2.</span> <span class="toc-text">关键观察</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E8%AE%BF%E9%97%AEEmbedding%E5%B1%82%EF%BC%9A"><span class="toc-number">7.3.</span> <span class="toc-text">直接访问Embedding层：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB%E4%B8%8E%E8%B5%84%E6%BA%90"><span class="toc-number">8.</span> <span class="toc-text">延伸阅读与资源</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Tokenizer-和-Embedding-的区别" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Tokenizer 和 Embedding 的区别
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/01/21/Tokenizer-%E5%92%8C-Embedding-%E7%9A%84%E5%8C%BA%E5%88%AB/" class="article-date">
+	  <time datetime="2026-01-21T09:29:34.000Z" itemprop="datePublished">2026-01-21</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/01/21/Tokenizer-%E5%92%8C-Embedding-%E7%9A%84%E5%8C%BA%E5%88%AB/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.4k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 13(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>在接触大语言模型（LLM）或自然语言处理（NLP）时，<strong>Tokenizer（分词器）</strong> 和 <strong>Embedding（嵌入）</strong> 是两个出现频率极高，却常被初学者混淆的概念。它们似乎都在做“把文字变成数字”的工作，但它们在模型中的角色、原理和目的却截然不同。</p>
+<p>简单来说：<strong>Tokenizer 负责“认字”（将文本切分为离散的符号），而 Embedding 负责“理解”（将符号转化为包含语义的数学向量）。</strong></p>
+<hr>
+<h2 id="Tokenizer（分词器）：LLM-的“字典”"><a href="#Tokenizer（分词器）：LLM-的“字典”" class="headerlink" title="Tokenizer（分词器）：LLM 的“字典”"></a>Tokenizer（分词器）：LLM 的“字典”</h2><p>大模型无法直接阅读我们看到的文字（如中文汉字或英文字母），它只能处理数字。Tokenizer 的工作就是充当<strong>翻译前的“查字典”步骤</strong>。</p>
+<h3 id="核心任务"><a href="#核心任务" class="headerlink" title="核心任务"></a>核心任务</h3><p>Tokenizer 的作用是将非结构化的 <strong>原始文本（Raw Text）</strong> 切分成模型能处理的最小单位——<strong>Token</strong>，并将这些 Token 映射为唯一的整数索引（Input IDs）。</p>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><ol>
+<li><strong>切分（Splitting）：</strong> 依据特定的规则（如空格、标点、或更高级的算法如 BPE、WordPiece），将句子切开。</li>
+<li><strong>映射（Mapping）：</strong> 在一个预先构建好的词表（Vocabulary）中查找每个片段对应的编号。</li>
+</ol>
+<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p>假设我们的输入是：“<strong>我爱AI</strong>”</p>
+<ul>
+<li><strong>Tokenizer 切分：</strong> <code>[&quot;我&quot;, &quot;爱&quot;, &quot;AI&quot;]</code></li>
+<li><strong>查表映射：</strong> 假设在词表中，“我”是 5，“爱”是 20，“AI”是 101。</li>
+<li><strong>Tokenizer 输出：</strong> <code>[5, 20, 101]</code></li>
+</ul>
+<h3 id="关键特征"><a href="#关键特征" class="headerlink" title="关键特征"></a>关键特征</h3><ul>
+<li><strong>输出是离散的整数：</strong> 比如 <code>101</code> 代表 “AI”，<code>102</code> 可能就代表完全不相关的 “香蕉”。在 Tokenizer 的阶段，数字之间没有数学上的关联（101 和 102 仅仅是索引的先后，没有语义上的远近）。</li>
+<li><strong>它不包含语义：</strong> Tokenizer 不知道”我”和”你”是相似的代词，它只知道它们在词表中位于不同的位置。</li>
+</ul>
+<h3 id="工作流程可视化"><a href="#工作流程可视化" class="headerlink" title="工作流程可视化"></a>工作流程可视化</h3><pre class="mermaid">graph LR
+    A[原始文本<br/>'我爱AI'] --> B[预处理<br/>Normalization]
+    B --> C[切分算法<br/>BPE/WordPiece]
+    C --> D["Token序列<br/>['我','爱','AI']"]
+    D --> E[词表查找<br/>Vocabulary Lookup]
+    E --> F["Token IDs<br/>[5, 20, 101]"]
+    
+    style A fill:#e1f5ff
+    style F fill:#fff4e1</pre>
+
+<h3 id="常见的Tokenizer算法"><a href="#常见的Tokenizer算法" class="headerlink" title="常见的Tokenizer算法"></a>常见的Tokenizer算法</h3><p>现代大语言模型主要使用以下几种分词算法：</p>
+<table>
+<thead>
+<tr>
+<th align="left">算法</th>
+<th align="left">代表模型</th>
+<th align="left">特点</th>
+<th align="left">优势</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>BPE (Byte Pair Encoding)</strong></td>
+<td align="left">GPT系列</td>
+<td align="left">基于字节对频率合并</td>
+<td align="left">能有效处理未登录词，压缩率高</td>
+</tr>
+<tr>
+<td align="left"><strong>WordPiece</strong></td>
+<td align="left">BERT</td>
+<td align="left">基于似然最大化</td>
+<td align="left">平衡了词汇量和表达能力</td>
+</tr>
+<tr>
+<td align="left"><strong>SentencePiece</strong></td>
+<td align="left">Llama、T5</td>
+<td align="left">直接处理原始文本</td>
+<td align="left">语言无关，支持多语言</td>
+</tr>
+<tr>
+<td align="left"><strong>Unigram</strong></td>
+<td align="left">mBART</td>
+<td align="left">基于概率模型</td>
+<td align="left">可以生成多种分词方案</td>
+</tr>
+</tbody></table>
+<h3 id="特殊Token说明"><a href="#特殊Token说明" class="headerlink" title="特殊Token说明"></a>特殊Token说明</h3><p>在词表中，除了普通词汇，还有一些特殊的Token用于控制模型行为：</p>
+<ul>
+<li><strong><code>[PAD]</code></strong>：填充符，用于对齐不同长度的序列</li>
+<li><strong><code>[UNK]</code></strong>：未知词，处理词表外的词汇</li>
+<li><strong><code>[CLS]</code></strong>：句子开始符（BERT）</li>
+<li><strong><code>[SEP]</code></strong>：句子分隔符</li>
+<li><strong><code>[MASK]</code></strong>：掩码符（用于MLM任务）</li>
+<li><strong><code>&lt;|endoftext|&gt;</code></strong>：文本结束符（GPT）</li>
+</ul>
+<hr>
+<h2 id="Embedding（嵌入层）：LLM-的“大脑连接”"><a href="#Embedding（嵌入层）：LLM-的“大脑连接”" class="headerlink" title="Embedding（嵌入层）：LLM 的“大脑连接”"></a>Embedding（嵌入层）：LLM 的“大脑连接”</h2><p>如果说 Tokenizer 只是把文字变成了身份证号，那么 Embedding 就是把这些身份证号变成了<strong>包含丰富特征的个人档案</strong>。</p>
+<h3 id="核心任务-1"><a href="#核心任务-1" class="headerlink" title="核心任务"></a>核心任务</h3><p>Embedding 是一个查找表（Lookup Table）或神经网络层，它将 Tokenizer 输出的<strong>整数 ID</strong> 转换为一个<strong>高维稠密向量（Dense Vector）</strong>。这个向量是一串浮点数，代表了该词在语义空间中的位置。</p>
+<h3 id="工作流程-1"><a href="#工作流程-1" class="headerlink" title="工作流程"></a>工作流程</h3><ol>
+<li><strong>接收输入：</strong> 拿到 Tokenizer 传来的 ID（例如 <code>101</code>）。</li>
+<li><strong>向量化：</strong> 在高维空间中找到 <code>101</code> 对应的向量表示。</li>
+</ol>
+<h3 id="举个例子-1"><a href="#举个例子-1" class="headerlink" title="举个例子"></a>举个例子</h3><p>继续上面的“<strong>我爱AI</strong>”，输入 ID 为 <code>[5, 20, 101]</code>。</p>
+<ul>
+<li><strong>Embedding 转化：</strong><ul>
+<li><code>5</code> (“我”) → <code>[0.12, -0.58, 0.99, ...]</code></li>
+<li><code>20</code> (“爱”) → <code>[0.77, 0.23, -0.11, ...]</code></li>
+<li><code>101</code> (“AI”) → <code>[-0.45, 0.88, 0.02, ...]</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="关键特征-1"><a href="#关键特征-1" class="headerlink" title="关键特征"></a>关键特征</h3><ul>
+<li><strong>输出是连续的浮点数向量：</strong> 比如 768 维或 4096 维的数组。</li>
+<li><strong>它包含语义（Semantic Meaning）：</strong> 这是 Embedding 最神奇的地方。在训练过程中，模型学会了将含义相近的词放在向量空间中靠近的位置。<ul>
+<li>例如：在向量空间中，”猫”和”狗”的距离会非常近，而”猫”和”冰箱”的距离会很远。</li>
+<li>经典的例子：<strong>King（国王） - Man（男人） + Woman（女人） ≈ Queen（女王）</strong>。这种数学运算只有在 Embedding 层之后才能实现，在 Tokenizer 阶段的整数 ID 上是做不到的。</li>
+</ul>
+</li>
+</ul>
+<h3 id="语义空间可视化"><a href="#语义空间可视化" class="headerlink" title="语义空间可视化"></a>语义空间可视化</h3><pre class="mermaid">graph TB
+    subgraph 动物语义空间
+        A1[猫<br/>Cat]
+        A2[狗<br/>Dog]
+        A3[老虎<br/>Tiger]
+    end
+    
+    subgraph AI技术语义空间
+        B1[机器学习<br/>ML]
+        B2[深度学习<br/>DL]
+        B3[神经网络<br/>NN]
+    end
+    
+    subgraph 日常用品语义空间
+        C1[冰箱<br/>Fridge]
+        C2[桌子<br/>Table]
+        C3[椅子<br/>Chair]
+    end
+    
+    A1 -.语义相近.-> A2
+    A2 -.语义相近.-> A3
+    B1 -.语义相近.-> B2
+    B2 -.语义相近.-> B3
+    C2 -.语义相近.-> C3
+    
+    A1 ~~~|语义距离远| C1
+    
+    style A1 fill:#ffd6d6
+    style A2 fill:#ffd6d6
+    style A3 fill:#ffd6d6
+    style B1 fill:#d6e5ff
+    style B2 fill:#d6e5ff
+    style B3 fill:#d6e5ff
+    style C1 fill:#e1ffe1
+    style C2 fill:#e1ffe1
+    style C3 fill:#e1ffe1</pre>
+
+<h3 id="Embedding-维度的选择"><a href="#Embedding-维度的选择" class="headerlink" title="Embedding 维度的选择"></a>Embedding 维度的选择</h3><p>不同模型使用不同的向量维度，这是性能与效率的权衡：</p>
+<table>
+<thead>
+<tr>
+<th align="left">模型</th>
+<th align="left">Embedding维度</th>
+<th align="left">参数量影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">BERT-base</td>
+<td align="left">768</td>
+<td align="left">较小，训练快</td>
+</tr>
+<tr>
+<td align="left">BERT-large</td>
+<td align="left">1024</td>
+<td align="left">中等</td>
+</tr>
+<tr>
+<td align="left">GPT-3</td>
+<td align="left">12288</td>
+<td align="left">极大，表达能力强</td>
+</tr>
+<tr>
+<td align="left">Llama-2-7B</td>
+<td align="left">4096</td>
+<td align="left">平衡性能与效率</td>
+</tr>
+</tbody></table>
+<p><strong>维度越大</strong>：</p>
+<ul>
+<li>✅ 表达能力越强，能捕捉更细微的语义差异</li>
+<li>✅ 模型容量更大，理解能力更强</li>
+<li>❌ 计算成本更高，内存占用更大</li>
+<li>❌ 更容易过拟合（在小数据集上）</li>
+</ul>
+<h3 id="Position-Embedding"><a href="#Position-Embedding" class="headerlink" title="Position Embedding"></a>Position Embedding</h3><p>值得注意的是，除了词嵌入（Token Embedding），模型还会加入 <strong>位置嵌入（Position Embedding）</strong> 来告诉模型词的先后顺序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">最终输入 = Token Embedding + Position Embedding</span><br></pre></td></tr></table></figure>
+
+<p>这是因为 Transformer 架构本身不具备序列顺序的概念，需要通过位置编码来补充位置信息。</p>
+<hr>
+<h2 id="核心区别对比表"><a href="#核心区别对比表" class="headerlink" title="核心区别对比表"></a>核心区别对比表</h2><p>为了更直观地理解，我们可以从以下几个维度对比：</p>
+<table>
+<thead>
+<tr>
+<th align="left">维度</th>
+<th align="left">Tokenizer (分词器)</th>
+<th align="left">Embedding (嵌入层)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>输入</strong></td>
+<td align="left">原始文本字符串 (Text)</td>
+<td align="left">整数索引 (Token IDs)</td>
+</tr>
+<tr>
+<td align="left"><strong>输出</strong></td>
+<td align="left">整数索引列表 (如 <code>[101, 205]</code>)</td>
+<td align="left">高维浮点数向量 (如 <code>[0.1, -0.9...]</code>)</td>
+</tr>
+<tr>
+<td align="left"><strong>数据性质</strong></td>
+<td align="left"><strong>离散的 (Discrete)</strong>：数字仅代表位置</td>
+<td align="left"><strong>连续的 (Continuous)</strong>：数字代表特征</td>
+</tr>
+<tr>
+<td align="left"><strong>是否包含语义</strong></td>
+<td align="left"><strong>不包含</strong>：只做硬性映射</td>
+<td align="left"><strong>包含</strong>：捕捉词义、词性、关联</td>
+</tr>
+<tr>
+<td align="left"><strong>可训练性</strong></td>
+<td align="left">通常在预训练前固定 (如 BPE 算法统计得出)</td>
+<td align="left">是模型参数的一部分，随模型训练不断优化</td>
+</tr>
+<tr>
+<td align="left"><strong>类比</strong></td>
+<td align="left"><strong>字典索引</strong>：查到“苹果”在第 10 页</td>
+<td align="left"><strong>对苹果的理解</strong>：圆的、红的、水果、甜的</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="它们是如何协作的？（Pipeline）"><a href="#它们是如何协作的？（Pipeline）" class="headerlink" title="它们是如何协作的？（Pipeline）"></a>它们是如何协作的？（Pipeline）</h2><p>在任何一个现代大语言模型（如 GPT-4, Llama 3, BERT）中，数据流向都是固定的串行关系：</p>
+<ol>
+<li><strong>用户输入：</strong> <code>What is tokenizer?</code></li>
+<li><strong>Tokenizer 层：</strong> 切分并映射为 ID → <code>[2054, 2003, 19204, 1029]</code></li>
+<li><strong>Embedding 层：</strong> 将 ID 转化为向量 → <code>[[0.1, ...], [0.5, ...], ...]</code></li>
+<li><strong>Transformer 层（Attention）：</strong> 模型在向量基础上进行复杂的数学运算（注意力机制等），理解上下文。</li>
+</ol>
+<h3 id="完整数据流转过程"><a href="#完整数据流转过程" class="headerlink" title="完整数据流转过程"></a>完整数据流转过程</h3><pre class="mermaid">graph TD
+    A[用户输入文本<br/>'What is tokenizer?'] --> B[Tokenizer 预处理]
+    B --> C[Token切分<br/>What/is/token/izer/?]
+    C --> D["ID映射<br/>[2054, 2003, 19204, 1029]"]
+    
+    D --> E[Embedding层<br/>查找表Lookup]
+    E --> F["Token向量矩阵<br/>Shape: [4, 768]"]
+    
+    F --> G[+ Position Embedding]
+    G --> H[最终输入向量]
+    
+    H --> I[Transformer层<br/>Self-Attention]
+    I --> J[前馈神经网络<br/>FFN]
+    J --> K[Layer Normalization]
+    K --> L[...重复N层]
+    
+    L --> M[输出层<br/>Language Model Head]
+    M --> N[预测结果]
+    
+    style A fill:#e1f5ff
+    style D fill:#fff4e1
+    style F fill:#ffe1f5
+    style H fill:#e1ffe1
+    style N fill:#ffe1e1
+    
+    classDef tokenizer fill:#fff4e1,stroke:#ffa500
+    classDef embedding fill:#ffe1f5,stroke:#ff1493
+    classDef model fill:#e1ffe1,stroke:#00ff00
+    
+    class B,C,D tokenizer
+    class E,F,G,H embedding
+    class I,J,K,L,M model</pre>
+
+<h3 id="数据形状变化"><a href="#数据形状变化" class="headerlink" title="数据形状变化"></a>数据形状变化</h3><p>让我们追踪一个具体的例子，看数据是如何逐步变化的：</p>
+<table>
+<thead>
+<tr>
+<th align="left">阶段</th>
+<th align="left">数据内容</th>
+<th align="left">数据类型</th>
+<th align="left">数据形状</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>原始输入</strong></td>
+<td align="left"><code>&quot;What is tokenizer?&quot;</code></td>
+<td align="left">String（字符串）</td>
+<td align="left">-</td>
+</tr>
+<tr>
+<td align="left"><strong>Tokenizer输出</strong></td>
+<td align="left"><code>[2054, 2003, 19204, 1029]</code></td>
+<td align="left">List[int]（整数列表）</td>
+<td align="left"><code>[4]</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Embedding输出</strong></td>
+<td align="left"><code>[[0.12, -0.58, ...], [...], ...]</code></td>
+<td align="left">Tensor（浮点张量）</td>
+<td align="left"><code>[4, 768]</code></td>
+</tr>
+<tr>
+<td align="left"><strong>+Position Embedding</strong></td>
+<td align="left"><code>[[0.15, -0.50, ...], [...], ...]</code></td>
+<td align="left">Tensor（浮点张量）</td>
+<td align="left"><code>[4, 768]</code></td>
+</tr>
+<tr>
+<td align="left"><strong>经过Transformer</strong></td>
+<td align="left"><code>[[0.88, 0.23, ...], [...], ...]</code></td>
+<td align="left">Tensor（浮点张量）</td>
+<td align="left"><code>[4, 768]</code></td>
+</tr>
+<tr>
+<td align="left"><strong>输出层</strong></td>
+<td align="left"><code>[[0.01, 0.85, 0.03, ...]]</code></td>
+<td align="left">Tensor（概率分布）</td>
+<td align="left"><code>[4, 50257]</code></td>
+</tr>
+</tbody></table>
+<p><strong>关键观察：</strong></p>
+<ul>
+<li><strong>Tokenizer → Embedding</strong>：从<strong>离散</strong>变为<strong>连续</strong></li>
+<li><strong>Embedding → Transformer</strong>：维度保持不变，但语义理解加深</li>
+<li><strong>最后输出</strong>：从隐藏表示转换为词表概率分布（用于预测下一个词）</li>
+</ul>
+<hr>
+<h2 id="常见误区与易混淆点"><a href="#常见误区与易混淆点" class="headerlink" title="常见误区与易混淆点"></a>常见误区与易混淆点</h2><p>在学习过程中，很多初学者会产生以下误解：</p>
+<h3 id="❌-误区1：认为-Tokenizer-的输出已经包含语义"><a href="#❌-误区1：认为-Tokenizer-的输出已经包含语义" class="headerlink" title="❌ 误区1：认为 Tokenizer 的输出已经包含语义"></a>❌ 误区1：认为 Tokenizer 的输出已经包含语义</h3><p><strong>错误理解：</strong> “既然 Token ID <code>101</code> 代表 ‘AI’，那它不就已经有意义了吗？”</p>
+<p><strong>正确理解：</strong> Token ID 只是<strong>索引编号</strong>，就像身份证号一样。身份证号 <code>330106</code> 和 <code>330107</code> 相邻，但这不代表这两个人有任何关系。只有经过 Embedding 层，模型才能理解词与词之间的语义关联。</p>
+<h3 id="❌-误区2：混淆-Token-ID-和-Embedding-向量"><a href="#❌-误区2：混淆-Token-ID-和-Embedding-向量" class="headerlink" title="❌ 误区2：混淆 Token ID 和 Embedding 向量"></a>❌ 误区2：混淆 Token ID 和 Embedding 向量</h3><p><strong>错误理解：</strong> “Token ID <code>[101, 102]</code> 不就是二维向量吗？”</p>
+<p><strong>正确理解：</strong> </p>
+<ul>
+<li>Token ID <code>[101, 102]</code> 是<strong>两个整数</strong>，不是向量</li>
+<li>Embedding 后是 <strong>两个高维向量</strong>，如 <code>[[0.1, 0.2, ..., 0.9], [0.5, 0.3, ..., 0.1]]</code>，每个向量有 768 或更多维度</li>
+</ul>
+<h3 id="❌-误区3：认为-Embedding-是固定不变的"><a href="#❌-误区3：认为-Embedding-是固定不变的" class="headerlink" title="❌ 误区3：认为 Embedding 是固定不变的"></a>❌ 误区3：认为 Embedding 是固定不变的</h3><p><strong>错误理解：</strong> “Embedding 就是个查找表，训练前就确定好了。”</p>
+<p><strong>正确理解：</strong> Embedding 层的<strong>权重矩阵是可训练的</strong>。在模型训练过程中，它会不断调整，使得语义相近的词在向量空间中越来越接近。这是模型”学习”语义的核心机制。</p>
+<h3 id="❌-误区4：认为-Tokenizer-和-Embedding-可以互换"><a href="#❌-误区4：认为-Tokenizer-和-Embedding-可以互换" class="headerlink" title="❌ 误区4：认为 Tokenizer 和 Embedding 可以互换"></a>❌ 误区4：认为 Tokenizer 和 Embedding 可以互换</h3><p><strong>错误理解：</strong> “我可以用不同的 Tokenizer 配同一个模型吗？”</p>
+<p><strong>正确理解：</strong> <strong>不可以！</strong> Tokenizer 的词表和 Embedding 层的权重矩阵必须严格对应：</p>
+<ul>
+<li>词表中第 101 个位置是 “AI”</li>
+<li>Embedding 矩阵的第 101 行存储的就是 “AI” 的向量表示</li>
+<li>如果 Tokenizer 改变，Embedding 矩阵也必须重新训练</li>
+</ul>
+<h3 id="✅-正确的理解框架"><a href="#✅-正确的理解框架" class="headerlink" title="✅ 正确的理解框架"></a>✅ 正确的理解框架</h3><pre class="mermaid">graph LR
+    A[Tokenizer<br/>文字→数字索引] --> B[Embedding<br/>索引→语义向量]
+    B --> C[模型计算<br/>向量→理解]
+    
+    A -.不可分离.-> B
+    
+    style A fill:#fff4e1
+    style B fill:#ffe1f5
+    style C fill:#e1ffe1</pre>
+
+<ul>
+<li>Tokenizer 和模型的 Embedding 层是<strong>绑定的</strong>，不能分离</li>
+<li>Tokenizer 处理的是<strong>符号映射</strong>（Symbol Mapping）</li>
+<li>Embedding 处理的是<strong>语义表示</strong>（Semantic Representation）</li>
+<li>两者配合完成从”文字”到”机器可理解的数学对象”的转换</li>
+</ul>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>Tokenizer 和 Embedding 缺一不可，但分工明确：</strong></p>
+<ul>
+<li><strong>Tokenizer</strong> 解决了 <strong>“如何把无限的自然语言文本映射到有限的数字集合”</strong> 的问题。它是数据进入模型的入口。</li>
+<li><strong>Embedding</strong> 解决了 <strong>“如何让计算机理解这些数字背后的含义和关系”</strong> 的问题。它是模型进行思考的基础。</li>
+</ul>
+<hr>
+<h2 id="实践：用代码看清两者"><a href="#实践：用代码看清两者" class="headerlink" title="实践：用代码看清两者"></a>实践：用代码看清两者</h2><p>理论理解后，让我们用实际代码演示整个过程：</p>
+<h3 id="使用-Transformers-库演示："><a href="#使用-Transformers-库演示：" class="headerlink" title="使用 Transformers 库演示："></a>使用 Transformers 库演示：</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer, AutoModel</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 加载预训练的Tokenizer和模型（以BERT为例）</span></span><br><span class="line">model_name = <span class="string">&quot;bert-base-uncased&quot;</span></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(model_name)</span><br><span class="line">model = AutoModel.from_pretrained(model_name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 原始文本</span></span><br><span class="line">text = <span class="string">&quot;What is tokenizer?&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. Tokenizer阶段：文本 → Token IDs</span></span><br><span class="line">tokens = tokenizer.tokenize(text)  <span class="comment"># 切分</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;切分后的Tokens: <span class="subst">&#123;tokens&#125;</span>&quot;</span>)</span><br><span class="line"><span class="comment"># 输出: [&#x27;what&#x27;, &#x27;is&#x27;, &#x27;token&#x27;, &#x27;##izer&#x27;, &#x27;?&#x27;]</span></span><br><span class="line"></span><br><span class="line">token_ids = tokenizer.encode(text, add_special_tokens=<span class="literal">False</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Token IDs: <span class="subst">&#123;token_ids&#125;</span>&quot;</span>)</span><br><span class="line"><span class="comment"># 输出: [2054, 2003, 19204, 17629, 1029]</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;数据类型: <span class="subst">&#123;<span class="built_in">type</span>(token_ids)&#125;</span>, 数据形状: <span class="subst">&#123;<span class="built_in">len</span>(token_ids)&#125;</span>&quot;</span>)</span><br><span class="line"><span class="comment"># 输出: 数据类型: &lt;class &#x27;list&#x27;&gt;, 数据形状: 5</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. Embedding阶段：Token IDs → 向量</span></span><br><span class="line">input_ids = torch.tensor([token_ids])  <span class="comment"># 转为Tensor</span></span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="comment"># 模型内部会自动调用Embedding层</span></span><br><span class="line">    outputs = model(input_ids)</span><br><span class="line">    embeddings = outputs.last_hidden_state  <span class="comment"># 获取Embedding输出</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;\nEmbedding向量形状: <span class="subst">&#123;embeddings.shape&#125;</span>&quot;</span>)</span><br><span class="line"><span class="comment"># 输出: Embedding向量形状: torch.Size([1, 5, 768])</span></span><br><span class="line"><span class="comment"># 解释: [batch_size=1, sequence_length=5, hidden_dim=768]</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;第一个词&#x27;what&#x27;的向量前10维: <span class="subst">&#123;embeddings[<span class="number">0</span>][<span class="number">0</span>][:<span class="number">10</span>]&#125;</span>&quot;</span>)</span><br><span class="line"><span class="comment"># 输出: tensor([ 0.1234, -0.5678, 0.9012, ...])</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 验证语义相似性</span></span><br><span class="line">text1 = <span class="string">&quot;cat&quot;</span></span><br><span class="line">text2 = <span class="string">&quot;dog&quot;</span></span><br><span class="line">text3 = <span class="string">&quot;car&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_embedding</span>(<span class="params">text</span>):</span><br><span class="line">    ids = tokenizer.encode(text, add_special_tokens=<span class="literal">False</span>)</span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        output = model(torch.tensor([ids]))</span><br><span class="line">    <span class="keyword">return</span> output.last_hidden_state[<span class="number">0</span>][<span class="number">0</span>]  <span class="comment"># 获取第一个token的向量</span></span><br><span class="line"></span><br><span class="line">vec_cat = get_embedding(text1)</span><br><span class="line">vec_dog = get_embedding(text2)</span><br><span class="line">vec_car = get_embedding(text3)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算余弦相似度</span></span><br><span class="line"><span class="keyword">from</span> torch.nn.functional <span class="keyword">import</span> cosine_similarity</span><br><span class="line"></span><br><span class="line">sim_cat_dog = cosine_similarity(vec_cat.unsqueeze(<span class="number">0</span>), vec_dog.unsqueeze(<span class="number">0</span>))</span><br><span class="line">sim_cat_car = cosine_similarity(vec_cat.unsqueeze(<span class="number">0</span>), vec_car.unsqueeze(<span class="number">0</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;\n&#x27;cat&#x27; 和 &#x27;dog&#x27; 的相似度: <span class="subst">&#123;sim_cat_dog.item():<span class="number">.4</span>f&#125;</span>&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;&#x27;cat&#x27; 和 &#x27;car&#x27; 的相似度: <span class="subst">&#123;sim_cat_car.item():<span class="number">.4</span>f&#125;</span>&quot;</span>)</span><br><span class="line"><span class="comment"># 输出示例:</span></span><br><span class="line"><span class="comment"># &#x27;cat&#x27; 和 &#x27;dog&#x27; 的相似度: 0.8234</span></span><br><span class="line"><span class="comment"># &#x27;cat&#x27; 和 &#x27;car&#x27; 的相似度: 0.3521</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="关键观察"><a href="#关键观察" class="headerlink" title="关键观察"></a>关键观察</h3><ol>
+<li><strong>Tokenizer 输出是列表</strong>：<code>[2054, 2003, ...]</code> - 简单的整数</li>
+<li><strong>Embedding 输出是张量</strong>：<code>torch.Size([1, 5, 768])</code> - 高维浮点向量</li>
+<li><strong>语义相似性只在Embedding之后才有意义</strong>：cat和dog的向量相似度明显高于cat和car</li>
+</ol>
+<h3 id="直接访问Embedding层："><a href="#直接访问Embedding层：" class="headerlink" title="直接访问Embedding层："></a>直接访问Embedding层：</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 直接获取模型的Embedding矩阵</span></span><br><span class="line">embedding_matrix = model.embeddings.word_embeddings.weight</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Embedding矩阵形状: <span class="subst">&#123;embedding_matrix.shape&#125;</span>&quot;</span>)</span><br><span class="line"><span class="comment"># 输出: Embedding矩阵形状: torch.Size([30522, 768])</span></span><br><span class="line"><span class="comment"># 解释: [词表大小=30522, 向量维度=768]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看特定Token的Embedding</span></span><br><span class="line">token_id = <span class="number">2054</span>  <span class="comment"># &#x27;what&#x27;</span></span><br><span class="line">embedding_vector = embedding_matrix[token_id]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;Token ID <span class="subst">&#123;token_id&#125;</span> 的Embedding向量: <span class="subst">&#123;embedding_vector[:<span class="number">10</span>]&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这个矩阵就是<strong>Embedding层的本质</strong>：一个 <code>[词表大小 × 向量维度]</code> 的查找表，每一行对应词表中一个词的向量表示。</p>
+<hr>
+<h2 id="延伸阅读与资源"><a href="#延伸阅读与资源" class="headerlink" title="延伸阅读与资源"></a>延伸阅读与资源</h2><ul>
+<li><p><strong>经典论文：</strong></p>
+<ul>
+<li><a href="https://arxiv.org/abs/1301.3781">Word2Vec: Efficient Estimation of Word Representations</a></li>
+<li><a href="https://arxiv.org/abs/1810.04805">BERT: Pre-training of Deep Bidirectional Transformers</a></li>
+<li><a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need (Transformer)</a></li>
+</ul>
+</li>
+<li><p><strong>推荐工具：</strong></p>
+<ul>
+<li><a href="https://huggingface.co/docs/transformers/">Hugging Face Transformers</a> - 最流行的预训练模型库</li>
+<li><a href="https://github.com/google/sentencepiece">SentencePiece</a> - Google的语言无关Tokenizer</li>
+<li><a href="https://github.com/openai/tiktoken">tiktoken</a> - OpenAI的高效Tokenizer</li>
+</ul>
+</li>
+<li><p><strong>可视化工具：</strong></p>
+<ul>
+<li><a href="https://projector.tensorflow.org/">Embedding Projector</a> - 可视化词向量空间</li>
+<li><a href="https://github.com/jessevig/bertviz">BertViz</a> - 可视化注意力机制</li>
+</ul>
+</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/01/21/Tokenizer-%E5%92%8C-Embedding-%E7%9A%84%E5%8C%BA%E5%88%AB/" title="Tokenizer 和 Embedding 的区别" target="_blank" rel="external">https://www.silenceboy.com/2026/01/21/Tokenizer-和-Embedding-的区别/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2026/01/14/E-I-O-S-%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86%E6%96%B9%E6%B3%95%E8%AE%BA/" title="E.I.O.S.知识管理方法论"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
