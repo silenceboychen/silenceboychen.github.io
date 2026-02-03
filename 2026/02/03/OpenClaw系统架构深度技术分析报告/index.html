@@ -1,0 +1,2039 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>OpenClaw系统架构深度技术分析报告 | morty的个人博客</title>
+  <meta name="description" content="本报告以系统架构师的视角，深入分析 OpenClaw 的技术架构设计  整体架构设计系统分层架构图graph TB     subgraph &quot;客户端层 (Client Layer)&quot;         Web[Web UI]         Mobile[移动应用]         CLI[CLI 工具]         Desktop[桌面应用]     end          subgra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenClaw系统架构深度技术分析报告">
+<meta property="og:url" content="https://www.silenceboy.com/2026/02/03/OpenClaw%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="本报告以系统架构师的视角，深入分析 OpenClaw 的技术架构设计  整体架构设计系统分层架构图graph TB     subgraph &quot;客户端层 (Client Layer)&quot;         Web[Web UI]         Mobile[移动应用]         CLI[CLI 工具]         Desktop[桌面应用]     end          subgra">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-02-03T05:57:26.000Z">
+<meta property="article:modified_time" content="2026-02-03T06:06:34.063Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/02/03/OpenClaw%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">11</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 13.8px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.9px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 14px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/02/03/OpenClaw%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/" class="title">OpenClaw系统架构深度技术分析报告</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-02-03T05:57:26.000Z" itemprop="datePublished">2026-02-03</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/28/AI-%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90%E5%B7%A5%E5%85%B7%E6%95%88%E8%83%BD%E5%BA%A6%E9%87%8F%E6%8C%87%E5%8D%97/" class="title">AI 代码生成工具效能度量指南</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-28T08:33:47.000Z" itemprop="datePublished">2026-01-28</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/22/Base%E3%80%81Chat%E4%B8%8EReasoning%E6%A8%A1%E5%9E%8B%E5%85%A8%E8%A7%A3%E6%9E%90/" class="title">Base、Chat与Reasoning模型全解析</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-22T06:58:30.000Z" itemprop="datePublished">2026-01-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/21/Tokenizer-%E5%92%8C-Embedding-%E7%9A%84%E5%8C%BA%E5%88%AB/" class="title">Tokenizer 和 Embedding 的区别</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-21T09:29:34.000Z" itemprop="datePublished">2026-01-21</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/01/14/E-I-O-S-%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86%E6%96%B9%E6%B3%95%E8%AE%BA/" class="title">E.I.O.S.知识管理方法论</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-01-14T07:33:21.000Z" itemprop="datePublished">2026-01-14</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.</span> <span class="toc-text">整体架构设计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-number">1.1.</span> <span class="toc-text">系统分层架构图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E6%B5%81%E8%BD%AC%E5%AE%8C%E6%95%B4%E9%93%BE%E8%B7%AF%E5%9B%BE"><span class="toc-number">1.2.</span> <span class="toc-text">消息流转完整链路图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E4%B8%8E%E6%A8%A1%E5%9D%97%E8%A7%A3%E8%80%A6%E6%9E%B6%E6%9E%84"><span class="toc-number">1.3.</span> <span class="toc-text">依赖注入与模块解耦架构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%AD%90%E7%B3%BB%E7%BB%9F%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">核心子系统深度分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Gateway-%E7%BD%91%E5%85%B3%E7%B3%BB%E7%BB%9F"><span class="toc-number">2.1.</span> <span class="toc-text">Gateway 网关系统</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E7%89%B9%E6%80%A7"><span class="toc-number">2.1.1.</span> <span class="toc-text">架构特性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86%E7%AD%96%E7%95%A5"><span class="toc-number">2.1.2.</span> <span class="toc-text">会话管理策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E7%83%AD%E9%87%8D%E8%BD%BD%E6%9C%BA%E5%88%B6"><span class="toc-number">2.1.3.</span> <span class="toc-text">配置热重载机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E9%9B%86%E6%88%90"><span class="toc-number">2.1.4.</span> <span class="toc-text">系统服务集成</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Channel-%E6%B8%A0%E9%81%93%E6%8A%BD%E8%B1%A1%E5%B1%82"><span class="toc-number">2.2.</span> <span class="toc-text">Channel 渠道抽象层</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E4%BB%B6%E5%8C%96%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-number">2.2.1.</span> <span class="toc-text">插件化架构设计</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%BD%92%E4%B8%80%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="toc-number">2.2.2.</span> <span class="toc-text">消息归一化流程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%E4%B8%89%E5%B1%82%E6%9C%BA%E5%88%B6"><span class="toc-number">2.2.3.</span> <span class="toc-text">权限控制三层机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E4%BB%B6%E5%8F%91%E7%8E%B0%E4%B8%8E%E6%B3%A8%E5%86%8C"><span class="toc-number">2.2.4.</span> <span class="toc-text">插件发现与注册</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Agent-%E4%BB%A3%E7%90%86%E5%BC%95%E6%93%8E"><span class="toc-number">2.3.</span> <span class="toc-text">Agent 代理引擎</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Pi-Agent-Core-%E9%9B%86%E6%88%90%E6%9E%B6%E6%9E%84"><span class="toc-number">2.3.1.</span> <span class="toc-text">Pi Agent Core 集成架构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E7%BA%A7%E5%AE%B9%E9%94%99%E6%9C%BA%E5%88%B6"><span class="toc-number">2.3.2.</span> <span class="toc-text">多级容错机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Thinking-%E6%A8%A1%E5%BC%8F%E6%8A%80%E6%9C%AF%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.3.3.</span> <span class="toc-text">Thinking 模式技术实现</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Canvas-%E5%AE%9E%E6%97%B6%E6%B8%B2%E6%9F%93%E8%83%BD%E5%8A%9B"><span class="toc-number">2.3.4.</span> <span class="toc-text">Canvas 实时渲染能力</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F%E4%B8%8E%E6%8F%92%E4%BB%B6%E6%9E%B6%E6%9E%84"><span class="toc-number">2.3.5.</span> <span class="toc-text">工具系统与插件架构</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Media-%E5%AA%92%E4%BD%93%E7%90%86%E8%A7%A3%E7%AE%A1%E9%81%93"><span class="toc-number">2.4.</span> <span class="toc-text">Media 媒体理解管道</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E6%A8%A1%E6%80%81%E5%A4%84%E7%90%86%E6%9E%B6%E6%9E%84"><span class="toc-number">2.4.1.</span> <span class="toc-text">多模态处理架构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%90%E4%BE%9B%E5%95%86%E9%80%82%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-number">2.4.2.</span> <span class="toc-text">提供商适配策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SSRF-%E6%94%BB%E5%87%BB%E9%98%B2%E6%8A%A4%E4%BD%93%E7%B3%BB"><span class="toc-number">2.4.3.</span> <span class="toc-text">SSRF 攻击防护体系</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AA%92%E4%BD%93%E8%BD%AC%E6%8D%A2%E4%B8%8E%E5%8E%8B%E7%BC%A9"><span class="toc-number">2.4.4.</span> <span class="toc-text">媒体转换与压缩</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E7%AD%96%E7%95%A5"><span class="toc-number">2.4.5.</span> <span class="toc-text">缓存策略</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E4%B8%8E%E6%8E%A7%E5%88%B6%E5%B1%82"><span class="toc-number">2.5.</span> <span class="toc-text">路由与控制层</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E5%86%B3%E7%AD%96%E6%A0%91"><span class="toc-number">2.5.1.</span> <span class="toc-text">路由决策树</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E5%8E%BB%E9%87%8D%E6%9C%BA%E5%88%B6"><span class="toc-number">2.5.2.</span> <span class="toc-text">消息去重机制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%9A%E8%AF%9D%E9%9A%94%E7%A6%BB%E7%AD%96%E7%95%A5"><span class="toc-number">2.5.3.</span> <span class="toc-text">会话隔离策略</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9E%E5%A4%8D%E5%88%86%E5%8F%91%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.4.</span> <span class="toc-text">回复分发流程</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E4%BA%AE%E7%82%B9%E4%B8%8E%E6%8A%80%E6%9C%AF%E7%89%B9%E8%89%B2"><span class="toc-number">3.</span> <span class="toc-text">设计亮点与技术特色</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%BA%AE%E7%82%B9"><span class="toc-number">3.1.</span> <span class="toc-text">架构设计亮点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E5%B1%82%E8%A7%A3%E8%80%A6%E6%9E%B6%E6%9E%84"><span class="toc-number">3.1.1.</span> <span class="toc-text">分层解耦架构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E4%BB%B6%E5%8C%96%E6%89%A9%E5%B1%95%E8%83%BD%E5%8A%9B"><span class="toc-number">3.1.2.</span> <span class="toc-text">插件化扩展能力</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%B9%E9%94%99%E4%B8%8E%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="toc-number">3.1.3.</span> <span class="toc-text">容错与高可用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E4%BD%93%E7%B3%BB"><span class="toc-number">3.1.4.</span> <span class="toc-text">安全防护体系</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96"><span class="toc-number">3.1.5.</span> <span class="toc-text">性能优化</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E5%88%9B%E6%96%B0%E7%82%B9"><span class="toc-number">3.2.</span> <span class="toc-text">技术创新点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B6%88%E6%81%AF%E6%B5%81%E8%BD%AC%E7%BC%96%E6%8E%92"><span class="toc-number">3.2.1.</span> <span class="toc-text">消息流转编排</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Agent-%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E"><span class="toc-number">3.2.2.</span> <span class="toc-text">Agent 执行引擎</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AA%92%E4%BD%93%E7%90%86%E8%A7%A3%E7%AE%A1%E9%81%93"><span class="toc-number">3.2.3.</span> <span class="toc-text">媒体理解管道</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1"><span class="toc-number">3.2.4.</span> <span class="toc-text">工具系统设计</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7"><span class="toc-number">3.3.</span> <span class="toc-text">可扩展性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B0%E5%A2%9E%E6%B8%A0%E9%81%93"><span class="toc-number">3.3.1.</span> <span class="toc-text">新增渠道</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B0%E5%A2%9E%E5%B7%A5%E5%85%B7"><span class="toc-number">3.3.2.</span> <span class="toc-text">新增工具</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B0%E5%A2%9E%E5%AA%92%E4%BD%93%E6%8F%90%E4%BE%9B%E5%95%86"><span class="toc-number">3.3.3.</span> <span class="toc-text">新增媒体提供商</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%AF%E6%B5%8B%E8%AF%95%E6%80%A7"><span class="toc-number">3.4.</span> <span class="toc-text">可测试性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E6%B5%8B%E8%AF%95"><span class="toc-number">3.4.1.</span> <span class="toc-text">依赖注入测试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Mock-%E6%9B%BF%E6%8D%A2"><span class="toc-number">3.4.2.</span> <span class="toc-text">Mock 替换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E8%A6%86%E7%9B%96"><span class="toc-number">3.4.3.</span> <span class="toc-text">单元测试覆盖</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E7%BB%B4%E5%8F%8B%E5%A5%BD"><span class="toc-number">3.5.</span> <span class="toc-text">运维友好</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E9%9B%86%E6%88%90-1"><span class="toc-number">3.5.1.</span> <span class="toc-text">系统服务集成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7"><span class="toc-number">3.5.2.</span> <span class="toc-text">可观测性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="toc-number">3.5.3.</span> <span class="toc-text">配置管理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E4%BC%98%E5%8A%BF"><span class="toc-number">4.1.</span> <span class="toc-text">核心优势</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E6%A0%88%E7%89%B9%E7%82%B9"><span class="toc-number">4.2.</span> <span class="toc-text">技术栈特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">4.3.</span> <span class="toc-text">适用场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95"><span class="toc-number">5.</span> <span class="toc-text">附录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E6%96%87%E4%BB%B6%E7%B4%A2%E5%BC%95"><span class="toc-number">5.1.</span> <span class="toc-text">关键文件索引</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Gateway-%E7%BD%91%E5%85%B3%E7%B3%BB%E7%BB%9F-1"><span class="toc-number">5.1.1.</span> <span class="toc-text">Gateway 网关系统</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Channel-%E6%B8%A0%E9%81%93%E6%8A%BD%E8%B1%A1%E5%B1%82-1"><span class="toc-number">5.1.2.</span> <span class="toc-text">Channel 渠道抽象层</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Agent-%E4%BB%A3%E7%90%86%E5%BC%95%E6%93%8E-1"><span class="toc-number">5.1.3.</span> <span class="toc-text">Agent 代理引擎</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Media-%E5%AA%92%E4%BD%93%E7%90%86%E8%A7%A3%E7%AE%A1%E9%81%93-1"><span class="toc-number">5.1.4.</span> <span class="toc-text">Media 媒体理解管道</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E4%B8%8E%E6%8E%A7%E5%88%B6%E5%B1%82-1"><span class="toc-number">5.1.5.</span> <span class="toc-text">路由与控制层</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5"><span class="toc-number">5.1.6.</span> <span class="toc-text">依赖注入</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-number">5.2.</span> <span class="toc-text">参考链接</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-OpenClaw系统架构深度技术分析报告" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      OpenClaw系统架构深度技术分析报告
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/02/03/OpenClaw%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/" class="article-date">
+	  <time datetime="2026-02-03T05:57:26.000Z" itemprop="datePublished">2026-02-03</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/02/03/OpenClaw%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 32(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p>本报告以系统架构师的视角，深入分析 OpenClaw 的技术架构设计</p>
+</blockquote>
+<h2 id="整体架构设计"><a href="#整体架构设计" class="headerlink" title="整体架构设计"></a>整体架构设计</h2><h3 id="系统分层架构图"><a href="#系统分层架构图" class="headerlink" title="系统分层架构图"></a>系统分层架构图</h3><pre class="mermaid">graph TB
+    subgraph "客户端层 (Client Layer)"
+        Web[Web UI]
+        Mobile[移动应用]
+        CLI[CLI 工具]
+        Desktop[桌面应用]
+    end
+    
+    subgraph "接入层 (Gateway Layer)"
+        GW[Gateway 网关服务器]
+        WS[WebSocket 服务]
+        HTTP[HTTP/REST API]
+        Hooks[Webhooks 端点]
+    end
+    
+    subgraph "渠道抽象层 (Channel Layer)"
+        CM[Channel Manager]
+        Telegram[Telegram 插件]
+        Discord[Discord 插件]
+        Slack[Slack 插件]
+        WhatsApp[WhatsApp 插件]
+        Signal[Signal 插件]
+        IMessage[iMessage 插件]
+        Extensions[扩展渠道插件...]
+    end
+    
+    subgraph "路由与控制层 (Routing & Control)"
+        Router[消息路由器]
+        Allowlist[Allowlist 过滤]
+        MentionGate[Mention 网关]
+        CommandGate[Command 网关]
+        SessionMgr[会话管理器]
+    end
+    
+    subgraph "代理层 (Agent Layer)"
+        AgentRunner[Agent Runner]
+        PiCore[Pi Agent Core]
+        ToolSystem[工具系统]
+        ModelRegistry[模型注册表]
+        Failover[容错回退机制]
+    end
+    
+    subgraph "媒体处理层 (Media Layer)"
+        MediaPipeline[媒体处理管道]
+        ImageProc[图像处理]
+        AudioProc[音频转录]
+        VideoProc[视频理解]
+        PDFProc[PDF 提取]
+        MediaCache[媒体缓存]
+    end
+    
+    subgraph "基础设施层 (Infrastructure)"
+        DI[依赖注入容器]
+        Config[配置管理]
+        Auth[认证系统]
+        Storage[持久化存储]
+        Daemon[系统服务管理]
+    end
+    
+    subgraph "外部服务 (External Services)"
+        LLM[大语言模型 API]
+        Vision[视觉模型 API]
+        TTS[语音合成 API]
+        Browser[浏览器控制]
+    end
+    
+    %% 连接关系
+    Web --> GW
+    Mobile --> GW
+    CLI --> GW
+    Desktop --> GW
+    
+    GW --> WS
+    GW --> HTTP
+    GW --> Hooks
+    
+    WS --> CM
+    HTTP --> CM
+    Hooks --> CM
+    
+    CM --> Telegram
+    CM --> Discord
+    CM --> Slack
+    CM --> WhatsApp
+    CM --> Signal
+    CM --> IMessage
+    CM --> Extensions
+    
+    Telegram --> Router
+    Discord --> Router
+    Slack --> Router
+    WhatsApp --> Router
+    
+    Router --> Allowlist
+    Allowlist --> MentionGate
+    MentionGate --> CommandGate
+    CommandGate --> SessionMgr
+    
+    SessionMgr --> AgentRunner
+    AgentRunner --> PiCore
+    PiCore --> ToolSystem
+    PiCore --> ModelRegistry
+    PiCore --> Failover
+    
+    AgentRunner --> MediaPipeline
+    MediaPipeline --> ImageProc
+    MediaPipeline --> AudioProc
+    MediaPipeline --> VideoProc
+    MediaPipeline --> PDFProc
+    MediaPipeline --> MediaCache
+    
+    AgentRunner --> DI
+    CM --> DI
+    Router --> DI
+    
+    DI --> Config
+    DI --> Auth
+    DI --> Storage
+    DI --> Daemon
+    
+    PiCore --> LLM
+    MediaPipeline --> Vision
+    ToolSystem --> Browser
+    ToolSystem --> TTS
+    
+    style GW fill:#ff6b6b
+    style CM fill:#4ecdc4
+    style Router fill:#45b7d1
+    style AgentRunner fill:#96ceb4
+    style MediaPipeline fill:#ffeaa7
+    style DI fill:#dfe6e9</pre>
+
+<h3 id="消息流转完整链路图"><a href="#消息流转完整链路图" class="headerlink" title="消息流转完整链路图"></a>消息流转完整链路图</h3><pre class="mermaid">sequenceDiagram
+    participant User as 用户
+    participant Channel as 渠道插件
+    participant Router as 路由器
+    participant Session as 会话管理
+    participant Agent as Agent Runner
+    participant Pi as Pi Core
+    participant Model as 模型 API
+    participant Media as 媒体管道
+    participant Tool as 工具系统
+    
+    User->>Channel: 1. 发送消息/附件
+    Channel->>Channel: 2. 归一化消息格式
+    Channel->>Router: 3. 消息入队
+    
+    Router->>Router: 4. Allowlist 检查
+    alt Allowlist 未通过
+        Router-->>Channel: 丢弃消息
+    end
+    
+    Router->>Router: 5. Command-Gating 检查
+    alt 未授权控制命令
+        Router-->>Channel: 丢弃消息
+    end
+    
+    Router->>Router: 6. Mention-Gating 检查
+    alt 群组需要 @mention 但未 mention
+        Router-->>Channel: 跳过处理
+    end
+    
+    Router->>Router: 7. 消息去重检查
+    alt 重复消息
+        Router-->>Channel: 跳过处理
+    end
+    
+    Router->>Session: 8. 路由到 Agent + Session
+    Session->>Session: 9. 初始化/恢复会话
+    
+    Session->>Agent: 10. 提交消息到 Agent
+    
+    alt 包含媒体附件
+        Agent->>Media: 11a. 媒体理解处理
+        Media->>Media: 下载/缓存媒体
+        Media->>Media: 图像描述/音频转录/视频理解
+        Media-->>Agent: 返回理解结果
+    end
+    
+    Agent->>Pi: 11b. 创建 Agent Session
+    Pi->>Model: 12. 调用模型 API
+    
+    alt 模型调用失败
+        Model-->>Pi: 错误响应
+        Pi->>Pi: 13a. Thinking Level 回退
+        alt Thinking 回退成功
+            Pi->>Model: 重试低级别 Thinking
+        else Auth Profile 切换
+            Pi->>Pi: 13b. 切换认证 Profile
+            Pi->>Model: 重试不同 Profile
+        else Model 回退
+            Pi->>Pi: 13c. 回退到候选模型
+            Pi->>Model: 重试候选模型
+        end
+    end
+    
+    Model-->>Pi: 14. 流式响应
+    
+    loop 流式处理
+        Pi-->>Agent: 15a. message_update 事件
+        Agent-->>Channel: 部分回复 (onPartialReply)
+        Channel-->>User: 实时显示打字状态
+    end
+    
+    alt 工具调用
+        Pi->>Tool: 15b. tool_execution_start
+        Tool->>Tool: 执行工具 (browser/canvas/message/...)
+        Tool-->>Pi: 工具结果
+        Pi-->>Agent: tool_execution_end
+        Agent-->>Channel: 工具结果消息 (onToolResult)
+        Channel-->>User: 显示工具执行结果
+        Pi->>Model: 继续模型调用
+    end
+    
+    Pi-->>Agent: 16. message_end 事件
+    Agent->>Agent: 17. 提取最终文本 + reasoning
+    Agent->>Agent: 18. 消息去重检查
+    Agent->>Session: 19. 更新会话状态
+    
+    Agent-->>Channel: 20. 最终回复 (onBlockReply)
+    
+    alt 跨渠道路由
+        Channel->>Router: 21a. 路由到原始渠道
+        Router->>Channel: 转发到目标渠道
+    end
+    
+    Channel-->>User: 22. 发送最终消息</pre>
+
+<h3 id="依赖注入与模块解耦架构"><a href="#依赖注入与模块解耦架构" class="headerlink" title="依赖注入与模块解耦架构"></a>依赖注入与模块解耦架构</h3><pre class="mermaid">graph TB
+    subgraph "CLI 层 (Command Layer)"
+        CMD[命令入口]
+        CliDeps[CliDeps 类型]
+    end
+    
+    subgraph "业务逻辑层 (Business Logic)"
+        Action[MessageAction]
+        OutboundDeps[OutboundSendDeps 类型]
+    end
+    
+    subgraph "基础设施层 (Infrastructure)"
+        WhatsApp[sendMessageWhatsApp]
+        Telegram[sendMessageTelegram]
+        Discord[sendMessageDiscord]
+        Slack[sendMessageSlack]
+        Signal[sendMessageSignal]
+        IMessage[sendMessageIMessage]
+    end
+    
+    subgraph "依赖容器 (Dependency Container)"
+        Factory[createDefaultDeps 工厂]
+        Converter[createOutboundSendDeps 转换器]
+    end
+    
+    subgraph "测试层 (Test Layer)"
+        TestDeps[Mock Deps]
+        TestFactory[makeDeps 工厂]
+    end
+    
+    CMD -->|调用| Factory
+    Factory -->|创建| CliDeps
+    CliDeps -->|引用| WhatsApp
+    CliDeps -->|引用| Telegram
+    CliDeps -->|引用| Discord
+    CliDeps -->|引用| Slack
+    CliDeps -->|引用| Signal
+    CliDeps -->|引用| IMessage
+    
+    CMD -->|注入| Action
+    Action -->|依赖| OutboundDeps
+    
+    CliDeps -->|转换| Converter
+    Converter -->|创建| OutboundDeps
+    
+    TestFactory -->|创建| TestDeps
+    TestDeps -->|Mock| WhatsApp
+    TestDeps -->|Mock| Telegram
+    TestDeps -.替换.-> CliDeps
+    
+    style Factory fill:#96ceb4
+    style Converter fill:#96ceb4
+    style TestFactory fill:#ffeaa7
+    style CliDeps fill:#a29bfe
+    style OutboundDeps fill:#a29bfe</pre>
+
+<hr>
+<h2 id="核心子系统深度分析"><a href="#核心子系统深度分析" class="headerlink" title="核心子系统深度分析"></a>核心子系统深度分析</h2><h3 id="Gateway-网关系统"><a href="#Gateway-网关系统" class="headerlink" title="Gateway 网关系统"></a>Gateway 网关系统</h3><h4 id="架构特性"><a href="#架构特性" class="headerlink" title="架构特性"></a>架构特性</h4><p><strong>双协议支持</strong>：</p>
+<ul>
+<li><p><strong>WebSocket</strong>：用于实时双向通信、事件推送、控制台连接</p>
+<ul>
+<li>握手流程：<code>connect.challenge</code> → <code>connect</code> → <code>hello-ok</code></li>
+<li>消息格式：JSON-RPC 风格 (<code>req</code>&#x2F;<code>res</code>&#x2F;<code>event</code>)</li>
+<li>连接管理：<code>GatewayWsClient</code> 维护连接状态</li>
+</ul>
+</li>
+<li><p><strong>HTTP&#x2F;REST</strong>：用于 Webhooks、兼容性端点、工具调用</p>
+<ul>
+<li>Control UI: <code>/</code></li>
+<li>Hooks: <code>/hooks/*</code> (wake, agent, mappings)</li>
+<li>OpenAI 兼容: <code>/v1/chat/completions</code></li>
+<li>Tools Invoke: <code>/tools/invoke</code></li>
+</ul>
+</li>
+</ul>
+<p><strong>请求路由机制</strong>：</p>
+<pre class="mermaid">graph LR
+    Request[请求] --> Parse[解析消息]
+    Parse --> Validate[validateRequestFrame]
+    Validate --> Handle[handleGatewayRequest]
+    Handle --> Auth[authorizeGatewayMethod]
+    Auth --> Handler[coreGatewayHandlers]
+    Handler --> Respond[respond 回调]
+    
+    Auth -.检查.-> Roles[Role: operator/node]
+    Auth -.检查.-> Scopes[Scope: admin/read/write]
+    
+    style Auth fill:#ff6b6b
+    style Handler fill:#4ecdc4</pre>
+
+<p><strong>核心特性</strong>：</p>
+<ul>
+<li><strong>方法注册</strong>：<code>coreGatewayHandlers</code> 合并核心方法与插件方法</li>
+<li><strong>权限模型</strong>：基于角色 (operator&#x2F;node) 和 scope 的细粒度授权</li>
+<li><strong>插件扩展</strong>：<code>loadGatewayPlugins()</code> 支持动态加载插件方法</li>
+</ul>
+<h4 id="会话管理策略"><a href="#会话管理策略" class="headerlink" title="会话管理策略"></a>会话管理策略</h4><p><strong>两层持久化架构</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. Session Store (sessions.json)</span><br><span class="line">   └─ SessionEntry: 会话元数据 + 配置覆盖</span><br><span class="line">   </span><br><span class="line">2. Transcript (*.jsonl)</span><br><span class="line">   └─ 树形消息历史 (id + parentId)</span><br></pre></td></tr></table></figure>
+
+<p><strong>会话键格式</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>Session Key 格式</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DM (main)</td>
+<td><code>agent:&#123;agentId&#125;:main</code></td>
+<td><code>agent:assistant:main</code></td>
+</tr>
+<tr>
+<td>DM (per-peer)</td>
+<td><code>agent:&#123;agentId&#125;:dm:&#123;peerId&#125;</code></td>
+<td><code>agent:assistant:dm:123456</code></td>
+</tr>
+<tr>
+<td>DM (per-channel-peer)</td>
+<td><code>agent:&#123;agentId&#125;:&#123;channel&#125;:dm:&#123;peerId&#125;</code></td>
+<td><code>agent:assistant:telegram:dm:123456</code></td>
+</tr>
+<tr>
+<td>Group</td>
+<td><code>agent:&#123;agentId&#125;:&#123;channel&#125;:group:&#123;groupId&#125;</code></td>
+<td><code>agent:assistant:telegram:group:abc</code></td>
+</tr>
+</tbody></table>
+<p><strong>会话元数据管理</strong>：</p>
+<ul>
+<li>Token 统计：<code>inputTokens</code>, <code>outputTokens</code>, <code>totalTokens</code>, <code>contextTokens</code></li>
+<li>模型覆盖：<code>providerOverride</code>, <code>modelOverride</code>, <code>authProfileOverride</code></li>
+<li>压缩控制：<code>compactionCount</code>, <code>memoryFlushAt</code></li>
+<li>交付上下文：<code>deliveryContext</code>, <code>lastChannel</code>, <code>lastTo</code></li>
+</ul>
+<h4 id="配置热重载机制"><a href="#配置热重载机制" class="headerlink" title="配置热重载机制"></a>配置热重载机制</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 重载策略: off | restart | hot | hybrid (默认)</span></span><br><span class="line"><span class="keyword">const</span> hotReloadRules = &#123;</span><br><span class="line">  <span class="string">&quot;hooks.*&quot;</span>: <span class="string">&quot;reload_hooks&quot;</span>,           <span class="comment">// 热重载 hooks</span></span><br><span class="line">  <span class="string">&quot;cron.*&quot;</span>: <span class="string">&quot;restart_cron&quot;</span>,            <span class="comment">// 重启 cron</span></span><br><span class="line">  <span class="string">&quot;gateway.*&quot;</span>: <span class="string">&quot;restart_gateway&quot;</span>,      <span class="comment">// 重启整个 Gateway</span></span><br><span class="line">  <span class="string">&quot;channels.*&quot;</span>: <span class="string">&quot;reload_channels&quot;</span>,     <span class="comment">// 热重载渠道配置</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>防抖机制</strong>：默认 300ms，避免频繁重载</p>
+<h4 id="系统服务集成"><a href="#系统服务集成" class="headerlink" title="系统服务集成"></a>系统服务集成</h4><table>
+<thead>
+<tr>
+<th>平台</th>
+<th>服务管理器</th>
+<th>服务标签</th>
+<th>安装路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>macOS</td>
+<td>launchd</td>
+<td><code>bot.molt.gateway</code></td>
+<td><code>~/Library/LaunchAgents/</code></td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>systemd</td>
+<td><code>openclaw-gateway.service</code></td>
+<td><code>~/.config/systemd/user/</code></td>
+</tr>
+</tbody></table>
+<p><strong>服务抽象层</strong>：</p>
+<ul>
+<li><code>src/daemon/service.ts</code> 提供统一接口</li>
+<li>支持：<code>install</code>, <code>uninstall</code>, <code>stop</code>, <code>restart</code>, <code>isLoaded</code></li>
+</ul>
+<hr>
+<h3 id="Channel-渠道抽象层"><a href="#Channel-渠道抽象层" class="headerlink" title="Channel 渠道抽象层"></a>Channel 渠道抽象层</h3><h4 id="插件化架构设计"><a href="#插件化架构设计" class="headerlink" title="插件化架构设计"></a>插件化架构设计</h4><p><strong>核心接口 - ChannelPlugin</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">ChannelPlugin</span>&lt;<span class="title class_">ResolvedAccount</span> = <span class="built_in">any</span>&gt; = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="title class_">ChannelId</span>;                           <span class="comment">// 渠道标识</span></span><br><span class="line">  <span class="attr">meta</span>: <span class="title class_">ChannelMeta</span>;                       <span class="comment">// 元数据（标签、文档）</span></span><br><span class="line">  <span class="attr">capabilities</span>: <span class="title class_">ChannelCapabilities</span>;       <span class="comment">// 能力声明</span></span><br><span class="line">  <span class="attr">config</span>: <span class="title class_">ChannelConfigAdapter</span>;            <span class="comment">// 配置管理</span></span><br><span class="line">  <span class="attr">outbound</span>: <span class="title class_">ChannelOutboundAdapter</span>;        <span class="comment">// 出站消息</span></span><br><span class="line">  <span class="attr">status</span>: <span class="title class_">ChannelStatusAdapter</span>;            <span class="comment">// 状态检查</span></span><br><span class="line">  <span class="attr">gateway</span>: <span class="title class_">ChannelGatewayAdapter</span>;          <span class="comment">// 生命周期管理</span></span><br><span class="line">  <span class="attr">security</span>: <span class="title class_">ChannelSecurityAdapter</span>;        <span class="comment">// 安全策略</span></span><br><span class="line">  <span class="attr">groups</span>: <span class="title class_">ChannelGroupAdapter</span>;             <span class="comment">// 群组策略</span></span><br><span class="line">  <span class="attr">mentions</span>: <span class="title class_">ChannelMentionAdapter</span>;         <span class="comment">// 提及处理</span></span><br><span class="line">  <span class="attr">threading</span>: <span class="title class_">ChannelThreadingAdapter</span>;      <span class="comment">// 线程处理</span></span><br><span class="line">  <span class="attr">messaging</span>: <span class="title class_">ChannelMessagingAdapter</span>;      <span class="comment">// 消息目标解析</span></span><br><span class="line">  <span class="comment">// ... 更多适配器</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>适配器模式优势</strong>：</p>
+<ul>
+<li>统一接口，不同实现</li>
+<li>可选适配器，按需实现</li>
+<li>类型安全，泛型约束</li>
+</ul>
+<h4 id="消息归一化流程"><a href="#消息归一化流程" class="headerlink" title="消息归一化流程"></a>消息归一化流程</h4><pre class="mermaid">graph LR
+    Raw[原始消息] --> Clean[清理空白/大小写]
+    Clean --> Prefix[识别前缀]
+    Prefix --> Parse[解析格式]
+    Parse --> Convert[转换为标准格式]
+    Convert --> Output[统一输出]
+    
+    Prefix -.识别.-> TgPrefix["telegram:, tg:, t.me/"]
+    Prefix -.识别.-> DcPrefix["discord:, @username#1234"]
+    Prefix -.识别.-> SlPrefix["slack:, #channel, <@USER>"]
+    
+    Parse -.URL.-> ID1[提取 ID]
+    Parse -.Username.-> ID2[解析为 ID]
+    Parse -.Display Name.-> ID3[查找 ID]
+    
+    style Parse fill:#4ecdc4
+    style Convert fill:#96ceb4</pre>
+
+<p><strong>归一化示例</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>渠道</th>
+<th>原始输入</th>
+<th>归一化输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Telegram</td>
+<td><code>t.me/username</code></td>
+<td><code>telegram:username</code></td>
+</tr>
+<tr>
+<td>Discord</td>
+<td><code>@user#1234</code></td>
+<td><code>discord:user:1234</code></td>
+</tr>
+<tr>
+<td>Slack</td>
+<td><code>&lt;@U123ABC&gt;</code></td>
+<td><code>slack:U123ABC</code></td>
+</tr>
+<tr>
+<td>WhatsApp</td>
+<td><code>+1234567890</code></td>
+<td><code>whatsapp:1234567890</code></td>
+</tr>
+</tbody></table>
+<h4 id="权限控制三层机制"><a href="#权限控制三层机制" class="headerlink" title="权限控制三层机制"></a>权限控制三层机制</h4><pre class="mermaid">graph TB
+    Message[消息到达] --> Layer1[第一层: Allowlist]
+    
+    Layer1 -->|检查| GroupAllow{群组 Allowlist}
+    GroupAllow -->|未通过| Drop1[丢弃消息]
+    GroupAllow -->|通过| SenderAllow{发送者 Allowlist}
+    SenderAllow -->|未通过| Drop2[丢弃消息]
+    SenderAllow -->|通过| Layer2[第二层: Command-Gating]
+    
+    Layer2 -->|检查| HasCmd{有控制命令?}
+    HasCmd -->|否| Layer3[第三层: Mention-Gating]
+    HasCmd -->|是| CmdAuth{命令授权?}
+    CmdAuth -->|否| Drop3[丢弃消息]
+    CmdAuth -->|是| Layer3
+    
+    Layer3 -->|检查| IsGroup{是群组?}
+    IsGroup -->|否| Process[处理消息]
+    IsGroup -->|是| ReqMention{需要 @mention?}
+    ReqMention -->|否| Process
+    ReqMention -->|是| WasMentioned{被 @mention?}
+    WasMentioned -->|否| CanBypass{可绕过?}
+    WasMentioned -->|是| Process
+    CanBypass -->|否| Skip[跳过处理]
+    CanBypass -->|是| Process
+    
+    style Layer1 fill:#ff6b6b
+    style Layer2 fill:#feca57
+    style Layer3 fill:#48dbfb
+    style Process fill:#1dd1a1</pre>
+
+<p><strong>Mention-Gating Bypass 条件</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">shouldBypass = </span><br><span class="line">  isGroup &amp;&amp;</span><br><span class="line">  requireMention &amp;&amp;</span><br><span class="line">  !wasMentioned &amp;&amp;</span><br><span class="line">  !hasAnyMention &amp;&amp;</span><br><span class="line">  allowTextCommands &amp;&amp;</span><br><span class="line">  commandAuthorized &amp;&amp;</span><br><span class="line">  hasControlCommand;</span><br></pre></td></tr></table></figure>
+
+<h4 id="插件发现与注册"><a href="#插件发现与注册" class="headerlink" title="插件发现与注册"></a>插件发现与注册</h4><p><strong>发现流程</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">1. 扫描 extensions/ 目录</span><br><span class="line">   └─ 查找 openclaw.plugin.json</span><br><span class="line">   </span><br><span class="line">2. 加载配置路径插件</span><br><span class="line">   └─ 从 config.plugins.paths 读取</span><br><span class="line">   </span><br><span class="line">3. 优先级去重</span><br><span class="line">   ├─ Workspace 插件 (优先级最高)</span><br><span class="line">   ├─ Extensions 插件</span><br><span class="line">   └─ External 插件 (优先级最低)</span><br><span class="line">   </span><br><span class="line">4. 排序</span><br><span class="line">   └─ 按 meta.order 和 meta.label 排序</span><br></pre></td></tr></table></figure>
+
+<p><strong>插件清单格式</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;telegram&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;channel&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;meta&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Telegram&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;order&quot;</span><span class="punctuation">:</span> <span class="number">10</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;docsPath&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/channels/telegram&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="Agent-代理引擎"><a href="#Agent-代理引擎" class="headerlink" title="Agent 代理引擎"></a>Agent 代理引擎</h3><h4 id="Pi-Agent-Core-集成架构"><a href="#Pi-Agent-Core-集成架构" class="headerlink" title="Pi Agent Core 集成架构"></a>Pi Agent Core 集成架构</h4><pre class="mermaid">graph TB
+    subgraph "OpenClaw 层"
+        Runner[Agent Runner]
+        SessionInit[Session 初始化]
+        ModelResolve[模型解析]
+        ToolCreate[工具创建]
+    end
+    
+    subgraph "Pi Core 层"
+        PiSession[Agent Session]
+        SessionMgr[SessionManager]
+        EventStream[事件流]
+        ToolExec[工具执行]
+    end
+    
+    subgraph "模型层"
+        ModelAPI[模型 API]
+        AuthStorage[认证存储]
+        ModelRegistry[模型注册表]
+    end
+    
+    Runner --> SessionInit
+    Runner --> ModelResolve
+    Runner --> ToolCreate
+    
+    SessionInit --> SessionMgr
+    ModelResolve --> AuthStorage
+    ModelResolve --> ModelRegistry
+    
+    Runner -->|createAgentSession| PiSession
+    PiSession --> EventStream
+    PiSession --> ToolExec
+    PiSession --> ModelAPI
+    
+    EventStream -->|订阅| Runner
+    ToolExec -->|execute| ToolCreate
+    
+    ModelAPI -->|失败| Runner
+    Runner -->|回退| ModelResolve
+    
+    style PiSession fill:#96ceb4
+    style SessionMgr fill:#a29bfe
+    style ModelAPI fill:#ffeaa7</pre>
+
+<p><strong>集成流程代码</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 模型解析</span></span><br><span class="line"><span class="keyword">const</span> &#123; model, authStorage, modelRegistry &#125; = <span class="title function_">resolveModel</span>(</span><br><span class="line">  provider, modelId, agentDir, config</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 会话管理器初始化</span></span><br><span class="line">sessionManager = <span class="title class_">SessionManager</span>.<span class="title function_">open</span>(sessionFile);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 创建 Agent Session (Pi Core)</span></span><br><span class="line"><span class="keyword">const</span> &#123; session &#125; = <span class="keyword">await</span> <span class="title function_">createAgentSession</span>(&#123;</span><br><span class="line">  <span class="attr">cwd</span>: workspace,</span><br><span class="line">  agentDir,</span><br><span class="line">  authStorage,</span><br><span class="line">  modelRegistry,</span><br><span class="line">  model,</span><br><span class="line">  <span class="attr">thinkingLevel</span>: <span class="title function_">mapThinkingLevel</span>(thinkLevel),</span><br><span class="line">  <span class="attr">tools</span>: [...builtInTools, ...customTools],</span><br><span class="line">  sessionManager,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4. 订阅事件流</span></span><br><span class="line"><span class="keyword">const</span> subscription = <span class="title function_">subscribeEmbeddedPiSession</span>(&#123;</span><br><span class="line">  session,</span><br><span class="line">  <span class="attr">onPartialReply</span>: <span class="function">(<span class="params">payload</span>) =&gt;</span> &#123; <span class="comment">/* 流式回复 */</span> &#125;,</span><br><span class="line">  <span class="attr">onBlockReply</span>: <span class="function">(<span class="params">payload</span>) =&gt;</span> &#123; <span class="comment">/* 块回复 */</span> &#125;,</span><br><span class="line">  <span class="attr">onToolResult</span>: <span class="function">(<span class="params">payload</span>) =&gt;</span> &#123; <span class="comment">/* 工具结果 */</span> &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="多级容错机制"><a href="#多级容错机制" class="headerlink" title="多级容错机制"></a>多级容错机制</h4><pre class="mermaid">graph TD
+    Start[开始执行] --> Attempt[尝试调用模型]
+    
+    Attempt --> Check{调用成功?}
+    Check -->|是| Success[返回结果]
+    Check -->|否| ErrorType{错误类型?}
+    
+    ErrorType -->|Thinking 不支持| ThinkFallback[Thinking Level 回退]
+    ErrorType -->|认证失败| AuthFallback[Auth Profile 切换]
+    ErrorType -->|限流/配额| ModelFallback[Model 回退]
+    ErrorType -->|超时/其他| ModelFallback
+    
+    ThinkFallback --> ThinkAvail{有可用级别?}
+    ThinkAvail -->|是| Attempt
+    ThinkAvail -->|否| AuthFallback
+    
+    AuthFallback --> AuthAvail{有可用 Profile?}
+    AuthAvail -->|是| Attempt
+    AuthAvail -->|否| ModelFallback
+    
+    ModelFallback --> ModelAvail{有候选模型?}
+    ModelAvail -->|是| Attempt
+    ModelAvail -->|否| Fail[抛出错误]
+    
+    style Success fill:#1dd1a1
+    style Fail fill:#ff6b6b
+    style ThinkFallback fill:#feca57
+    style AuthFallback fill:#48dbfb
+    style ModelFallback fill:#a29bfe</pre>
+
+<p><strong>Thinking Level 回退序列</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xhigh → high → medium → low → minimal → off</span><br></pre></td></tr></table></figure>
+
+<p><strong>Model 回退配置</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">agents</span>: &#123;</span><br><span class="line">    <span class="attr">defaults</span>: &#123;</span><br><span class="line">      <span class="attr">model</span>: <span class="string">&quot;openai/gpt-4o&quot;</span>,</span><br><span class="line">      <span class="attr">fallbacks</span>: [</span><br><span class="line">        <span class="string">&quot;anthropic/claude-3-5-sonnet-20241022&quot;</span>,</span><br><span class="line">        <span class="string">&quot;google/gemini-2.0-flash-exp&quot;</span>,</span><br><span class="line">        <span class="string">&quot;openai/gpt-4o-mini&quot;</span></span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>错误分类机制</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>触发条件</th>
+<th>回退策略</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>rate_limit</code></td>
+<td>429 状态码</td>
+<td>切换 Auth Profile 或回退模型</td>
+</tr>
+<tr>
+<td><code>quota</code></td>
+<td>配额耗尽</td>
+<td>回退模型</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td>401&#x2F;403 状态码</td>
+<td>切换 Auth Profile</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>请求超时</td>
+<td>回退模型</td>
+</tr>
+<tr>
+<td><code>context_overflow</code></td>
+<td>上下文溢出</td>
+<td>压缩会话或回退模型</td>
+</tr>
+</tbody></table>
+<h4 id="Thinking-模式技术实现"><a href="#Thinking-模式技术实现" class="headerlink" title="Thinking 模式技术实现"></a>Thinking 模式技术实现</h4><p><strong>Thinking Level 映射</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>用途</th>
+<th>成本</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>off</code></td>
+<td>无推理</td>
+<td>最低</td>
+<td>简单对话</td>
+</tr>
+<tr>
+<td><code>minimal</code></td>
+<td>最小推理</td>
+<td>低</td>
+<td>日常任务</td>
+</tr>
+<tr>
+<td><code>low</code></td>
+<td>低级推理</td>
+<td>中低</td>
+<td>编码任务</td>
+</tr>
+<tr>
+<td><code>medium</code></td>
+<td>中级推理</td>
+<td>中等</td>
+<td>复杂分析</td>
+</tr>
+<tr>
+<td><code>high</code></td>
+<td>高级推理</td>
+<td>高</td>
+<td>深度思考</td>
+</tr>
+<tr>
+<td><code>xhigh</code></td>
+<td>极高推理</td>
+<td>最高</td>
+<td>研究级任务</td>
+</tr>
+</tbody></table>
+<p><strong>Reasoning Mode 处理</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> reasoningMode = params.<span class="property">reasoningMode</span> ?? <span class="string">&quot;off&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (reasoningMode === <span class="string">&quot;stream&quot;</span>) &#123;</span><br><span class="line">  <span class="comment">// 流式输出 reasoning</span></span><br><span class="line">  ctx.<span class="title function_">emitReasoningStream</span>(</span><br><span class="line">    <span class="title function_">extractThinkingFromTaggedStream</span>(deltaBuffer)</span><br><span class="line">  );</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (reasoningMode === <span class="string">&quot;on&quot;</span>) &#123;</span><br><span class="line">  <span class="comment">// 在消息结束时发送完整 reasoning</span></span><br><span class="line">  <span class="keyword">const</span> reasoning = <span class="title function_">extractAssistantThinking</span>(message);</span><br><span class="line">  <span class="built_in">void</span> <span class="title function_">onBlockReply</span>(&#123; <span class="attr">text</span>: <span class="title function_">formatReasoningMessage</span>(reasoning) &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>提取与格式化</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从 &lt;thinking&gt;...&lt;/thinking&gt; 标签中提取</span></span><br><span class="line"><span class="title function_">extractAssistantThinking</span>(<span class="attr">msg</span>: <span class="title class_">AssistantMessage</span>): <span class="built_in">string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 格式化为用户可读格式</span></span><br><span class="line"><span class="title function_">formatReasoningMessage</span>(<span class="attr">rawThinking</span>: <span class="built_in">string</span>): <span class="built_in">string</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Canvas-实时渲染能力"><a href="#Canvas-实时渲染能力" class="headerlink" title="Canvas 实时渲染能力"></a>Canvas 实时渲染能力</h4><p><strong>Canvas 工具架构</strong>：</p>
+<pre class="mermaid">graph LR
+    Agent[Agent] -->|调用| CanvasTool[canvas 工具]
+    CanvasTool -->|node.invoke| Gateway[Gateway]
+    Gateway -->|转发| Node[目标 Node]
+    Node -->|执行| Action[Canvas 动作]
+    Action -->|结果| Node
+    Node -->|返回| Gateway
+    Gateway -->|返回| CanvasTool
+    CanvasTool -->|结果| Agent
+    
+    Action -.支持.-> Present[显示 Canvas]
+    Action -.支持.-> Navigate[导航 URL]
+    Action -.支持.-> Eval[执行 JS]
+    Action -.支持.-> Snapshot[截图]
+    Action -.支持.-> A2UI[A2UI 推送]
+    
+    style CanvasTool fill:#96ceb4
+    style Action fill:#ffeaa7</pre>
+
+<p><strong>Canvas 操作类型</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>参数</th>
+<th>返回</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>present</code></td>
+<td><code>position</code>, <code>size</code></td>
+<td>-</td>
+<td>显示 Canvas</td>
+</tr>
+<tr>
+<td><code>hide</code></td>
+<td>-</td>
+<td>-</td>
+<td>隐藏 Canvas</td>
+</tr>
+<tr>
+<td><code>navigate</code></td>
+<td><code>url</code></td>
+<td>-</td>
+<td>导航到 URL</td>
+</tr>
+<tr>
+<td><code>eval</code></td>
+<td><code>code</code></td>
+<td><code>result</code></td>
+<td>执行 JavaScript</td>
+</tr>
+<tr>
+<td><code>snapshot</code></td>
+<td><code>format</code>, <code>quality</code></td>
+<td><code>base64</code></td>
+<td>截图</td>
+</tr>
+<tr>
+<td><code>a2ui_push</code></td>
+<td><code>jsonl</code></td>
+<td>-</td>
+<td>推送 UI 定义</td>
+</tr>
+<tr>
+<td><code>a2ui_reset</code></td>
+<td>-</td>
+<td>-</td>
+<td>重置 A2UI</td>
+</tr>
+</tbody></table>
+<p><strong>A2UI 集成</strong>：</p>
+<ul>
+<li>JSONL 格式的声明式 UI</li>
+<li>支持表单、按钮、列表等组件</li>
+<li>实时响应用户交互</li>
+</ul>
+<h4 id="工具系统与插件架构"><a href="#工具系统与插件架构" class="headerlink" title="工具系统与插件架构"></a>工具系统与插件架构</h4><p><strong>工具分类体系</strong>：</p>
+<pre class="mermaid">graph TB
+    Tools[所有工具]
+    
+    Tools --> BuiltIn[内置工具]
+    Tools --> OpenClaw[OpenClaw 工具]
+    Tools --> Plugin[插件工具]
+    
+    BuiltIn --> FS[文件系统]
+    BuiltIn --> Runtime[运行时]
+    
+    FS --> Read[read]
+    FS --> Write[write]
+    FS --> Edit[edit]
+    FS --> Apply[apply_patch]
+    
+    Runtime --> Exec[exec]
+    Runtime --> Process[process]
+    
+    OpenClaw --> Browser[browser]
+    OpenClaw --> Canvas[canvas]
+    OpenClaw --> Message[message]
+    OpenClaw --> Sessions[sessions_*]
+    OpenClaw --> Memory[memory_*]
+    OpenClaw --> Web[web_*]
+    OpenClaw --> Image[image]
+    OpenClaw --> Cron[cron]
+    OpenClaw --> Gateway[gateway]
+    OpenClaw --> Nodes[nodes]
+    
+    Plugin --> Custom[自定义工具...]
+    
+    style BuiltIn fill:#ff6b6b
+    style OpenClaw fill:#4ecdc4
+    style Plugin fill:#96ceb4</pre>
+
+<p><strong>工具策略系统</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 工具 Profile 定义</span></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ToolProfileId</span> = <span class="string">&quot;minimal&quot;</span> | <span class="string">&quot;coding&quot;</span> | <span class="string">&quot;messaging&quot;</span> | <span class="string">&quot;full&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="attr">TOOL_PROFILES</span>: <span class="title class_">Record</span>&lt;<span class="title class_">ToolProfileId</span>, <span class="title class_">ToolProfilePolicy</span>&gt; = &#123;</span><br><span class="line">  <span class="attr">minimal</span>: &#123;</span><br><span class="line">    <span class="attr">allow</span>: [<span class="string">&quot;session_status&quot;</span>]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">coding</span>: &#123;</span><br><span class="line">    <span class="attr">allow</span>: [</span><br><span class="line">      <span class="string">&quot;group:fs&quot;</span>,           <span class="comment">// 文件系统组</span></span><br><span class="line">      <span class="string">&quot;group:runtime&quot;</span>,      <span class="comment">// 运行时组</span></span><br><span class="line">      <span class="string">&quot;group:sessions&quot;</span>,     <span class="comment">// 会话组</span></span><br><span class="line">      <span class="string">&quot;browser&quot;</span>,</span><br><span class="line">      <span class="string">&quot;canvas&quot;</span>,</span><br><span class="line">      <span class="string">&quot;web_search&quot;</span>,</span><br><span class="line">      <span class="string">&quot;web_fetch&quot;</span></span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">messaging</span>: &#123;</span><br><span class="line">    <span class="attr">allow</span>: [</span><br><span class="line">      <span class="string">&quot;group:messaging&quot;</span>,    <span class="comment">// 消息组</span></span><br><span class="line">      <span class="string">&quot;sessions_list&quot;</span>,</span><br><span class="line">      <span class="string">&quot;web_search&quot;</span>,</span><br><span class="line">      <span class="string">&quot;web_fetch&quot;</span></span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">full</span>: &#123;&#125;  <span class="comment">// 允许所有工具</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>工具策略层级</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1. 全局策略: tools.global.allow/deny</span><br><span class="line">2. Provider 策略: tools.providers[provider].allow/deny</span><br><span class="line">3. Agent 策略: agents[agentId].tools.allow/deny</span><br><span class="line">4. Group 策略: channels[channel].groups[groupId].tools.allow/deny</span><br><span class="line">5. Subagent 策略: 继承父会话策略</span><br></pre></td></tr></table></figure>
+
+<p><strong>插件工具解析</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> pluginTools = <span class="title function_">resolvePluginTools</span>(&#123;</span><br><span class="line">  <span class="attr">context</span>: &#123;</span><br><span class="line">    config,</span><br><span class="line">    workspaceDir,</span><br><span class="line">    agentDir,</span><br><span class="line">    agentId,</span><br><span class="line">    sessionKey,</span><br><span class="line">    messageChannel,</span><br><span class="line">    sandboxed,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">existingToolNames</span>: <span class="keyword">new</span> <span class="title class_">Set</span>(tools.<span class="title function_">map</span>(<span class="function"><span class="params">t</span> =&gt;</span> t.<span class="property">name</span>)),</span><br><span class="line">  <span class="attr">toolAllowlist</span>: options?.<span class="property">pluginToolAllowlist</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="Media-媒体理解管道"><a href="#Media-媒体理解管道" class="headerlink" title="Media 媒体理解管道"></a>Media 媒体理解管道</h3><h4 id="多模态处理架构"><a href="#多模态处理架构" class="headerlink" title="多模态处理架构"></a>多模态处理架构</h4><pre class="mermaid">graph TB
+    Entry[applyMediaUnderstanding] --> Select[selectAttachments]
+    
+    Select --> Image{图像?}
+    Select --> Audio{音频?}
+    Select --> Video{视频?}
+    Select --> PDF{PDF?}
+    
+    Image --> ImgCache[MediaAttachmentCache]
+    Audio --> AudCache[MediaAttachmentCache]
+    Video --> VidCache[MediaAttachmentCache]
+    PDF --> PDFCache[MediaAttachmentCache]
+    
+    ImgCache --> Vision[Vision API]
+    AudCache --> Transcribe[转录 API]
+    VidCache --> VideoAPI[视频理解 API]
+    PDFCache --> Extract[文本提取/渲染]
+    
+    Vision --> ImgDesc[图像描述]
+    Transcribe --> AudText[音频文本]
+    VideoAPI --> VidDesc[视频描述]
+    Extract --> PDFText[PDF 文本/图像]
+    
+    ImgDesc --> Format[formatMediaUnderstandingBody]
+    AudText --> Format
+    VidDesc --> Format
+    PDFText --> Format
+    
+    Format --> Output[输出到消息上下文]
+    
+    style Vision fill:#ffeaa7
+    style Transcribe fill:#ffeaa7
+    style VideoAPI fill:#ffeaa7
+    style Extract fill:#ffeaa7</pre>
+
+<p><strong>处理能力顺序</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="attr">CAPABILITY_ORDER</span>: <span class="title class_">MediaUnderstandingCapability</span>[] = </span><br><span class="line">  [<span class="string">&quot;image&quot;</span>, <span class="string">&quot;audio&quot;</span>, <span class="string">&quot;video&quot;</span>];</span><br></pre></td></tr></table></figure>
+
+<p><strong>并发控制</strong>：</p>
+<ul>
+<li>默认并发数：2</li>
+<li>使用 <code>runWithConcurrency()</code> 限制并发</li>
+<li>Worker 池模式，任务队列</li>
+</ul>
+<h4 id="提供商适配策略"><a href="#提供商适配策略" class="headerlink" title="提供商适配策略"></a>提供商适配策略</h4><p><strong>提供商注册表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>提供商</th>
+<th>图像</th>
+<th>音频</th>
+<th>视频</th>
+<th>默认模型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OpenAI</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>gpt-4o-mini</td>
+</tr>
+<tr>
+<td>Anthropic</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>claude-3-5-sonnet</td>
+</tr>
+<tr>
+<td>Google</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>gemini-2.0-flash-exp</td>
+</tr>
+<tr>
+<td>Deepgram</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>nova-3</td>
+</tr>
+<tr>
+<td>Groq</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>whisper-large-v3-turbo</td>
+</tr>
+<tr>
+<td>Minimax</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>-</td>
+</tr>
+</tbody></table>
+<p><strong>统一接口抽象</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">MediaUnderstandingProvider</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">capabilities</span>: <span class="title class_">MediaUnderstandingCapability</span>[];</span><br><span class="line">  </span><br><span class="line">  <span class="attr">describeImage</span>?: <span class="function">(<span class="params"><span class="attr">req</span>: <span class="title class_">ImageDescriptionRequest</span></span>) </span></span><br><span class="line"><span class="function">    =&gt;</span> <span class="title class_">Promise</span>&lt;<span class="title class_">ImageDescriptionResult</span>&gt;;</span><br><span class="line">  </span><br><span class="line">  <span class="attr">transcribeAudio</span>?: <span class="function">(<span class="params"><span class="attr">req</span>: <span class="title class_">AudioTranscriptionRequest</span></span>) </span></span><br><span class="line"><span class="function">    =&gt;</span> <span class="title class_">Promise</span>&lt;<span class="title class_">AudioTranscriptionResult</span>&gt;;</span><br><span class="line">  </span><br><span class="line">  <span class="attr">describeVideo</span>?: <span class="function">(<span class="params"><span class="attr">req</span>: <span class="title class_">VideoDescriptionRequest</span></span>) </span></span><br><span class="line"><span class="function">    =&gt;</span> <span class="title class_">Promise</span>&lt;<span class="title class_">VideoDescriptionResult</span>&gt;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="SSRF-攻击防护体系"><a href="#SSRF-攻击防护体系" class="headerlink" title="SSRF 攻击防护体系"></a>SSRF 攻击防护体系</h4><p><strong>多层防护架构</strong>：</p>
+<pre class="mermaid">graph TB
+    Request[媒体请求] --> DNS[DNS 解析阶段]
+    
+    DNS --> CheckPrivate{私有 IP?}
+    CheckPrivate -->|是| BlockList[检查黑名单]
+    CheckPrivate -->|否| Resolve[解析域名]
+    
+    BlockList --> IsBlocked{在黑名单?}
+    IsBlocked -->|是| Drop1[拒绝请求]
+    IsBlocked -->|否| Resolve
+    
+    Resolve --> Pin[固定 IP]
+    Pin --> Fetch[HTTP 请求阶段]
+    
+    Fetch --> Policy{SSRF 策略}
+    Policy -->|禁止私有网络| CheckIP{目标是私有 IP?}
+    Policy -->|允许私有网络| Execute[执行请求]
+    
+    CheckIP -->|是| Drop2[拒绝请求]
+    CheckIP -->|否| Execute
+    
+    Execute --> Limit[大小限制]
+    Limit --> Success[返回结果]
+    
+    style DNS fill:#ff6b6b
+    style Fetch fill:#feca57
+    style Success fill:#1dd1a1</pre>
+
+<p><strong>私有 IP 检测</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="variable constant_">PRIVATE_IP_RANGES</span> = [</span><br><span class="line">  <span class="string">&quot;10.0.0.0/8&quot;</span>,           <span class="comment">// 私有 A 类</span></span><br><span class="line">  <span class="string">&quot;172.16.0.0/12&quot;</span>,        <span class="comment">// 私有 B 类</span></span><br><span class="line">  <span class="string">&quot;192.168.0.0/16&quot;</span>,       <span class="comment">// 私有 C 类</span></span><br><span class="line">  <span class="string">&quot;127.0.0.0/8&quot;</span>,          <span class="comment">// 本地回环</span></span><br><span class="line">  <span class="string">&quot;169.254.0.0/16&quot;</span>,       <span class="comment">// 链路本地</span></span><br><span class="line">  <span class="string">&quot;100.64.0.0/10&quot;</span>,        <span class="comment">// 共享地址空间</span></span><br><span class="line">  <span class="string">&quot;fc00::/7&quot;</span>,             <span class="comment">// IPv6 唯一本地</span></span><br><span class="line">  <span class="string">&quot;fe80::/10&quot;</span>,            <span class="comment">// IPv6 链路本地</span></span><br><span class="line">  <span class="string">&quot;::1/128&quot;</span>,              <span class="comment">// IPv6 回环</span></span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+
+<p><strong>主机名黑名单</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="variable constant_">BLACKLIST_HOSTNAMES</span> = [</span><br><span class="line">  <span class="string">&quot;localhost&quot;</span>,</span><br><span class="line">  <span class="string">&quot;metadata.google.internal&quot;</span>,</span><br><span class="line">  <span class="string">&quot;169.254.169.254&quot;</span>,      <span class="comment">// AWS/Azure 元数据</span></span><br><span class="line">  <span class="string">&quot;.local&quot;</span>,</span><br><span class="line">  <span class="string">&quot;.internal&quot;</span>,</span><br><span class="line">  <span class="string">&quot;.localhost&quot;</span></span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+
+<p><strong>防护点</strong>：</p>
+<ol>
+<li>DNS 解析前检查主机名</li>
+<li>DNS 解析后检查 IP</li>
+<li>固定 IP 防止 DNS 重绑定</li>
+<li>HTTP 请求前再次检查</li>
+<li>响应大小限制</li>
+</ol>
+<h4 id="媒体转换与压缩"><a href="#媒体转换与压缩" class="headerlink" title="媒体转换与压缩"></a>媒体转换与压缩</h4><p><strong>图像处理管道</strong>：</p>
+<pre class="mermaid">graph LR
+    Input[原始图像] --> EXIF[EXIF 方向归一化]
+    EXIF --> Format{格式?}
+    
+    Format -->|HEIC| Convert[转换为 JPEG]
+    Format -->|其他| Resize[尺寸调整]
+    
+    Convert --> Resize
+    
+    Resize --> Compress[压缩]
+    
+    Compress --> Check{大小检查}
+    Check -->|超限| Optimize[网格搜索优化]
+    Check -->|合格| Output[输出]
+    
+    Optimize --> Reduce[降低尺寸/质量]
+    Reduce --> Check
+    
+    style EXIF fill:#4ecdc4
+    style Compress fill:#ffeaa7
+    style Optimize fill:#ff6b6b</pre>
+
+<p><strong>压缩策略</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>质量范围</th>
+<th>最大尺寸</th>
+<th>优化策略</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>JPEG</td>
+<td>70-90</td>
+<td>2048px</td>
+<td>质量降级</td>
+</tr>
+<tr>
+<td>PNG</td>
+<td>压缩级别 6-9</td>
+<td>2048px</td>
+<td>网格搜索</td>
+</tr>
+<tr>
+<td>WebP</td>
+<td>70-90</td>
+<td>2048px</td>
+<td>质量降级</td>
+</tr>
+</tbody></table>
+<p><strong>PNG 网格搜索优化</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 尺寸候选: 2048, 1600, 1200, 1000, 800</span></span><br><span class="line"><span class="comment">// 压缩级别: 6, 7, 8, 9</span></span><br><span class="line"><span class="comment">// 目标: 找到第一个满足大小限制的组合</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> maxDim <span class="keyword">of</span> [<span class="number">2048</span>, <span class="number">1600</span>, <span class="number">1200</span>, <span class="number">1000</span>, <span class="number">800</span>]) &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> compressionLevel <span class="keyword">of</span> [<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]) &#123;</span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="title function_">resizeToPng</span>(&#123; maxDim, compressionLevel &#125;);</span><br><span class="line">    <span class="keyword">if</span> (result.<span class="property">size</span> &lt;= maxBytes) <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>PDF 处理策略</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 文本优先</span></span><br><span class="line"><span class="keyword">const</span> textContent = <span class="keyword">await</span> <span class="title function_">extractPdfText</span>(buffer);</span><br><span class="line"><span class="keyword">if</span> (textContent.<span class="property">length</span> &gt;= <span class="variable constant_">MIN_TEXT_LENGTH</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123; <span class="attr">text</span>: textContent &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 图像回退</span></span><br><span class="line"><span class="keyword">const</span> images = <span class="keyword">await</span> <span class="title function_">renderPdfPages</span>(buffer, &#123;</span><br><span class="line">  <span class="attr">maxPages</span>: <span class="number">4</span>,</span><br><span class="line">  <span class="attr">maxPixels</span>: <span class="number">4_000_000</span>,</span><br><span class="line">  <span class="attr">scale</span>: <span class="title function_">calculateScale</span>(pdfWidth, pdfHeight, maxPixels),</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">return</span> &#123; images &#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="缓存策略"><a href="#缓存策略" class="headerlink" title="缓存策略"></a>缓存策略</h4><p><strong>三级缓存架构</strong>：</p>
+<pre class="mermaid">graph TB
+    Request[媒体请求] --> L1[L1: 内存缓存]
+    
+    L1 --> Hit1{命中?}
+    Hit1 -->|是| Return1[返回 Buffer]
+    Hit1 -->|否| L2[L2: 磁盘缓存]
+    
+    L2 --> Hit2{命中?}
+    Hit2 -->|是| Return2[返回文件路径]
+    Hit2 -->|否| L3[L3: 临时文件]
+    
+    L3 --> Download[下载媒体]
+    Download --> Store[存储到临时文件]
+    Store --> Cleanup[注册清理]
+    Cleanup --> Return3[返回文件路径]
+    
+    Return1 --> Use[使用]
+    Return2 --> Use
+    Return3 --> Use
+    
+    Use --> Done{处理完成?}
+    Done -->|是| Delete[删除临时文件]
+    
+    style L1 fill:#1dd1a1
+    style L2 fill:#feca57
+    style L3 fill:#ff6b6b</pre>
+
+<p><strong>MediaAttachmentCache 结构</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">AttachmentCacheEntry</span> = &#123;</span><br><span class="line">  <span class="attr">buffer</span>?: <span class="title class_">Buffer</span>;          <span class="comment">// 内存 Buffer</span></span><br><span class="line">  <span class="attr">resolvedPath</span>?: <span class="built_in">string</span>;    <span class="comment">// 已解析的本地路径</span></span><br><span class="line">  <span class="attr">tempPath</span>?: <span class="built_in">string</span>;        <span class="comment">// 临时下载路径</span></span><br><span class="line">  <span class="attr">statSize</span>?: <span class="built_in">number</span>;        <span class="comment">// 文件大小</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cache = <span class="keyword">new</span> <span class="title class_">Map</span>&lt;<span class="built_in">number</span>, <span class="title class_">AttachmentCacheEntry</span>&gt;();</span><br></pre></td></tr></table></figure>
+
+<p><strong>媒体服务器缓存</strong>：</p>
+<ul>
+<li>存储目录：<code>~/.openclaw/media/</code></li>
+<li>TTL：默认 2 分钟</li>
+<li>单次使用：响应后延迟 50ms 删除</li>
+<li>大小限制：5MB</li>
+<li>自动清理：定期清理过期文件</li>
+</ul>
+<p><strong>清理策略</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 响应后清理</span></span><br><span class="line"><span class="built_in">setTimeout</span>(<span class="function">() =&gt;</span> fs.<span class="title function_">unlink</span>(mediaPath), <span class="number">50</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 定期清理</span></span><br><span class="line"><span class="built_in">setInterval</span>(<span class="function">() =&gt;</span> <span class="title function_">cleanOldMedia</span>(), <span class="variable constant_">CLEANUP_INTERVAL</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 进程退出清理</span></span><br><span class="line">process.<span class="title function_">on</span>(<span class="string">&quot;exit&quot;</span>, <span class="function">() =&gt;</span> <span class="title function_">cleanup</span>());</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="路由与控制层"><a href="#路由与控制层" class="headerlink" title="路由与控制层"></a>路由与控制层</h3><h4 id="路由决策树"><a href="#路由决策树" class="headerlink" title="路由决策树"></a>路由决策树</h4><pre class="mermaid">graph TB
+    Message[消息到达] --> Parse[解析上下文]
+    
+    Parse --> Filter[过滤 Bindings]
+    Filter --> Match1{Peer 匹配?}
+    
+    Match1 -->|是| Route1[路由到 Peer Agent]
+    Match1 -->|否| Match2{Parent Peer 匹配?}
+    
+    Match2 -->|是| Route2[路由到 Parent Agent]
+    Match2 -->|否| Match3{Guild 匹配?}
+    
+    Match3 -->|是| Route3[路由到 Guild Agent]
+    Match3 -->|否| Match4{Team 匹配?}
+    
+    Match4 -->|是| Route4[路由到 Team Agent]
+    Match4 -->|否| Match5{Account 匹配?}
+    
+    Match5 -->|是| Route5[路由到 Account Agent]
+    Match5 -->|否| Match6{Channel 匹配?}
+    
+    Match6 -->|是| Route6[路由到 Channel Agent]
+    Match6 -->|否| Default[路由到默认 Agent]
+    
+    Route1 --> Init[初始化会话]
+    Route2 --> Init
+    Route3 --> Init
+    Route4 --> Init
+    Route5 --> Init
+    Route6 --> Init
+    Default --> Init
+    
+    style Match1 fill:#ff6b6b
+    style Match2 fill:#feca57
+    style Match3 fill:#48dbfb
+    style Match4 fill:#a29bfe
+    style Match5 fill:#4ecdc4
+    style Match6 fill:#96ceb4
+    style Default fill:#dfe6e9</pre>
+
+<p><strong>路由优先级表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>匹配类型</th>
+<th>匹配字段</th>
+<th>使用场景</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Peer</td>
+<td><code>match.peer</code></td>
+<td>特定对话绑定</td>
+<td><code>&#123; kind: &quot;dm&quot;, id: &quot;123&quot; &#125;</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Parent Peer</td>
+<td><code>match.peer</code> (parent)</td>
+<td>Thread 继承</td>
+<td>回复线程消息</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Guild</td>
+<td><code>match.guildId</code></td>
+<td>Discord 服务器</td>
+<td><code>guild-abc123</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Team</td>
+<td><code>match.teamId</code></td>
+<td>MS Teams</td>
+<td><code>team-xyz789</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Account</td>
+<td><code>match.accountId</code> (非 <code>*</code>)</td>
+<td>账户级别</td>
+<td><code>default</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Channel</td>
+<td><code>match.accountId</code> &#x3D; <code>*</code></td>
+<td>通道级别</td>
+<td>所有 Telegram 账户</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Default</td>
+<td>无匹配</td>
+<td>默认 Agent</td>
+<td><code>main</code></td>
+</tr>
+</tbody></table>
+<h4 id="消息去重机制"><a href="#消息去重机制" class="headerlink" title="消息去重机制"></a>消息去重机制</h4><p><strong>去重键格式</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> dedupeKey = </span><br><span class="line">  <span class="string">`<span class="subst">$&#123;provider&#125;</span>|<span class="subst">$&#123;accountId&#125;</span>|<span class="subst">$&#123;sessionKey&#125;</span>|<span class="subst">$&#123;peerId&#125;</span>|<span class="subst">$&#123;threadId&#125;</span>|<span class="subst">$&#123;messageId&#125;</span>`</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>去重缓存配置</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">ttl</span>: <span class="number">20</span> * <span class="number">60</span> * <span class="number">1000</span>,      <span class="comment">// 20 分钟</span></span><br><span class="line">  <span class="attr">maxEntries</span>: <span class="number">5000</span>,          <span class="comment">// 最大 5000 条</span></span><br><span class="line">  <span class="attr">cleanupInterval</span>: <span class="number">60000</span>     <span class="comment">// 1 分钟清理一次</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>去重检查时机</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在 dispatchReplyFromConfig 入口</span></span><br><span class="line"><span class="keyword">if</span> (<span class="title function_">shouldSkipDuplicateInbound</span>(ctx)) &#123;</span><br><span class="line">  <span class="title function_">recordProcessed</span>(<span class="string">&quot;skipped&quot;</span>, &#123; <span class="attr">reason</span>: <span class="string">&quot;duplicate&quot;</span> &#125;);</span><br><span class="line">  <span class="keyword">return</span>; <span class="comment">// 跳过处理</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="会话隔离策略"><a href="#会话隔离策略" class="headerlink" title="会话隔离策略"></a>会话隔离策略</h4><p><strong>隔离级别对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>Session Key 格式</th>
+<th>DM 隔离</th>
+<th>群组隔离</th>
+<th>跨渠道</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>main</code></td>
+<td><code>agent:&#123;id&#125;:main</code></td>
+<td>所有共享</td>
+<td>按群组</td>
+<td>是</td>
+</tr>
+<tr>
+<td><code>per-peer</code></td>
+<td><code>agent:&#123;id&#125;:dm:&#123;peerId&#125;</code></td>
+<td>按发送者</td>
+<td>按群组</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>per-channel-peer</code></td>
+<td><code>agent:&#123;id&#125;:&#123;ch&#125;:dm:&#123;peerId&#125;</code></td>
+<td>按渠道+发送者</td>
+<td>按渠道+群组</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>per-account-channel-peer</code></td>
+<td><code>agent:&#123;id&#125;:&#123;ch&#125;:&#123;acc&#125;:dm:&#123;peerId&#125;</code></td>
+<td>按账户+渠道+发送者</td>
+<td>按账户+渠道+群组</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<p><strong>身份链接</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">session</span>: &#123;</span><br><span class="line">    <span class="attr">identityLinks</span>: &#123;</span><br><span class="line">      <span class="attr">canonical</span>: [</span><br><span class="line">        <span class="string">&quot;telegram:123456&quot;</span>,</span><br><span class="line">        <span class="string">&quot;discord:user#1234&quot;</span>,</span><br><span class="line">        <span class="string">&quot;slack:U123ABC&quot;</span></span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当消息来自链接的身份时，会路由到同一个会话。</p>
+<h4 id="回复分发流程"><a href="#回复分发流程" class="headerlink" title="回复分发流程"></a>回复分发流程</h4><pre class="mermaid">sequenceDiagram
+    participant Agent as Agent Runner
+    participant Dispatcher as ReplyDispatcher
+    participant Router as ReplyRouter
+    participant Channel as Channel Plugin
+    participant User as 用户
+    
+    Agent->>Dispatcher: onToolResult (工具结果)
+    Dispatcher->>Dispatcher: 串行化 (sendChain)
+    Dispatcher->>Router: 检查路由
+    
+    alt 跨渠道路由
+        Router->>Channel: routeReply (原始渠道)
+    else 当前渠道
+        Router->>Channel: dispatcher.send
+    end
+    
+    Channel->>User: 发送工具结果
+    
+    Agent->>Dispatcher: onBlockReply (块回复)
+    Dispatcher->>Dispatcher: 应用人工延迟
+    Dispatcher->>Router: 检查路由
+    Router->>Channel: 发送块回复
+    Channel->>User: 发送块回复
+    
+    Agent->>Dispatcher: onBlockReply (最终回复)
+    Dispatcher->>Router: 检查路由
+    
+    alt TTS 启用
+        Router->>Router: maybeApplyTtsToPayload
+    end
+    
+    Router->>Channel: 发送最终回复
+    Channel->>User: 发送最终回复
+    
+    Dispatcher->>Dispatcher: waitForIdle (等待分发完成)</pre>
+
+<p><strong>ReplyDispatcher 特性</strong>：</p>
+<ul>
+<li><strong>串行化分发</strong>：<code>sendChain</code> Promise 链确保顺序</li>
+<li><strong>人工延迟</strong>：block 回复之间插入延迟（模拟打字）</li>
+<li><strong>响应前缀</strong>：<code>responsePrefix</code> 模板化前缀</li>
+<li><strong>心跳条带</strong>：<code>onHeartbeatStrip</code> 处理长时间等待</li>
+</ul>
+<p><strong>跨渠道路由条件</strong>：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> shouldRouteToOriginating =</span><br><span class="line">  <span class="title function_">isRoutableChannel</span>(originatingChannel) &amp;&amp;</span><br><span class="line">  originatingTo &amp;&amp;</span><br><span class="line">  originatingChannel !== currentSurface;</span><br></pre></td></tr></table></figure>
+
+<p>当用户在 Telegram 发起对话，但当前回复渠道是 Slack 时，会路由回 Telegram。</p>
+<hr>
+<h2 id="设计亮点与技术特色"><a href="#设计亮点与技术特色" class="headerlink" title="设计亮点与技术特色"></a>设计亮点与技术特色</h2><h3 id="架构设计亮点"><a href="#架构设计亮点" class="headerlink" title="架构设计亮点"></a>架构设计亮点</h3><h4 id="分层解耦架构"><a href="#分层解耦架构" class="headerlink" title="分层解耦架构"></a>分层解耦架构</h4><ul>
+<li><strong>清晰的职责边界</strong>：Gateway、Channel、Agent、Media 各司其职</li>
+<li><strong>依赖注入模式</strong>：通过 <code>CliDeps</code> 和 <code>OutboundSendDeps</code> 实现模块解耦</li>
+<li><strong>适配器模式</strong>：<code>ChannelPlugin</code> 适配器统一不同渠道的接口</li>
+<li><strong>工厂模式</strong>：<code>createDefaultDeps</code> 和 <code>createOutboundSendDeps</code> 管理依赖创建</li>
+</ul>
+<h4 id="插件化扩展能力"><a href="#插件化扩展能力" class="headerlink" title="插件化扩展能力"></a>插件化扩展能力</h4><ul>
+<li><strong>渠道插件</strong>：<code>extensions/</code> 目录支持动态加载新渠道</li>
+<li><strong>工具插件</strong>：Agent 工具系统支持插件工具</li>
+<li><strong>Gateway 插件</strong>：Gateway 方法可通过插件扩展</li>
+<li><strong>模型插件</strong>：模型注册表支持自定义模型</li>
+</ul>
+<h4 id="容错与高可用"><a href="#容错与高可用" class="headerlink" title="容错与高可用"></a>容错与高可用</h4><ul>
+<li><strong>三级回退机制</strong>：Thinking Level → Auth Profile → Model</li>
+<li><strong>错误分类</strong>：精确识别错误类型并采取相应策略</li>
+<li><strong>配置热重载</strong>：部分配置变更无需重启</li>
+<li><strong>健康检查</strong>：Gateway 健康端点、Channel 状态探测</li>
+</ul>
+<h4 id="安全防护体系"><a href="#安全防护体系" class="headerlink" title="安全防护体系"></a>安全防护体系</h4><ul>
+<li><strong>多层 SSRF 防护</strong>：DNS 固定 + 私有 IP 检测 + 主机名黑名单</li>
+<li><strong>权限控制三层机制</strong>：Allowlist → Command-Gating → Mention-Gating</li>
+<li><strong>会话隔离</strong>：支持多级隔离策略</li>
+<li><strong>路径遍历防护</strong>：<code>openFileWithinRoot</code> 和 ID 格式验证</li>
+</ul>
+<h4 id="性能优化"><a href="#性能优化" class="headerlink" title="性能优化"></a>性能优化</h4><ul>
+<li><strong>并发控制</strong>：媒体处理并发限制</li>
+<li><strong>流式处理</strong>：大文件流式读取、Agent 流式回复</li>
+<li><strong>三级缓存</strong>：内存 + 磁盘 + 临时文件</li>
+<li><strong>智能压缩</strong>：PNG 网格搜索优化</li>
+</ul>
+<h3 id="技术创新点"><a href="#技术创新点" class="headerlink" title="技术创新点"></a>技术创新点</h3><h4 id="消息流转编排"><a href="#消息流转编排" class="headerlink" title="消息流转编排"></a>消息流转编排</h4><ul>
+<li><strong>统一归一化</strong>：不同渠道消息统一为标准格式</li>
+<li><strong>智能路由</strong>：7 级优先级路由决策</li>
+<li><strong>去重机制</strong>：基于组合键的 TTL 缓存去重</li>
+<li><strong>跨渠道路由</strong>：支持消息在不同渠道间路由</li>
+</ul>
+<h4 id="Agent-执行引擎"><a href="#Agent-执行引擎" class="headerlink" title="Agent 执行引擎"></a>Agent 执行引擎</h4><ul>
+<li><strong>Pi Core 深度集成</strong>：无缝集成 Pi Agent Core</li>
+<li><strong>事件驱动架构</strong>：基于事件订阅的流式处理</li>
+<li><strong>Block Reply 系统</strong>：支持中间回复和最终回复</li>
+<li><strong>消息去重</strong>：避免 messaging tool 重复发送</li>
+</ul>
+<h4 id="媒体理解管道"><a href="#媒体理解管道" class="headerlink" title="媒体理解管道"></a>媒体理解管道</h4><ul>
+<li><strong>多模态统一抽象</strong>：图像&#x2F;音频&#x2F;视频&#x2F;PDF 统一处理</li>
+<li><strong>提供商适配</strong>：支持多种 Vision&#x2F;Audio API</li>
+<li><strong>智能压缩</strong>：自动优化媒体大小</li>
+<li><strong>SSRF 防护</strong>：多层次安全防护</li>
+</ul>
+<h4 id="工具系统设计"><a href="#工具系统设计" class="headerlink" title="工具系统设计"></a>工具系统设计</h4><ul>
+<li><strong>工具策略分级</strong>：全局 → Provider → Agent → Group → Subagent</li>
+<li><strong>工具组抽象</strong>：<code>group:fs</code>、<code>group:runtime</code> 等组概念</li>
+<li><strong>插件工具</strong>：支持外部插件提供工具</li>
+<li><strong>Canvas 集成</strong>：实时渲染和 A2UI 支持</li>
+</ul>
+<h3 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h3><h4 id="新增渠道"><a href="#新增渠道" class="headerlink" title="新增渠道"></a>新增渠道</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 创建插件目录</span></span><br><span class="line">extensions/<span class="keyword">new</span>-channel/</span><br><span class="line">  ├── openclaw.<span class="property">plugin</span>.<span class="property">json</span></span><br><span class="line">  ├── index.<span class="property">ts</span></span><br><span class="line">  └── src/</span><br><span class="line">      ├── channel.<span class="property">ts</span></span><br><span class="line">      └── runtime.<span class="property">ts</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 实现 ChannelPlugin 接口</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="attr">newChannelPlugin</span>: <span class="title class_">ChannelPlugin</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="string">&quot;new-channel&quot;</span>,</span><br><span class="line">  <span class="attr">capabilities</span>: &#123; <span class="attr">chatTypes</span>: [<span class="string">&quot;dm&quot;</span>, <span class="string">&quot;group&quot;</span>] &#125;,</span><br><span class="line">  <span class="attr">config</span>: &#123; <span class="comment">/* 配置适配器 */</span> &#125;,</span><br><span class="line">  <span class="attr">outbound</span>: &#123; <span class="comment">/* 出站适配器 */</span> &#125;,</span><br><span class="line">  <span class="comment">// ... 其他适配器</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 自动发现和注册</span></span><br><span class="line"><span class="comment">// 无需修改核心代码</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="新增工具"><a href="#新增工具" class="headerlink" title="新增工具"></a>新增工具</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在插件中定义工具</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">createMyTool</span>(<span class="params"></span>): <span class="title class_">AnyAgentTool</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&quot;my_tool&quot;</span>,</span><br><span class="line">    <span class="attr">description</span>: <span class="string">&quot;My custom tool&quot;</span>,</span><br><span class="line">    <span class="attr">parameters</span>: <span class="title class_">MyToolSchema</span>,</span><br><span class="line">    <span class="attr">execute</span>: <span class="title function_">async</span> (toolCallId, params) =&gt; &#123;</span><br><span class="line">      <span class="comment">// 工具实现</span></span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">jsonResult</span>(&#123; <span class="attr">status</span>: <span class="string">&quot;ok&quot;</span> &#125;);</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 工具会自动被 resolvePluginTools 发现</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="新增媒体提供商"><a href="#新增媒体提供商" class="headerlink" title="新增媒体提供商"></a>新增媒体提供商</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在 src/media-understanding/providers/ 添加</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="attr">myProvider</span>: <span class="title class_">MediaUnderstandingProvider</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="string">&quot;my-provider&quot;</span>,</span><br><span class="line">  <span class="attr">capabilities</span>: [<span class="string">&quot;image&quot;</span>, <span class="string">&quot;audio&quot;</span>],</span><br><span class="line">  <span class="attr">describeImage</span>: <span class="title function_">async</span> (req) =&gt; &#123;</span><br><span class="line">    <span class="comment">// 实现图像描述</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">transcribeAudio</span>: <span class="title function_">async</span> (req) =&gt; &#123;</span><br><span class="line">    <span class="comment">// 实现音频转录</span></span><br><span class="line">  &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在 buildMediaUnderstandingRegistry 中注册</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="可测试性"><a href="#可测试性" class="headerlink" title="可测试性"></a>可测试性</h3><h4 id="依赖注入测试"><a href="#依赖注入测试" class="headerlink" title="依赖注入测试"></a>依赖注入测试</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 轻松替换依赖</span></span><br><span class="line"><span class="keyword">const</span> makeDeps = (<span class="attr">overrides</span>: <span class="title class_">Partial</span>&lt;<span class="title class_">CliDeps</span>&gt; = &#123;&#125;): <span class="function"><span class="params">CliDeps</span> =&gt;</span> (&#123;</span><br><span class="line">  <span class="attr">sendMessageWhatsApp</span>: vi.<span class="title function_">fn</span>(),</span><br><span class="line">  <span class="attr">sendMessageTelegram</span>: vi.<span class="title function_">fn</span>(),</span><br><span class="line">  ...overrides,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> deps = <span class="title function_">makeDeps</span>(&#123;</span><br><span class="line">  <span class="attr">sendMessageWhatsApp</span>: vi.<span class="title function_">fn</span>().<span class="title function_">mockResolvedValue</span>(&#123; <span class="attr">success</span>: <span class="literal">true</span> &#125;),</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Mock-替换"><a href="#Mock-替换" class="headerlink" title="Mock 替换"></a>Mock 替换</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在测试中 Mock 整个模块</span></span><br><span class="line">vi.<span class="title function_">mock</span>(<span class="string">&quot;../cli/deps.js&quot;</span>, <span class="title function_">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> actual = <span class="keyword">await</span> vi.<span class="title function_">importActual</span>(<span class="string">&quot;../cli/deps.js&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    ...actual,</span><br><span class="line">    <span class="attr">createDefaultDeps</span>: <span class="function">() =&gt;</span> mockDeps,</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="单元测试覆盖"><a href="#单元测试覆盖" class="headerlink" title="单元测试覆盖"></a>单元测试覆盖</h4><ul>
+<li>Gateway：请求路由、会话管理、权限检查</li>
+<li>Channel：消息归一化、权限控制、路由决策</li>
+<li>Agent：模型回退、工具执行、流式处理</li>
+<li>Media：SSRF 防护、压缩优化、提供商适配</li>
+</ul>
+<h3 id="运维友好"><a href="#运维友好" class="headerlink" title="运维友好"></a>运维友好</h3><h4 id="系统服务集成-1"><a href="#系统服务集成-1" class="headerlink" title="系统服务集成"></a>系统服务集成</h4><ul>
+<li><strong>macOS launchd</strong>：自动启动、日志管理</li>
+<li><strong>Linux systemd</strong>：用户服务、自动重启</li>
+<li><strong>Docker 支持</strong>：容器化部署</li>
+</ul>
+<h4 id="可观测性"><a href="#可观测性" class="headerlink" title="可观测性"></a>可观测性</h4><ul>
+<li><strong>健康检查</strong>：Gateway <code>/health</code> 端点</li>
+<li><strong>状态探测</strong>：Channel <code>status --probe</code></li>
+<li><strong>日志系统</strong>：统一日志格式、macOS 统一日志集成</li>
+<li><strong>事件广播</strong>：Gateway 事件实时推送</li>
+</ul>
+<h4 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h4><ul>
+<li><strong>热重载</strong>：部分配置无需重启</li>
+<li><strong>配置迁移</strong>：自动迁移旧版本配置</li>
+<li><strong>配置验证</strong>：加载时验证配置正确性</li>
+<li><strong>环境变量</strong>：支持环境变量覆盖</li>
+</ul>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="核心优势"><a href="#核心优势" class="headerlink" title="核心优势"></a>核心优势</h3><ol>
+<li><strong>架构清晰</strong>：分层设计，职责明确，易于理解和维护</li>
+<li><strong>高度解耦</strong>：依赖注入和适配器模式实现模块解耦</li>
+<li><strong>强扩展性</strong>：插件化架构，支持渠道&#x2F;工具&#x2F;模型扩展</li>
+<li><strong>容错健壮</strong>：多级回退机制，确保系统稳定运行</li>
+<li><strong>安全可靠</strong>：多层安全防护，权限控制完善</li>
+<li><strong>性能优化</strong>：并发控制、流式处理、多级缓存</li>
+<li><strong>可测试性</strong>：依赖注入支持，单元测试覆盖完善</li>
+</ol>
+<h3 id="技术栈特点"><a href="#技术栈特点" class="headerlink" title="技术栈特点"></a>技术栈特点</h3><ul>
+<li><strong>语言</strong>：TypeScript (ESM)，类型安全</li>
+<li><strong>运行时</strong>：Node 22+，Bun 支持</li>
+<li><strong>AI 集成</strong>：Pi Agent Core，多模型支持</li>
+<li><strong>消息渠道</strong>：10+ 种渠道，插件化扩展</li>
+<li><strong>媒体处理</strong>：多模态统一处理，多提供商适配</li>
+<li><strong>系统集成</strong>：launchd、systemd、Docker</li>
+</ul>
+<h3 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h3><ul>
+<li><strong>AI 助手平台</strong>：多渠道统一接入的 AI 助手</li>
+<li><strong>自动化工具</strong>：支持复杂工作流的自动化</li>
+<li><strong>多模态应用</strong>：需要处理图像&#x2F;音频&#x2F;视频的应用</li>
+<li><strong>企业集成</strong>：需要集成多种通讯工具的企业应用</li>
+</ul>
+<p>OpenClaw 的架构设计展现了现代 AI 应用的最佳实践，通过清晰的分层、强大的扩展能力和完善的安全机制，构建了一个健壮、灵活、易于维护的 AI 工具链平台。</p>
+<hr>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><h3 id="关键文件索引"><a href="#关键文件索引" class="headerlink" title="关键文件索引"></a>关键文件索引</h3><h4 id="Gateway-网关系统-1"><a href="#Gateway-网关系统-1" class="headerlink" title="Gateway 网关系统"></a>Gateway 网关系统</h4><ul>
+<li><code>src/gateway/server.impl.ts</code> - Gateway 主实现</li>
+<li><code>src/gateway/server-methods.ts</code> - 请求路由与授权</li>
+<li><code>src/gateway/server-ws-runtime.ts</code> - WebSocket 运行时</li>
+<li><code>src/gateway/session-utils.ts</code> - 会话管理工具</li>
+</ul>
+<h4 id="Channel-渠道抽象层-1"><a href="#Channel-渠道抽象层-1" class="headerlink" title="Channel 渠道抽象层"></a>Channel 渠道抽象层</h4><ul>
+<li><code>src/channels/plugins/types.plugin.ts</code> - ChannelPlugin 接口定义</li>
+<li><code>src/channels/plugins/catalog.ts</code> - 插件发现与加载</li>
+<li><code>src/channels/allowlist-match.ts</code> - Allowlist 匹配逻辑</li>
+<li><code>src/channels/command-gating.ts</code> - Command-Gating 实现</li>
+<li><code>src/channels/mention-gating.ts</code> - Mention-Gating 实现</li>
+</ul>
+<h4 id="Agent-代理引擎-1"><a href="#Agent-代理引擎-1" class="headerlink" title="Agent 代理引擎"></a>Agent 代理引擎</h4><ul>
+<li><code>src/agents/pi-embedded-runner/run.ts</code> - Agent Runner 主入口</li>
+<li><code>src/agents/pi-embedded-runner/model.ts</code> - 模型解析</li>
+<li><code>src/agents/failover-error.ts</code> - 容错错误分类</li>
+<li><code>src/agents/model-fallback.ts</code> - 模型回退机制</li>
+<li><code>src/agents/pi-tools.ts</code> - 工具创建</li>
+<li><code>src/agents/tools/canvas-tool.ts</code> - Canvas 工具</li>
+</ul>
+<h4 id="Media-媒体理解管道-1"><a href="#Media-媒体理解管道-1" class="headerlink" title="Media 媒体理解管道"></a>Media 媒体理解管道</h4><ul>
+<li><code>src/media-understanding/apply.ts</code> - 媒体理解入口</li>
+<li><code>src/media-understanding/providers/index.ts</code> - 提供商注册表</li>
+<li><code>src/infra/net/ssrf.ts</code> - SSRF 防护</li>
+<li><code>src/media/image-ops.ts</code> - 图像处理</li>
+<li><code>src/media/fetch.ts</code> - 媒体获取</li>
+</ul>
+<h4 id="路由与控制层-1"><a href="#路由与控制层-1" class="headerlink" title="路由与控制层"></a>路由与控制层</h4><ul>
+<li><code>src/routing/resolve-route.ts</code> - 路由决策</li>
+<li><code>src/auto-reply/reply/session.ts</code> - 会话初始化</li>
+<li><code>src/auto-reply/reply/dispatch-from-config.ts</code> - 回复分发</li>
+<li><code>src/auto-reply/reply/reply-dispatcher.ts</code> - ReplyDispatcher</li>
+<li><code>src/auto-reply/reply/inbound-dedupe.ts</code> - 消息去重</li>
+</ul>
+<h4 id="依赖注入"><a href="#依赖注入" class="headerlink" title="依赖注入"></a>依赖注入</h4><ul>
+<li><code>src/cli/deps.ts</code> - CliDeps 定义</li>
+<li><code>src/cli/outbound-send-deps.ts</code> - 依赖转换</li>
+<li><code>src/infra/outbound/deliver.ts</code> - OutboundSendDeps</li>
+</ul>
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><ul>
+<li>官方文档：<a href="https://docs.openclaw.ai/">https://docs.openclaw.ai</a></li>
+<li>GitHub 仓库：<a href="https://github.com/openclaw/openclaw">https://github.com/openclaw/openclaw</a></li>
+<li>Pi Agent Core：<a href="https://github.com/badlogic/pi-mono">https://github.com/badlogic/pi-mono</a></li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/02/03/OpenClaw%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E6%B7%B1%E5%BA%A6%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/" title="OpenClaw系统架构深度技术分析报告" target="_blank" rel="external">https://www.silenceboy.com/2026/02/03/OpenClaw系统架构深度技术分析报告/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2026/01/28/AI-%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90%E5%B7%A5%E5%85%B7%E6%95%88%E8%83%BD%E5%BA%A6%E9%87%8F%E6%8C%87%E5%8D%97/" title="AI 代码生成工具效能度量指南"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
