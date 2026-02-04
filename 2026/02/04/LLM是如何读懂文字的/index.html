@@ -17,22 +17,21 @@
   <meta http-equiv="window-target" content="_top" />
   
   
-  <title>js获取内容中的url链接，并设置a标签 | morty的个人博客</title>
-  <meta name="description" content="12345var regexp &#x3D; &#x2F;(http:\&#x2F;\&#x2F;|https:\&#x2F;\&#x2F;)((\w|&#x3D;|\?|\.|\&#x2F;|\&amp;|-)+)&#x2F;g;content &#x3D; content.replace(regexp, function($url)&#123; return &quot;&lt;a href&#x3D;&#x27;&quot; + $url + &quot;&#x27; target&#x3D;&#x27;_b">
+  <title>LLM是如何读懂文字的 | morty的个人博客</title>
+  <meta name="description" content="本文深入浅出地解析了大语言模型（LLM）如何将人类语言转换为数学运算，再将计算结果转换回文字的完整过程。从分词器（Tokenizer）将文字切分为整数ID，到嵌入层（Embedding Layer）将ID映射为高维语义向量，再经过位置编码（Positional Encoding）添加顺序信息，然后通过几十层Transformer进行矩阵计算和语义理解，最后通过反向映射（Unembedding）和">
 <meta property="og:type" content="article">
-<meta property="og:title" content="js获取内容中的url链接，并设置a标签">
-<meta property="og:url" content="https://www.silenceboy.com/2016/05/24/js%E8%8E%B7%E5%8F%96%E5%86%85%E5%AE%B9%E4%B8%AD%E7%9A%84url%E9%93%BE%E6%8E%A5%EF%BC%8C%E5%B9%B6%E8%AE%BE%E7%BD%AEa%E6%A0%87%E7%AD%BE/index.html">
+<meta property="og:title" content="LLM是如何读懂文字的">
+<meta property="og:url" content="https://www.silenceboy.com/2026/02/04/LLM%E6%98%AF%E5%A6%82%E4%BD%95%E8%AF%BB%E6%87%82%E6%96%87%E5%AD%97%E7%9A%84/index.html">
 <meta property="og:site_name" content="blog">
-<meta property="og:description" content="12345var regexp &#x3D; &#x2F;(http:\&#x2F;\&#x2F;|https:\&#x2F;\&#x2F;)((\w|&#x3D;|\?|\.|\&#x2F;|\&amp;|-)+)&#x2F;g;content &#x3D; content.replace(regexp, function($url)&#123; return &quot;&lt;a href&#x3D;&#x27;&quot; + $url + &quot;&#x27; target&#x3D;&#x27;_b">
+<meta property="og:description" content="本文深入浅出地解析了大语言模型（LLM）如何将人类语言转换为数学运算，再将计算结果转换回文字的完整过程。从分词器（Tokenizer）将文字切分为整数ID，到嵌入层（Embedding Layer）将ID映射为高维语义向量，再经过位置编码（Positional Encoding）添加顺序信息，然后通过几十层Transformer进行矩阵计算和语义理解，最后通过反向映射（Unembedding）和">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2016-05-24T01:39:27.000Z">
-<meta property="article:modified_time" content="2021-09-27T07:27:40.000Z">
+<meta property="article:published_time" content="2026-02-04T09:06:31.000Z">
+<meta property="article:modified_time" content="2026-02-04T09:36:08.357Z">
 <meta property="article:author" content="morty">
-<meta property="article:tag" content="javascript">
-<meta property="article:tag" content="正则表达式">
+<meta property="article:tag" content="AI">
 <meta name="twitter:card" content="summary">
   <!-- Canonical links -->
-  <link rel="canonical" href="https://www.silenceboy.com/2016/05/24/js%E8%8E%B7%E5%8F%96%E5%86%85%E5%AE%B9%E4%B8%AD%E7%9A%84url%E9%93%BE%E6%8E%A5%EF%BC%8C%E5%B9%B6%E8%AE%BE%E7%BD%AEa%E6%A0%87%E7%AD%BE/index.html">
+  <link rel="canonical" href="https://www.silenceboy.com/2026/02/04/LLM%E6%98%AF%E5%A6%82%E4%BD%95%E8%AF%BB%E6%87%82%E6%96%87%E5%AD%97%E7%9A%84/index.html">
   
     <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
   
@@ -337,21 +336,21 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%AF%8D%E5%99%A8%EF%BC%88Tokenizer%EF%BC%89%E2%80%94-%E6%9F%A5%E5%AD%97%E5%85%B8%EF%BC%8C%E6%8A%8A%E5%AD%97%E5%8F%98%E6%95%B4%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">分词器（Tokenizer）— 查字典，把字变整数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">不同的分词算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%AE%8A%E6%A0%87%E8%AE%B0%EF%BC%88Special-Tokens%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">特殊标记（Special Tokens）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Embedding-Layer%EF%BC%88%E5%B5%8C%E5%85%A5%E5%B1%82%EF%BC%89%E2%80%94-%E6%8A%8A%E6%95%B4%E6%95%B0%E5%8F%98%E5%90%91%E9%87%8F"><span class="toc-number">2.</span> <span class="toc-text">Embedding Layer（嵌入层）— 把整数变向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%EF%BC%88Positional-Encoding%EF%BC%89%E2%80%94-%E5%8A%A0%E4%B8%8A%E9%A1%BA%E5%BA%8F%E4%BF%A1%E6%81%AF"><span class="toc-number">3.</span> <span class="toc-text">位置编码（Positional Encoding）— 加上顺序信息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%E6%96%B9%E6%B3%95"><span class="toc-number">3.1.</span> <span class="toc-text">不同的位置编码方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transformer-%E5%86%85%E9%83%A8%E8%AE%A1%E7%AE%97-%E2%80%94-%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E5%AD%97"><span class="toc-number">4.</span> <span class="toc-text">Transformer 内部计算 — 预测下一个字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%E9%99%90%E5%88%B6"><span class="toc-number">4.1.</span> <span class="toc-text">上下文窗口限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unembedding%EF%BC%88%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%EF%BC%89%E2%80%94-%E5%90%91%E9%87%8F%E5%8F%98%E5%9B%9E%E5%AD%97"><span class="toc-number">5.</span> <span class="toc-text">Unembedding（反向映射）— 向量变回字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%87%E6%A0%B7%E7%AD%96%E7%95%A5-%E2%80%94-%E6%8E%A7%E5%88%B6%E5%88%9B%E9%80%A0%E5%8A%9B"><span class="toc-number">5.1.</span> <span class="toc-text">采样策略 — 控制创造力</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%E7%B3%BB%E7%BB%9F%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">6.</span> <span class="toc-text">总结系统流程图</span></a></li></ol>
     </nav>
   </div>
 </aside>
 
 <main class="main" role="main">
   <div class="content">
-  <article id="post-js获取内容中的url链接，并设置a标签" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+  <article id="post-LLM是如何读懂文字的" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
     
     <div class="article-header">
       
         
   
     <h1 class="article-title" itemprop="name">
-      js获取内容中的url链接，并设置a标签
+      LLM是如何读懂文字的
     </h1>
   
 
@@ -359,20 +358,20 @@
       <div class="article-meta">
         <span class="article-date">
     <i class="icon icon-calendar-check"></i>
-	<a href="/2016/05/24/js%E8%8E%B7%E5%8F%96%E5%86%85%E5%AE%B9%E4%B8%AD%E7%9A%84url%E9%93%BE%E6%8E%A5%EF%BC%8C%E5%B9%B6%E8%AE%BE%E7%BD%AEa%E6%A0%87%E7%AD%BE/" class="article-date">
-	  <time datetime="2016-05-24T01:39:27.000Z" itemprop="datePublished">2016-05-24</time>
+	<a href="/2026/02/04/LLM%E6%98%AF%E5%A6%82%E4%BD%95%E8%AF%BB%E6%87%82%E6%96%87%E5%AD%97%E7%9A%84/" class="article-date">
+	  <time datetime="2026-02-04T09:06:31.000Z" itemprop="datePublished">2026-02-04</time>
 	</a>
 </span>
         
   <span class="article-category">
     <i class="icon icon-folder"></i>
-    <a class="article-category-link" href="/categories/javascript/">javascript</a>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
   </span>
 
         
   <span class="article-tag">
     <i class="icon icon-tags"></i>
-	<a class="article-tag-link-link" href="/tags/javascript/" rel="tag">javascript</a>, <a class="article-tag-link-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
   </span>
 
 
@@ -385,20 +384,176 @@
 	</span>
 
 
-        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2016/05/24/js%E8%8E%B7%E5%8F%96%E5%86%85%E5%AE%B9%E4%B8%AD%E7%9A%84url%E9%93%BE%E6%8E%A5%EF%BC%8C%E5%B9%B6%E8%AE%BE%E7%BD%AEa%E6%A0%87%E7%AD%BE/#comments" class="article-comment-link">评论</a></span>
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/02/04/LLM%E6%98%AF%E5%A6%82%E4%BD%95%E8%AF%BB%E6%87%82%E6%96%87%E5%AD%97%E7%9A%84/#comments" class="article-comment-link">评论</a></span>
         
 	
-		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 40(字)</span>
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.4k(字)</span>
 	
 	
-		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 1(分)</span>
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 8(分)</span>
 	
 
       </div>
     </div>
     <div class="article-entry marked-body" itemprop="articleBody">
       
-        <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">var regexp = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|\&amp;|-)+)/g;</span><br><span class="line">content = content.replace(regexp, function($url)&#123;</span><br><span class="line"> return &quot;&lt;a href=&#x27;&quot; + $url + &quot;&#x27; target=&#x27;_blank&#x27;&gt;&quot; + $url + &quot;&lt;/a&gt;&quot;;</span><br><span class="line">&#125;);</span><br><span class="line">console.log(content);</span><br></pre></td></tr></table></figure>
+        <blockquote>
+<p>本文深入浅出地解析了大语言模型（LLM）如何将人类语言转换为数学运算，再将计算结果转换回文字的完整过程。从分词器（Tokenizer）将文字切分为整数ID，到嵌入层（Embedding Layer）将ID映射为高维语义向量，再经过位置编码（Positional Encoding）添加顺序信息，然后通过几十层Transformer进行矩阵计算和语义理解，最后通过反向映射（Unembedding）和采样策略生成输出文字。</p>
+</blockquote>
+<hr>
+<h2 id="分词器（Tokenizer）—-查字典，把字变整数"><a href="#分词器（Tokenizer）—-查字典，把字变整数" class="headerlink" title="分词器（Tokenizer）— 查字典，把字变整数"></a>分词器（Tokenizer）— 查字典，把字变整数</h2><p>在你按下回车键的瞬间，文字并没有直接进入模型的大脑（神经网络），而是先被送到了一个名为 <strong>Tokenizer（分词器）</strong> 的组件中。</p>
+<p>Tokenizer 不是神经网络，它更像是一个静态的<strong>超级字典</strong>。</p>
+<ol>
+<li><strong>切分：</strong> 输入句子 <code>我爱AI</code>。</li>
+<li><strong>查表：</strong> Tokenizer 会查阅一个巨大的词表（Vocabulary），找到每个字对应的<strong>唯一编号（ID）</strong>。<ul>
+<li>“我” -&gt; ID: <code>254</code></li>
+<li>“爱” -&gt; ID: <code>3301</code></li>
+<li>“AI” -&gt; ID: <code>1209</code></li>
+</ul>
+</li>
+<li><strong>输出：</strong> 此时，文字变成了一个整数列表（Tensor）：<code>[254, 3301, 1209]</code>。</li>
+</ol>
+<blockquote>
+<p><strong>注意：</strong> 这一步只是查表，没有任何复杂的矩阵运算，也没有语义理解。电脑只知道现在来了三个代号。</p>
+</blockquote>
+<h3 id="不同的分词算法"><a href="#不同的分词算法" class="headerlink" title="不同的分词算法"></a>不同的分词算法</h3><p>实际上，不同的模型使用不同的分词算法：</p>
+<ul>
+<li><strong>BPE (Byte Pair Encoding)：</strong> GPT系列使用的算法，会把高频出现的字符组合合并成一个token。比如”ing”、”ed”可能是独立的token。</li>
+<li><strong>WordPiece：</strong> BERT使用的算法，类似BPE，但使用不同的合并策略。</li>
+<li><strong>SentencePiece：</strong> 一些多语言模型使用，可以直接处理原始文本，不需要预先分词。</li>
+</ul>
+<p>这就是为什么相同的句子在GPT-4和Claude中，token数量可能不一样——它们用的字典不同！</p>
+<blockquote>
+<p><strong>关键要点：训练与推理的一致性</strong></p>
+<p>这里有一个至关重要的技术细节：<strong>模型在对话（推理）时使用的Tokenizer，必须和训练时使用的Tokenizer完全相同</strong>。</p>
+<p>想象一下，训练时”AI”这个词被分配了ID 1209，Embedding矩阵的第1209行就学习到了”AI”的语义。如果推理时用了不同的Tokenizer，”AI”可能被分配成ID 5678，模型就会去查第5678行——那里存的可能是”香蕉”的语义！整个系统就乱套了。</p>
+<p>所以每个LLM都会把Tokenizer和模型权重<strong>绑定发布</strong>，确保你下载GPT-4模型时，同时拿到的是训练GPT-4时用的那个专属词表和分词规则。这就像是模型的”专属字典”，不能随意更换。</p>
+</blockquote>
+<h3 id="特殊标记（Special-Tokens）"><a href="#特殊标记（Special-Tokens）" class="headerlink" title="特殊标记（Special Tokens）"></a>特殊标记（Special Tokens）</h3><p>除了普通文字，Tokenizer还会添加一些特殊标记：</p>
+<ul>
+<li><strong><code>[CLS]</code>：</strong> 分类标记（BERT），表示句子开始</li>
+<li><strong><code>[SEP]</code>：</strong> 分隔标记，用于分隔不同的句子</li>
+<li><strong><code>[PAD]</code>：</strong> 填充标记，用于对齐批次处理中不同长度的输入</li>
+<li><strong><code>[MASK]</code>：</strong> 掩码标记（BERT），用于训练时遮蔽某些词</li>
+<li><strong><code>&lt;|endoftext|&gt;</code>：</strong> GPT中表示文本结束</li>
+</ul>
+<p>这些特殊标记就像是给模型的”指令符号”，告诉它这段文字的结构。</p>
+<hr>
+<h2 id="Embedding-Layer（嵌入层）—-把整数变向量"><a href="#Embedding-Layer（嵌入层）—-把整数变向量" class="headerlink" title="Embedding Layer（嵌入层）— 把整数变向量"></a>Embedding Layer（嵌入层）— 把整数变向量</h2><p><strong>模型内部自带了一个巨大的 Embedding 矩阵</strong>。</p>
+<p>虽然你没有使用外部的 embedding model，但 Base Model 的架构中，<strong>第一层（Layer 0）</strong> 永远是一个巨大的查找表矩阵。</p>
+<ul>
+<li><p><strong>矩阵长什么样？</strong><br>假设词表大小是 50,000 个词，模型的维度（Hidden Size）是 4,096。<br>这个矩阵就是一个 <code>[50000 x 4096]</code> 的巨型表格。每一行都代表一个词的”语义坐标”。</p>
+</li>
+<li><p><strong>发生了什么？</strong><br>模型拿到上一步的 ID <code>[254, 3301, 1209]</code>，然后去这个矩阵里”抽屉取物”：</p>
+<ul>
+<li>去第 254 行，把那一行 4096 个数字复制出来。</li>
+<li>去第 3301 行，把那一行 4096 个数字复制出来。</li>
+<li>…</li>
+</ul>
+</li>
+<li><p><strong>结果：</strong><br>现在的输入变成了一个 <code>[3, 4096]</code> 的浮点数矩阵。</p>
+<ul>
+<li><code>254</code> 变成了 <code>[0.1, -0.9, 0.05 ...]</code> （代表”我”的语义向量）</li>
+<li><code>3301</code> 变成了 <code>[0.8, 0.2, -0.3 ...]</code> （代表”爱”的语义向量）</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>关键点：</strong> 这个 Embedding 矩阵的参数（那些浮点数），是和模型其他部分的参数<strong>一起训练出来的</strong>。所以 Base Model 自己就懂得如何把 ID 转换成它能理解的向量。</p>
+</blockquote>
+<hr>
+<h2 id="位置编码（Positional-Encoding）—-加上顺序信息"><a href="#位置编码（Positional-Encoding）—-加上顺序信息" class="headerlink" title="位置编码（Positional Encoding）— 加上顺序信息"></a>位置编码（Positional Encoding）— 加上顺序信息</h2><p>只有 Embedding 是不够的，因为 Transformer 架构并行处理，它默认不知道”我爱你”和”你爱我”的区别。</p>
+<p>在进入真正的深层网络之前，模型会把表示位置的向量（Position Vector）<strong>加</strong>到刚才的词向量上。</p>
+<ul>
+<li><code>最终向量 = 词义向量 + 位置向量</code></li>
+</ul>
+<h3 id="不同的位置编码方法"><a href="#不同的位置编码方法" class="headerlink" title="不同的位置编码方法"></a>不同的位置编码方法</h3><p>随着技术发展，出现了多种位置编码方案：</p>
+<ul>
+<li><strong>绝对位置编码（Absolute Positional Encoding）：</strong> 原始Transformer使用的方法，使用正弦和余弦函数生成固定的位置向量。每个位置都有一个固定的编码。</li>
+<li><strong>可学习位置编码（Learned Positional Encoding）：</strong> GPT等模型使用，位置向量是训练出来的参数，不是固定的数学函数。</li>
+<li><strong>相对位置编码（Relative Positional Encoding）：</strong> 不编码绝对位置，而是编码词与词之间的相对距离。</li>
+<li><strong>RoPE（Rotary Position Embedding）：</strong> LLaMA等新模型使用，通过旋转变换注入位置信息，在长文本处理上表现更好。</li>
+</ul>
+<p>不同的位置编码方法会影响模型对长文本的理解能力和上下文窗口的最大长度。</p>
+<p>此时，数据正式准备好，可以进入 Transformer 的核心层进行”矩阵计算”了。</p>
+<hr>
+<h2 id="Transformer-内部计算-—-预测下一个字"><a href="#Transformer-内部计算-—-预测下一个字" class="headerlink" title="Transformer 内部计算 — 预测下一个字"></a>Transformer 内部计算 — 预测下一个字</h2><p>现在，数据流经几十层 Transformer Block（如 Self-Attention 和 MLP）。</p>
+<p>每一层都在做大量的<strong>矩阵乘法（Matrix Multiplication）</strong>：</p>
+<ol>
+<li><strong>Attention（注意力）：</strong> 计算词与词之间的关系。比如看到”爱”，模型会回头看”我”和”AI”，通过矩阵运算算出它们之间的关联强度。</li>
+<li><strong>MLP（前馈网络）：</strong> 这一步就是我们在上一条回答中提到的”记忆提取”。模型根据上下文，激活特定的神经元。</li>
+</ol>
+<h3 id="上下文窗口限制"><a href="#上下文窗口限制" class="headerlink" title="上下文窗口限制"></a>上下文窗口限制</h3><p>需要注意的是，模型并不能处理无限长的文本。每个模型都有一个 <strong>上下文窗口（Context Window）</strong> 限制：</p>
+<ul>
+<li><strong>GPT-3.5：</strong> 4,096 tokens（约3,000个中文字）</li>
+<li><strong>GPT-4：</strong> 8,192 tokens 或 32,768 tokens（取决于版本）</li>
+<li><strong>Claude 3：</strong> 200,000 tokens（约15万个中文字）</li>
+<li><strong>Gemini 1.5 Pro：</strong> 1,000,000 tokens</li>
+</ul>
+<p>这个限制来自于Attention机制的计算复杂度——对于 N 个token，需要计算 N×N 的关系矩阵，内存和计算量会快速增长。所以如果输入超过这个长度，模型要么会截断，要么会报错。</p>
+<p><strong>最终输出：</strong><br>经过几十层计算后，最后一个 token（也就是”AI”这个位置）会输出一个新的向量。这个向量包含了”我爱AI”这整句话的上下文含义。</p>
+<hr>
+<h2 id="Unembedding（反向映射）—-向量变回字"><a href="#Unembedding（反向映射）—-向量变回字" class="headerlink" title="Unembedding（反向映射）— 向量变回字"></a>Unembedding（反向映射）— 向量变回字</h2><p>最后一步，模型要把脑子里的”语义向量”变回人类能看的字。</p>
+<ol>
+<li><strong>投影：</strong> 最后的向量会乘以一个巨大的矩阵（通常就是 Embedding 矩阵的转置，或者叫 Head）。这个操作会把向量维度从 4096 映射回 50,000（词表大小）。</li>
+<li><strong>Logits：</strong> 此时，你会得到 50,000 个分数（Logits）。<ul>
+<li>“吗”的分数：5.2</li>
+<li>“。”的分数：12.8</li>
+<li>“的”的分数：-3.0</li>
+</ul>
+</li>
+<li><strong>Softmax：</strong> 这些分数被转化成概率。<ul>
+<li>“。”的概率：90%</li>
+<li>“吗”的概率：5%</li>
+</ul>
+</li>
+<li><strong>采样：</strong> 模型（或者说生成策略）选择概率最高的那个 ID，比如对应的是”。”。</li>
+<li><strong>解码：</strong> Tokenizer 把 ID 换回文字 “。”。</li>
+</ol>
+<h3 id="采样策略-—-控制创造力"><a href="#采样策略-—-控制创造力" class="headerlink" title="采样策略 — 控制创造力"></a>采样策略 — 控制创造力</h3><p>第4步的”采样”其实有很多种策略，它们会极大地影响模型的输出风格：</p>
+<ul>
+<li><p><strong>Greedy Sampling（贪心采样）：</strong> 永远选择概率最高的词。</p>
+<ul>
+<li>优点：输出稳定、确定</li>
+<li>缺点：可能重复、缺乏创造力</li>
+</ul>
+</li>
+<li><p><strong>Temperature（温度参数）：</strong> 在计算概率之前，调整 Logits 的分布。</p>
+<ul>
+<li><code>Temperature = 1.0</code>：原始分布</li>
+<li><code>Temperature &lt; 1.0</code>（如0.5）：让高概率的词更高，输出更确定</li>
+<li><code>Temperature &gt; 1.0</code>（如1.5）：让分布更平坦，输出更随机、更有创造力</li>
+</ul>
+<p>就像调节咖啡的温度——温度越高，味道越不稳定！</p>
+</li>
+<li><p><strong>Top-K Sampling：</strong> 只从概率最高的 K 个词中随机选择。</p>
+<ul>
+<li>例如 <code>K=50</code>，只考虑前50个最可能的词</li>
+<li>避免选到那些概率极低的奇怪词</li>
+</ul>
+</li>
+<li><p><strong>Top-P Sampling（Nucleus Sampling）：</strong> 选择累积概率达到 P 的最小词集合。</p>
+<ul>
+<li>例如 <code>P=0.9</code>，选择那些加起来占90%概率的词</li>
+<li>优点：动态调整候选词数量，更灵活</li>
+</ul>
+</li>
+</ul>
+<p>你在ChatGPT的设置中调整”温度”或”创造力”参数时，实际上就是在控制这些采样策略！</p>
+<hr>
+<h2 id="总结系统流程图"><a href="#总结系统流程图" class="headerlink" title="总结系统流程图"></a>总结系统流程图</h2><p>如果你输入”你好”：</p>
+<ol>
+<li><strong>Text:</strong> “你好”</li>
+<li><strong>Tokenizer:</strong> 查字典 -&gt; <code>[ID: 101, ID: 204]</code></li>
+<li><strong>Internal Embedding Layer:</strong> 查内部矩阵 -&gt; <code>[[0.1, ...], [0.9, ...]]</code> (变成向量)</li>
+<li><strong>Positional Encoding:</strong> 加上位置信息 -&gt; 最终输入向量</li>
+<li><strong>Transformer Layers:</strong> 几十层的矩阵乘法 (混合上下文，提取记忆) -&gt; <code>[Context Vector]</code></li>
+<li><strong>Output Head:</strong> 向量乘回词表大小 -&gt; <code>[Logits]</code> (5万个词的分数)</li>
+<li><strong>Sampling Strategy:</strong> 根据采样策略（如Top-P、Temperature）选择 ID -&gt; <code>ID: 305</code></li>
+<li><strong>Tokenizer:</strong> 查字典 <code>ID: 305</code> -&gt; “！”</li>
+</ol>
+<p>外部的 Embedding Model 实际上就是把 Model 的前几层（Tokenization + Embedding Layer）单独拿出来用而已。Model 自己体内天生就”内置”了这个转换器。</p>
+
       
     </div>
     <div class="article-footer">
@@ -407,7 +562,7 @@
     
     <li class="post-copyright-link hidden-xs">
       <strong>本文链接：</strong>
-      <a href="https://www.silenceboy.com/2016/05/24/js%E8%8E%B7%E5%8F%96%E5%86%85%E5%AE%B9%E4%B8%AD%E7%9A%84url%E9%93%BE%E6%8E%A5%EF%BC%8C%E5%B9%B6%E8%AE%BE%E7%BD%AEa%E6%A0%87%E7%AD%BE/" title="js获取内容中的url链接，并设置a标签" target="_blank" rel="external">https://www.silenceboy.com/2016/05/24/js获取内容中的url链接，并设置a标签/</a>
+      <a href="https://www.silenceboy.com/2026/02/04/LLM%E6%98%AF%E5%A6%82%E4%BD%95%E8%AF%BB%E6%87%82%E6%96%87%E5%AD%97%E7%9A%84/" title="LLM是如何读懂文字的" target="_blank" rel="external">https://www.silenceboy.com/2026/02/04/LLM是如何读懂文字的/</a>
     </li>
     
     <li class="post-copyright-license">
@@ -453,13 +608,9 @@
   
   <ul class="pager pull-left">
     
-    <li class="prev">
-      <a href="/2016/05/27/javascript%E5%9C%A8%E7%BD%91%E9%A1%B5%E4%B8%AD%E5%AE%9E%E7%8E%B0%E7%B2%98%E8%B4%B4qq%E6%88%AA%E5%9B%BE%E5%8A%9F%E8%83%BD/" title="javascript在网页中实现粘贴qq截图功能"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
-    </li>
-    
     
     <li class="next">
-      <a href="/2016/05/21/vi-vim%E5%A4%9A%E8%A1%8C%E6%B3%A8%E9%87%8A%E5%92%8C%E5%8F%96%E6%B6%88%E6%B3%A8%E9%87%8A/" title="vi/vim多行注释和取消注释"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+      <a href="/2026/02/04/Base%E6%A8%A1%E5%9E%8B%E5%A6%82%E4%BD%95%E8%AE%B0%E4%BD%8F%E6%B5%B7%E9%87%8F%E7%9A%84%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/" title="Base模型如何记住海量的训练数据"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
     </li>
     
     
