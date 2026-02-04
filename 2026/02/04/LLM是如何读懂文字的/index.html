@@ -26,7 +26,7 @@
 <meta property="og:description" content="本文深入浅出地解析了大语言模型（LLM）如何将人类语言转换为数学运算，再将计算结果转换回文字的完整过程。从分词器（Tokenizer）将文字切分为整数ID，到嵌入层（Embedding Layer）将ID映射为高维语义向量，再经过位置编码（Positional Encoding）添加顺序信息，然后通过几十层Transformer进行矩阵计算和语义理解，最后通过反向映射（Unembedding）和">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-02-04T09:06:31.000Z">
-<meta property="article:modified_time" content="2026-02-04T09:36:08.357Z">
+<meta property="article:modified_time" content="2026-02-04T09:38:34.601Z">
 <meta property="article:author" content="morty">
 <meta property="article:tag" content="AI">
 <meta name="twitter:card" content="summary">
@@ -336,7 +336,7 @@
   <div class="slimContent">
     <nav id="toc" class="article-toc">
       <h3 class="toc-title">文章目录</h3>
-      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%AF%8D%E5%99%A8%EF%BC%88Tokenizer%EF%BC%89%E2%80%94-%E6%9F%A5%E5%AD%97%E5%85%B8%EF%BC%8C%E6%8A%8A%E5%AD%97%E5%8F%98%E6%95%B4%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">分词器（Tokenizer）— 查字典，把字变整数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">不同的分词算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%AE%8A%E6%A0%87%E8%AE%B0%EF%BC%88Special-Tokens%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">特殊标记（Special Tokens）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Embedding-Layer%EF%BC%88%E5%B5%8C%E5%85%A5%E5%B1%82%EF%BC%89%E2%80%94-%E6%8A%8A%E6%95%B4%E6%95%B0%E5%8F%98%E5%90%91%E9%87%8F"><span class="toc-number">2.</span> <span class="toc-text">Embedding Layer（嵌入层）— 把整数变向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%EF%BC%88Positional-Encoding%EF%BC%89%E2%80%94-%E5%8A%A0%E4%B8%8A%E9%A1%BA%E5%BA%8F%E4%BF%A1%E6%81%AF"><span class="toc-number">3.</span> <span class="toc-text">位置编码（Positional Encoding）— 加上顺序信息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%E6%96%B9%E6%B3%95"><span class="toc-number">3.1.</span> <span class="toc-text">不同的位置编码方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transformer-%E5%86%85%E9%83%A8%E8%AE%A1%E7%AE%97-%E2%80%94-%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E5%AD%97"><span class="toc-number">4.</span> <span class="toc-text">Transformer 内部计算 — 预测下一个字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%E9%99%90%E5%88%B6"><span class="toc-number">4.1.</span> <span class="toc-text">上下文窗口限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unembedding%EF%BC%88%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%EF%BC%89%E2%80%94-%E5%90%91%E9%87%8F%E5%8F%98%E5%9B%9E%E5%AD%97"><span class="toc-number">5.</span> <span class="toc-text">Unembedding（反向映射）— 向量变回字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%87%E6%A0%B7%E7%AD%96%E7%95%A5-%E2%80%94-%E6%8E%A7%E5%88%B6%E5%88%9B%E9%80%A0%E5%8A%9B"><span class="toc-number">5.1.</span> <span class="toc-text">采样策略 — 控制创造力</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%E7%B3%BB%E7%BB%9F%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">6.</span> <span class="toc-text">总结系统流程图</span></a></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E8%AF%8D%E5%99%A8%EF%BC%88Tokenizer%EF%BC%89%E2%80%94-%E6%9F%A5%E5%AD%97%E5%85%B8%EF%BC%8C%E6%8A%8A%E5%AD%97%E5%8F%98%E6%95%B4%E6%95%B0"><span class="toc-number">1.</span> <span class="toc-text">分词器（Tokenizer）— 查字典，把字变整数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E5%88%86%E8%AF%8D%E7%AE%97%E6%B3%95"><span class="toc-number">1.1.</span> <span class="toc-text">不同的分词算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%89%B9%E6%AE%8A%E6%A0%87%E8%AE%B0%EF%BC%88Special-Tokens%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">特殊标记（Special Tokens）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Embedding-Layer%EF%BC%88%E5%B5%8C%E5%85%A5%E5%B1%82%EF%BC%89%E2%80%94-%E6%8A%8A%E6%95%B4%E6%95%B0%E5%8F%98%E5%90%91%E9%87%8F"><span class="toc-number">2.</span> <span class="toc-text">Embedding Layer（嵌入层）— 把整数变向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%EF%BC%88Positional-Encoding%EF%BC%89%E2%80%94-%E5%8A%A0%E4%B8%8A%E9%A1%BA%E5%BA%8F%E4%BF%A1%E6%81%AF"><span class="toc-number">3.</span> <span class="toc-text">位置编码（Positional Encoding）— 加上顺序信息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%E6%96%B9%E6%B3%95"><span class="toc-number">3.1.</span> <span class="toc-text">不同的位置编码方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transformer-%E5%86%85%E9%83%A8%E8%AE%A1%E7%AE%97-%E2%80%94-%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E5%AD%97"><span class="toc-number">4.</span> <span class="toc-text">Transformer 内部计算 — 预测下一个字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%E9%99%90%E5%88%B6"><span class="toc-number">4.1.</span> <span class="toc-text">上下文窗口限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unembedding%EF%BC%88%E5%8F%8D%E5%90%91%E6%98%A0%E5%B0%84%EF%BC%89%E2%80%94-%E5%90%91%E9%87%8F%E5%8F%98%E5%9B%9E%E5%AD%97"><span class="toc-number">5.</span> <span class="toc-text">Unembedding（反向映射）— 向量变回字</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%87%E6%A0%B7%E7%AD%96%E7%95%A5-%E2%80%94-%E6%8E%A7%E5%88%B6%E5%88%9B%E9%80%A0%E5%8A%9B"><span class="toc-number">5.1.</span> <span class="toc-text">采样策略 — 控制创造力</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="toc-number">6.</span> <span class="toc-text">总结：完整流程</span></a></li></ol>
     </nav>
   </div>
 </aside>
@@ -439,7 +439,7 @@
 </ul>
 <p>这些特殊标记就像是给模型的”指令符号”，告诉它这段文字的结构。</p>
 <hr>
-<h2 id="Embedding-Layer（嵌入层）—-把整数变向量"><a href="#Embedding-Layer（嵌入层）—-把整数变向量" class="headerlink" title="Embedding Layer（嵌入层）— 把整数变向量"></a>Embedding Layer（嵌入层）— 把整数变向量</h2><p><strong>模型内部自带了一个巨大的 Embedding 矩阵</strong>。</p>
+<h2 id="Embedding-Layer（嵌入层）—-把整数变向量"><a href="#Embedding-Layer（嵌入层）—-把整数变向量" class="headerlink" title="Embedding Layer（嵌入层）— 把整数变向量"></a>Embedding Layer（嵌入层）— 把整数变向量</h2><p><strong>模型内部自带了一个巨大的 Embedding 矩阵</strong>。外部的 Embedding Model 实际上就是把 Model 的前几层（Tokenization + Embedding Layer）单独拿出来用而已。Model 自己体内天生就”内置”了这个转换器。</p>
 <p>虽然你没有使用外部的 embedding model，但 Base Model 的架构中，<strong>第一层（Layer 0）</strong> 永远是一个巨大的查找表矩阵。</p>
 <ul>
 <li><p><strong>矩阵长什么样？</strong><br>假设词表大小是 50,000 个词，模型的维度（Hidden Size）是 4,096。<br>这个矩阵就是一个 <code>[50000 x 4096]</code> 的巨型表格。每一行都代表一个词的”语义坐标”。</p>
@@ -541,7 +541,7 @@
 </ul>
 <p>你在ChatGPT的设置中调整”温度”或”创造力”参数时，实际上就是在控制这些采样策略！</p>
 <hr>
-<h2 id="总结系统流程图"><a href="#总结系统流程图" class="headerlink" title="总结系统流程图"></a>总结系统流程图</h2><p>如果你输入”你好”：</p>
+<h2 id="总结：完整流程"><a href="#总结：完整流程" class="headerlink" title="总结：完整流程"></a>总结：完整流程</h2><p>如果你输入”你好”：</p>
 <ol>
 <li><strong>Text:</strong> “你好”</li>
 <li><strong>Tokenizer:</strong> 查字典 -&gt; <code>[ID: 101, ID: 204]</code></li>
@@ -552,7 +552,6 @@
 <li><strong>Sampling Strategy:</strong> 根据采样策略（如Top-P、Temperature）选择 ID -&gt; <code>ID: 305</code></li>
 <li><strong>Tokenizer:</strong> 查字典 <code>ID: 305</code> -&gt; “！”</li>
 </ol>
-<p>外部的 Embedding Model 实际上就是把 Model 的前几层（Tokenization + Embedding Layer）单独拿出来用而已。Model 自己体内天生就”内置”了这个转换器。</p>
 
       
     </div>
