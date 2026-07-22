@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>深度解析LLM的Temperature与Top-p参数 | morty的个人博客</title>
+  <meta name="description" content="如果你是 ChatGPT 的深度用户，或者是正在基于 LLM 开发应用的工程师，你一定在 API 文档或 Playground 界面中见过这两个参数：Temperature（温度） 和 Top-p。 通常的建议是：”想更有创造力就调高，想更严谨就调低”。但作为一个技术人，你可能并不满足于这种模糊的感性认知。  它们到底是如何在数学层面影响模型输出的？ 为什么有了 Temperature 还需要 T">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度解析LLM的Temperature与Top-p参数">
+<meta property="og:url" content="https://www.silenceboy.com/2026/02/05/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90LLM%E7%9A%84Temperature%E4%B8%8ETop-p%E5%8F%82%E6%95%B0/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="如果你是 ChatGPT 的深度用户，或者是正在基于 LLM 开发应用的工程师，你一定在 API 文档或 Playground 界面中见过这两个参数：Temperature（温度） 和 Top-p。 通常的建议是：”想更有创造力就调高，想更严谨就调低”。但作为一个技术人，你可能并不满足于这种模糊的感性认知。  它们到底是如何在数学层面影响模型输出的？ 为什么有了 Temperature 还需要 T">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-02-05T16:50:26.000Z">
+<meta property="article:modified_time" content="2026-07-22T01:25:54.687Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/02/05/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90LLM%E7%9A%84Temperature%E4%B8%8ETop-p%E5%8F%82%E6%95%B0/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    <link href="//cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" rel="stylesheet">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"><style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">27</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 14px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.8px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 13.9px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/07/">七月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/04/">四月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/03/">三月 2026</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" class="title">MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-07-22T01:40:42.000Z" itemprop="datePublished">2026-07-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/04/01/Harness-Engineering%E4%BB%8B%E7%BB%8D/" class="title">Harness Engineering介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-04-01T09:58:03.000Z" itemprop="datePublished">2026-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-LLM-%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E5%88%A9%E5%99%A8%EF%BC%9AKV-Cache-%E8%AF%A6%E8%A7%A3/" class="title">深入浅出 LLM 推理加速利器：KV Cache 详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T17:14:42.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" class="title">QMD记忆系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T16:57:22.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" class="title">AI核心术语介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-20T15:06:50.000Z" itemprop="datePublished">2026-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%A7%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E8%B4%A8%EF%BC%9A%E4%B8%80%E5%9C%BA%E2%80%9D%E5%A1%AB%E7%A9%BA%E6%B8%B8%E6%88%8F%E2%80%9D"><span class="toc-number">1.</span> <span class="toc-text">大模型的本质：一场”填空游戏”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Temperature%EF%BC%9A%E6%94%B9%E5%8F%98%E6%A6%82%E7%8E%87%E5%88%86%E5%B8%83%E7%9A%84%E2%80%9D%E7%86%B5%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">Temperature：改变概率分布的”熵”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%F0%9F%A5%B6-%E4%BD%8E%E6%B8%A9%E7%8A%B6%E6%80%81%EF%BC%88T-1%EF%BC%8C%E4%BE%8B%E5%A6%82-0-1%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">🥶 低温状态（T &lt; 1，例如 0.1）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%F0%9F%94%A5-%E9%AB%98%E6%B8%A9%E7%8A%B6%E6%80%81%EF%BC%88T-1%EF%BC%8C%E4%BE%8B%E5%A6%82-1-5%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">🔥 高温状态（T &gt; 1，例如 1.5）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%84%EF%B8%8F-%E7%BB%9D%E5%AF%B9%E9%9B%B6%E5%BA%A6%EF%BC%88T-0%EF%BC%89%EF%BC%9A%E7%A1%AE%E5%AE%9A%E6%80%A7%E9%87%87%E6%A0%B7%E7%9A%84%E7%89%B9%E6%AE%8A%E6%A8%A1%E5%BC%8F"><span class="toc-number">2.3.</span> <span class="toc-text">❄️ 绝对零度（T &#x3D; 0）：确定性采样的特殊模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Top-p%EF%BC%9A%E5%88%92%E5%AE%9A%E5%80%99%E9%80%89%E4%BA%BA%E7%9A%84%E2%80%9DVIP%E5%9C%88%E5%AD%90%E2%80%9D"><span class="toc-number">3.</span> <span class="toc-text">Top-p：划定候选人的”VIP圈子”</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91"><span class="toc-number">3.1.</span> <span class="toc-text">核心逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E8%8A%82%E6%95%88%E6%9E%9C"><span class="toc-number">3.2.</span> <span class="toc-text">调节效果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Top-k-vs-Top-p%EF%BC%9A%E4%B8%A4%E7%A7%8D%E6%88%AA%E6%96%AD%E7%AD%96%E7%95%A5%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">3.3.</span> <span class="toc-text">Top-k vs Top-p：两种截断策略的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Top-k%EF%BC%9A%E5%9B%BA%E5%AE%9A%E6%95%B0%E9%87%8F%E6%88%AA%E6%96%AD"><span class="toc-number">3.3.1.</span> <span class="toc-text">Top-k：固定数量截断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Top-p%EF%BC%9A%E5%8A%A8%E6%80%81%E6%95%B0%E9%87%8F%E6%88%AA%E6%96%AD"><span class="toc-number">3.3.2.</span> <span class="toc-text">Top-p：动态数量截断</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%88%E6%9E%81%E9%97%AE%E9%A2%98%EF%BC%9A%E5%BA%94%E8%AF%A5%E6%80%8E%E4%B9%88%E8%B0%83%EF%BC%9F"><span class="toc-number">4.</span> <span class="toc-text">终极问题：应该怎么调？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%BB%84%E9%87%91%E6%B3%95%E5%88%99%EF%BC%9AAlter-one-not-both"><span class="toc-number">4.1.</span> <span class="toc-text">黄金法则：Alter one, not both</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E5%90%8C%E6%97%B6%E8%B0%83%E6%95%B4%EF%BC%9F%E6%B7%B1%E5%85%A5%E8%A7%A3%E6%9E%90"><span class="toc-number">4.2.</span> <span class="toc-text">为什么不建议同时调整？深入解析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AB%98Temperature-%E4%BD%8ETop-p-%E8%87%AA%E7%9B%B8%E7%9F%9B%E7%9B%BE"><span class="toc-number">4.2.1.</span> <span class="toc-text">高Temperature + 低Top-p &#x3D; 自相矛盾</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%8ETemperature-%E9%AB%98Top-p-%E5%90%8E%E8%80%85%E6%97%A0%E7%94%A8"><span class="toc-number">4.2.2.</span> <span class="toc-text">低Temperature + 高Top-p &#x3D; 后者无用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%82%A3%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%8F%AF%E4%BB%A5%E5%90%8C%E6%97%B6%E8%B0%83%E6%95%B4%EF%BC%9F"><span class="toc-number">4.2.3.</span> <span class="toc-text">那什么时候可以同时调整？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9C%9F%E5%AE%9E%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%90%8C%E4%B8%80%E4%B8%AA-Prompt-%E7%9A%84%E4%B8%8D%E5%90%8C%E2%80%9D%E9%9D%A2%E5%AD%94%E2%80%9D"><span class="toc-number">4.3.</span> <span class="toc-text">真实案例：同一个 Prompt 的不同”面孔”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9C%85-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%8C%87%E5%8D%97"><span class="toc-number">4.4.</span> <span class="toc-text">✅ 最佳实践指南</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%9A%A0%EF%B8%8F-%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA%E4%B8%8E%E6%BE%84%E6%B8%85"><span class="toc-number">5.</span> <span class="toc-text">⚠️ 常见误区与澄清</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA1%EF%BC%9A%E2%80%9DTemperature-%E8%B6%8A%E9%AB%98%EF%BC%8C%E6%A8%A1%E5%9E%8B%E8%B6%8A%E8%81%AA%E6%98%8E%E2%80%9D"><span class="toc-number">5.1.</span> <span class="toc-text">误区1：”Temperature 越高，模型越聪明”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA2%EF%BC%9A%E2%80%9DTop-p-%E8%83%BD%E6%8F%90%E9%AB%98%E8%BE%93%E5%87%BA%E8%B4%A8%E9%87%8F%E2%80%9D"><span class="toc-number">5.2.</span> <span class="toc-text">误区2：”Top-p 能提高输出质量”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA3%EF%BC%9A%E2%80%9DTemperature-2-%E6%AF%94-1-%E6%9B%B4%E6%9C%89%E5%88%9B%E9%80%A0%E5%8A%9B%E2%80%9D"><span class="toc-number">5.3.</span> <span class="toc-text">误区3：”Temperature&#x3D;2 比 1 更有创造力”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA4%EF%BC%9A%E2%80%9D%E8%AE%BE%E7%BD%AE%E4%BA%86-Temp-0-%E5%B0%B1%E5%AE%8C%E5%85%A8%E6%B2%A1%E6%9C%89%E9%9A%8F%E6%9C%BA%E6%80%A7%E2%80%9D"><span class="toc-number">5.4.</span> <span class="toc-text">误区4：”设置了 Temp&#x3D;0 就完全没有随机性”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA5%EF%BC%9A%E2%80%9DTop-p-1-0-%E5%B0%B1%E6%98%AF%E4%B8%8D%E9%99%90%E5%88%B6%E2%80%9D"><span class="toc-number">5.5.</span> <span class="toc-text">误区5：”Top-p&#x3D;1.0 就是不限制”</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E9%98%B6%EF%BC%9A%E5%85%B6%E4%BB%96%E5%BD%B1%E5%93%8D%E7%94%9F%E6%88%90%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-number">6.</span> <span class="toc-text">进阶：其他影响生成的参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#frequency-penalty%EF%BC%88%E9%A2%91%E7%8E%87%E6%83%A9%E7%BD%9A%EF%BC%8C%E8%8C%83%E5%9B%B4-2-0-2-0%EF%BC%89"><span class="toc-number">6.1.</span> <span class="toc-text">frequency_penalty（频率惩罚，范围 -2.0 ~ 2.0）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#presence-penalty%EF%BC%88%E5%AD%98%E5%9C%A8%E6%83%A9%E7%BD%9A%EF%BC%8C%E8%8C%83%E5%9B%B4-2-0-2-0%EF%BC%89"><span class="toc-number">6.2.</span> <span class="toc-text">presence_penalty（存在惩罚，范围 -2.0 ~ 2.0）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#max-tokens%EF%BC%88%E6%9C%80%E5%A4%A7token%E6%95%B0%EF%BC%89"><span class="toc-number">6.3.</span> <span class="toc-text">max_tokens（最大token数）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#seed%EF%BC%88%E9%9A%8F%E6%9C%BA%E7%A7%8D%E5%AD%90%EF%BC%8C%E9%83%A8%E5%88%86%E5%B9%B3%E5%8F%B0%E6%94%AF%E6%8C%81%EF%BC%89"><span class="toc-number">6.4.</span> <span class="toc-text">seed（随机种子，部分平台支持）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">7.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86"><span class="toc-number">7.1.</span> <span class="toc-text">核心原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%94%A8%E5%BB%BA%E8%AE%AE"><span class="toc-number">7.2.</span> <span class="toc-text">实用建议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BF%AB%E9%80%9F%E6%9F%A5%E8%AF%A2%E8%A1%A8"><span class="toc-number">7.3.</span> <span class="toc-text">快速查询表</span></a></li></ol></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-深度解析LLM的Temperature与Top-p参数" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      深度解析LLM的Temperature与Top-p参数
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/02/05/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90LLM%E7%9A%84Temperature%E4%B8%8ETop-p%E5%8F%82%E6%95%B0/" class="article-date">
+	  <time datetime="2026-02-05T16:50:26.000Z" itemprop="datePublished">2026-02-05</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/02/05/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90LLM%E7%9A%84Temperature%E4%B8%8ETop-p%E5%8F%82%E6%95%B0/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 13(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>如果你是 ChatGPT 的深度用户，或者是正在基于 LLM 开发应用的工程师，你一定在 API 文档或 Playground 界面中见过这两个参数：<strong>Temperature（温度）</strong> 和 <strong>Top-p</strong>。</p>
+<p>通常的建议是：”想更有创造力就调高，想更严谨就调低”。但作为一个技术人，你可能并不满足于这种模糊的感性认知。</p>
+<ul>
+<li>它们到底是如何在数学层面影响模型输出的？</li>
+<li>为什么有了 Temperature 还需要 Top-p？</li>
+<li>为什么 OpenAI 建议”通常只调整其中一个”？</li>
+</ul>
+<h2 id="大模型的本质：一场”填空游戏”"><a href="#大模型的本质：一场”填空游戏”" class="headerlink" title="大模型的本质：一场”填空游戏”"></a>大模型的本质：一场”填空游戏”</h2><p>要理解这两个参数，首先得明白 LLM 是如何生成回答的。无论模型多么智能，其核心任务只有一个：<strong>预测下一个 Token（词/字）</strong>。</p>
+<p>假设我们给大模型一个 Prompt（提示词）：</p>
+<blockquote>
+<p><strong>“目前最主流的 AI 开发语言是____”</strong></p>
+</blockquote>
+<p>大模型并不是直接把答案”Python”扔给你，而是会经历以下三个核心步骤：</p>
+<ol>
+<li><strong>打分（Logits Generation）</strong>：模型会扫描词表中的几万个词，根据上下文给每个词打分。<ul>
+<li><em>Python: 4.5分</em></li>
+<li><em>Java: 2.0分</em></li>
+<li><em>C++: 1.5分</em></li>
+<li><em>香蕉: -3.0分</em></li>
+</ul>
+</li>
+<li><strong>转概率（Softmax）</strong>：分数本身无法直接使用，模型通过 Softmax 函数将这些分数转化为概率百分比。<strong>Temperature 正是在这一步发挥作用</strong>，它直接参与 Softmax 计算，调节概率分布的形状。</li>
+<li><strong>采样（Sampling）</strong>：根据概率选择下一个词。<strong>Top-p 在这一步发挥作用</strong>，它通过截断低概率词来限定候选池范围。</li>
+</ol>
+<h2 id="Temperature：改变概率分布的”熵”"><a href="#Temperature：改变概率分布的”熵”" class="headerlink" title="Temperature：改变概率分布的”熵”"></a>Temperature：改变概率分布的”熵”</h2><p><strong>Temperature（温度）</strong> 是一个作用于 Softmax 函数的缩放参数。你可以把它想象成一个 <strong>“概率放大/缩小器”</strong>。</p>
+<p>在数学上，Softmax 的标准公式是 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -1.293ex;" xmlns="http://www.w3.org/2000/svg" width="4.916ex" height="3.265ex" role="img" focusable="false" viewBox="0 -871.7 2172.8 1443.3"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mfrac"><g data-mml-node="msup" transform="translate(669,394) scale(0.707)"><g data-mml-node="mi"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="TeXAtom" transform="translate(499,363) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mi" transform="translate(498,-307.4)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g></g></g></g><g data-mml-node="mrow" transform="translate(220,-394.8) scale(0.707)"><g data-mml-node="mo"><path data-c="2211" d="M61 748Q64 750 489 750H913L954 640Q965 609 976 579T993 533T999 516H979L959 517Q936 579 886 621T777 682Q724 700 655 705T436 710H319Q183 710 183 709Q186 706 348 484T511 259Q517 250 513 244L490 216Q466 188 420 134T330 27L149 -187Q149 -188 362 -188Q388 -188 436 -188T506 -189Q679 -189 778 -162T936 -43Q946 -27 959 6H999L913 -249L489 -250Q65 -250 62 -248Q56 -246 56 -239Q56 -234 118 -161Q186 -81 245 -11L428 206Q428 207 242 462L57 717L56 728Q56 744 61 748Z"></path></g><g data-mml-node="msup" transform="translate(1222.7,0)"><g data-mml-node="mi"><path data-c="1D452" d="M39 168Q39 225 58 272T107 350T174 402T244 433T307 442H310Q355 442 388 420T421 355Q421 265 310 237Q261 224 176 223Q139 223 138 221Q138 219 132 186T125 128Q125 81 146 54T209 26T302 45T394 111Q403 121 406 121Q410 121 419 112T429 98T420 82T390 55T344 24T281 -1T205 -11Q126 -11 83 42T39 168ZM373 353Q367 405 305 405Q272 405 244 391T199 357T170 316T154 280T149 261Q149 260 169 260Q282 260 327 284T373 353Z"></path></g><g data-mml-node="TeXAtom" transform="translate(499,472.1) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mi" transform="translate(498,-307.4)"><path data-c="1D457" d="M297 596Q297 627 318 644T361 661Q378 661 389 651T403 623Q403 595 384 576T340 557Q322 557 310 567T297 596ZM288 376Q288 405 262 405Q240 405 220 393T185 362T161 325T144 293L137 279Q135 278 121 278H107Q101 284 101 286T105 299Q126 348 164 391T252 441Q253 441 260 441T272 442Q296 441 316 432Q341 418 354 401T367 348V332L318 133Q267 -67 264 -75Q246 -125 194 -164T75 -204Q25 -204 7 -183T-12 -137Q-12 -110 7 -91T53 -71Q70 -71 82 -81T95 -112Q95 -148 63 -167Q69 -168 77 -168Q111 -168 139 -140T182 -74L193 -32Q204 11 219 72T251 197T278 308T289 365Q289 372 288 376Z"></path></g></g></g></g></g><rect width="1932.8" height="60" x="120" y="220"></rect></g></g></g></svg></mjx-container>。引入 Temperature (<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.593ex" height="1.532ex" role="img" focusable="false" viewBox="0 -677 704 677"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path></g></g></g></svg></mjx-container>) 后，公式变为：</p>
+<p><mjx-container class="MathJax" jax="SVG" display="true"><svg style="vertical-align: -2.272ex;" xmlns="http://www.w3.org/2000/svg" width="18.811ex" height="5.575ex" role="img" focusable="false" viewBox="0 -1460 8314.5 2464.2"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"></path></g><g data-mml-node="mi" transform="translate(675,-150) scale(0.707)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g></g><g data-mml-node="mo" transform="translate(1246.7,0)"><path data-c="3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path></g><g data-mml-node="mfrac" transform="translate(2302.5,0)"><g data-mml-node="mrow" transform="translate(855,710)"><g data-mml-node="mi"><path data-c="65" d="M28 218Q28 273 48 318T98 391T163 433T229 448Q282 448 320 430T378 380T406 316T415 245Q415 238 408 231H126V216Q126 68 226 36Q246 30 270 30Q312 30 342 62Q359 79 369 104L379 128Q382 131 395 131H398Q415 131 415 121Q415 117 412 108Q393 53 349 21T250 -11Q155 -11 92 58T28 218ZM333 275Q322 403 238 411H236Q228 411 220 410T195 402T166 381T143 340T127 274V267H333V275Z"></path><path data-c="78" d="M201 0Q189 3 102 3Q26 3 17 0H11V46H25Q48 47 67 52T96 61T121 78T139 96T160 122T180 150L226 210L168 288Q159 301 149 315T133 336T122 351T113 363T107 370T100 376T94 379T88 381T80 383Q74 383 44 385H16V431H23Q59 429 126 429Q219 429 229 431H237V385Q201 381 201 369Q201 367 211 353T239 315T268 274L272 270L297 304Q329 345 329 358Q329 364 327 369T322 376T317 380T310 384L307 385H302V431H309Q324 428 408 428Q487 428 493 431H499V385H492Q443 385 411 368Q394 360 377 341T312 257L296 236L358 151Q424 61 429 57T446 50Q464 46 499 46H516V0H510H502Q494 1 482 1T457 2T432 2T414 3Q403 3 377 3T327 1L304 0H295V46H298Q309 46 320 51T331 63Q331 65 291 120L250 175Q249 174 219 133T185 88Q181 83 181 74Q181 63 188 55T206 46Q208 46 208 23V0H201Z" transform="translate(444,0)"></path><path data-c="70" d="M36 -148H50Q89 -148 97 -134V-126Q97 -119 97 -107T97 -77T98 -38T98 6T98 55T98 106Q98 140 98 177T98 243T98 296T97 335T97 351Q94 370 83 376T38 385H20V408Q20 431 22 431L32 432Q42 433 61 434T98 436Q115 437 135 438T165 441T176 442H179V416L180 390L188 397Q247 441 326 441Q407 441 464 377T522 216Q522 115 457 52T310 -11Q242 -11 190 33L182 40V-45V-101Q182 -128 184 -134T195 -145Q216 -148 244 -148H260V-194H252L228 -193Q205 -192 178 -192T140 -191Q37 -191 28 -194H20V-148H36ZM424 218Q424 292 390 347T305 402Q234 402 182 337V98Q222 26 294 26Q345 26 384 80T424 218Z" transform="translate(972,0)"></path></g><g data-mml-node="mo" transform="translate(1528,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mo" transform="translate(1528,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msub" transform="translate(1917,0)"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mi" transform="translate(498,-150) scale(0.707)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(2709,0)"><g data-mml-node="mo"><path data-c="2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></g></g><g data-mml-node="mi" transform="translate(3209,0)"><path data-c="1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path></g><g data-mml-node="mo" transform="translate(3913,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g><g data-mml-node="mrow" transform="translate(220,-710)"><g data-mml-node="mo"><path data-c="2211" d="M61 748Q64 750 489 750H913L954 640Q965 609 976 579T993 533T999 516H979L959 517Q936 579 886 621T777 682Q724 700 655 705T436 710H319Q183 710 183 709Q186 706 348 484T511 259Q517 250 513 244L490 216Q466 188 420 134T330 27L149 -187Q149 -188 362 -188Q388 -188 436 -188T506 -189Q679 -189 778 -162T936 -43Q946 -27 959 6H999L913 -249L489 -250Q65 -250 62 -248Q56 -246 56 -239Q56 -234 118 -161Q186 -81 245 -11L428 206Q428 207 242 462L57 717L56 728Q56 744 61 748Z"></path></g><g data-mml-node="mi" transform="translate(1222.7,0)"><path data-c="65" d="M28 218Q28 273 48 318T98 391T163 433T229 448Q282 448 320 430T378 380T406 316T415 245Q415 238 408 231H126V216Q126 68 226 36Q246 30 270 30Q312 30 342 62Q359 79 369 104L379 128Q382 131 395 131H398Q415 131 415 121Q415 117 412 108Q393 53 349 21T250 -11Q155 -11 92 58T28 218ZM333 275Q322 403 238 411H236Q228 411 220 410T195 402T166 381T143 340T127 274V267H333V275Z"></path><path data-c="78" d="M201 0Q189 3 102 3Q26 3 17 0H11V46H25Q48 47 67 52T96 61T121 78T139 96T160 122T180 150L226 210L168 288Q159 301 149 315T133 336T122 351T113 363T107 370T100 376T94 379T88 381T80 383Q74 383 44 385H16V431H23Q59 429 126 429Q219 429 229 431H237V385Q201 381 201 369Q201 367 211 353T239 315T268 274L272 270L297 304Q329 345 329 358Q329 364 327 369T322 376T317 380T310 384L307 385H302V431H309Q324 428 408 428Q487 428 493 431H499V385H492Q443 385 411 368Q394 360 377 341T312 257L296 236L358 151Q424 61 429 57T446 50Q464 46 499 46H516V0H510H502Q494 1 482 1T457 2T432 2T414 3Q403 3 377 3T327 1L304 0H295V46H298Q309 46 320 51T331 63Q331 65 291 120L250 175Q249 174 219 133T185 88Q181 83 181 74Q181 63 188 55T206 46Q208 46 208 23V0H201Z" transform="translate(444,0)"></path><path data-c="70" d="M36 -148H50Q89 -148 97 -134V-126Q97 -119 97 -107T97 -77T98 -38T98 6T98 55T98 106Q98 140 98 177T98 243T98 296T97 335T97 351Q94 370 83 376T38 385H20V408Q20 431 22 431L32 432Q42 433 61 434T98 436Q115 437 135 438T165 441T176 442H179V416L180 390L188 397Q247 441 326 441Q407 441 464 377T522 216Q522 115 457 52T310 -11Q242 -11 190 33L182 40V-45V-101Q182 -128 184 -134T195 -145Q216 -148 244 -148H260V-194H252L228 -193Q205 -192 178 -192T140 -191Q37 -191 28 -194H20V-148H36ZM424 218Q424 292 390 347T305 402Q234 402 182 337V98Q222 26 294 26Q345 26 384 80T424 218Z" transform="translate(972,0)"></path></g><g data-mml-node="mo" transform="translate(2750.7,0)"><path data-c="2061" d=""></path></g><g data-mml-node="mo" transform="translate(2750.7,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msub" transform="translate(3139.7,0)"><g data-mml-node="mi"><path data-c="1D467" d="M347 338Q337 338 294 349T231 360Q211 360 197 356T174 346T162 335T155 324L153 320Q150 317 138 317Q117 317 117 325Q117 330 120 339Q133 378 163 406T229 440Q241 442 246 442Q271 442 291 425T329 392T367 375Q389 375 411 408T434 441Q435 442 449 442H462Q468 436 468 434Q468 430 463 420T449 399T432 377T418 358L411 349Q368 298 275 214T160 106L148 94L163 93Q185 93 227 82T290 71Q328 71 360 90T402 140Q406 149 409 151T424 153Q443 153 443 143Q443 138 442 134Q425 72 376 31T278 -11Q252 -11 232 6T193 40T155 57Q111 57 76 -3Q70 -11 59 -11H54H41Q35 -5 35 -2Q35 13 93 84Q132 129 225 214T340 322Q352 338 347 338Z"></path></g><g data-mml-node="mi" transform="translate(498,-150) scale(0.707)"><path data-c="1D457" d="M297 596Q297 627 318 644T361 661Q378 661 389 651T403 623Q403 595 384 576T340 557Q322 557 310 567T297 596ZM288 376Q288 405 262 405Q240 405 220 393T185 362T161 325T144 293L137 279Q135 278 121 278H107Q101 284 101 286T105 299Q126 348 164 391T252 441Q253 441 260 441T272 442Q296 441 316 432Q341 418 354 401T367 348V332L318 133Q267 -67 264 -75Q246 -125 194 -164T75 -204Q25 -204 7 -183T-12 -137Q-12 -110 7 -91T53 -71Q70 -71 82 -81T95 -112Q95 -148 63 -167Q69 -168 77 -168Q111 -168 139 -140T182 -74L193 -32Q204 11 219 72T251 197T278 308T289 365Q289 372 288 376Z"></path></g></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(3979,0)"><g data-mml-node="mo"><path data-c="2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></g></g><g data-mml-node="mi" transform="translate(4479,0)"><path data-c="1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path></g><g data-mml-node="mo" transform="translate(5183,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g><rect width="5772" height="60" x="120" y="220"></rect></g></g></g></svg></mjx-container></p>
+<p>这个简单的除法操作，带来了神奇的变化：</p>
+<h3 id="🥶-低温状态（T-1，例如-0-1）"><a href="#🥶-低温状态（T-1，例如-0-1）" class="headerlink" title="🥶 低温状态（T < 1，例如 0.1）"></a>🥶 低温状态（T &lt; 1，例如 0.1）</h3><ul>
+<li><strong>原理</strong>：当 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.593ex" height="1.532ex" role="img" focusable="false" viewBox="0 -677 704 677"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path></g></g></g></svg></mjx-container> 变小，分母变小，指数运算会急剧<strong>拉大</strong>高分词与低分词的差距。</li>
+<li><strong>现象</strong>：”强者愈强，弱者愈弱”。原本概率只是略高的”Python”，概率可能从 40% 飙升到 90%；而”Java”的概率会被压缩到近乎为 0。</li>
+<li><strong>结果</strong>：模型变得<strong>极度自信、保守、确定</strong>。它只盯着最高分的那个词，生成的代码或答案非常精准，但也极其刻板。</li>
+</ul>
+<h3 id="🔥-高温状态（T-1，例如-1-5）"><a href="#🔥-高温状态（T-1，例如-1-5）" class="headerlink" title="🔥 高温状态（T > 1，例如 1.5）"></a>🔥 高温状态（T &gt; 1，例如 1.5）</h3><ul>
+<li><strong>原理</strong>：当 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="1.593ex" height="1.532ex" role="img" focusable="false" viewBox="0 -677 704 677"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path></g></g></g></svg></mjx-container> 变大，差距被<strong>缩小</strong>。</li>
+<li><strong>现象</strong>：概率分布变得<strong>平缓（Flat）</strong>。”Python”的优势被削弱，”Java”、”C++”甚至长尾词（如”Julia”）的概率都得到了提升。</li>
+<li><strong>结果</strong>：模型变得<strong>活跃、发散、不可预测</strong>。它更愿意尝试冷门词汇，适合创意写作或头脑风暴，但这也意味着更容易一本正经地胡说八道（幻觉）。</li>
+</ul>
+<h3 id="❄️-绝对零度（T-0）：确定性采样的特殊模式"><a href="#❄️-绝对零度（T-0）：确定性采样的特殊模式" class="headerlink" title="❄️ 绝对零度（T = 0）：确定性采样的特殊模式"></a>❄️ 绝对零度（T = 0）：确定性采样的特殊模式</h3><p><strong>Temperature = 0</strong> 是一个非常特殊的边界情况，此时模型进入<strong>完全确定性模式</strong>（Greedy Decoding）。</p>
+<ul>
+<li><strong>数学处理</strong>：由于不能真的除以0，实际实现中会直接选择 logits 最大的 token，<strong>跳过 Softmax 计算</strong>。</li>
+<li><strong>采样特性</strong>：不再是概率采样，而是<strong>永远选择概率最高的那个词</strong>。</li>
+<li><strong>Top-p 失效</strong>：此时 Top-p 参数完全无效，因为根本不进行概率采样。</li>
+</ul>
+<p><strong>实践意义</strong>：</p>
+<ul>
+<li><strong>完全可复现</strong>：同样的输入永远得到同样的输出（同一模型版本下）</li>
+<li><strong>适用场景</strong>：需要稳定结果的任务（测试、基准评测、代码生成、数学解题）</li>
+<li><strong>注意事项</strong>：虽然输出确定，但不代表”最优”，只是”最可能”</li>
+</ul>
+<blockquote>
+<p><strong>一句话总结：</strong> Temperature 调节的是<strong>竞争的激烈程度</strong>。低温是”赢家通吃”，高温是”百花齐放”，零度是”冠军独享”。</p>
+</blockquote>
+<h2 id="Top-p：划定候选人的”VIP圈子”"><a href="#Top-p：划定候选人的”VIP圈子”" class="headerlink" title="Top-p：划定候选人的”VIP圈子”"></a>Top-p：划定候选人的”VIP圈子”</h2><p>虽然 Temperature 能拉平概率，但它无法彻底剔除那些完全离谱的词（比如”香蕉”）。在高温下，即使是垃圾词也有被选中的可能。</p>
+<p>这时候，就需要 <strong>Top-p</strong>（学术上称为<strong>核采样 Nucleus Sampling</strong>）出场了。它不是改变概率数值，而是<strong>直接切断长尾</strong>。</p>
+<h3 id="核心逻辑"><a href="#核心逻辑" class="headerlink" title="核心逻辑"></a>核心逻辑</h3><p>Top-p 设定了一个<strong>累加概率阈值（P）</strong>。模型会将所有候选词按概率从高到低排列，然后逐个累加，直到总和达到 P 值为止。<strong>只有这个圈子里的词，才有资格进入下一轮筛选。</strong></p>
+<p><strong>举个栗子（假设 Top-p = 0.9）：</strong></p>
+<ul>
+<li><em>Python (40%) + Java (25%) + C++ (20%) + Julia (6%) = 91%</em></li>
+<li><strong>截断！</strong> 此时累加概率超过了 0.9。</li>
+<li><strong>结果</strong>：剩下的 9% 概率对应的词（比如”香蕉”、”自行车”等几万个无关词）会被直接<strong>一刀切掉</strong>，哪怕它们在 Temperature 调高时概率有所上升，也无法通过 Top-p 的安检门。</li>
+</ul>
+<h3 id="调节效果"><a href="#调节效果" class="headerlink" title="调节效果"></a>调节效果</h3><ul>
+<li><strong>Top-p 调低（如 0.1）</strong>：只保留头部极少数最确定的词，效果类似于低 Temperature，极其稳健。</li>
+<li><strong>Top-p 调高（如 0.95）</strong>：允许更多可能性的词进入候选池，保留了表达的多样性。</li>
+</ul>
+<blockquote>
+<p><strong>一句话总结：</strong> Top-p 是一个<strong>动态保镖</strong>，它根据当前的确定性自动调整候选池大小，负责切除低概率的”长尾垃圾”，确保生成的每一句话在逻辑上至少是通顺的。</p>
+</blockquote>
+<h3 id="Top-k-vs-Top-p：两种截断策略的区别"><a href="#Top-k-vs-Top-p：两种截断策略的区别" class="headerlink" title="Top-k vs Top-p：两种截断策略的区别"></a>Top-k vs Top-p：两种截断策略的区别</h3><p>除了 Top-p，你可能还听说过 <strong>Top-k 采样</strong>。两者都是截断策略，但机制不同：</p>
+<h4 id="Top-k：固定数量截断"><a href="#Top-k：固定数量截断" class="headerlink" title="Top-k：固定数量截断"></a>Top-k：固定数量截断</h4><ul>
+<li><strong>逻辑</strong>：只保留概率最高的 <strong>k 个词</strong>（如 k=50）</li>
+<li><strong>特点</strong>：候选池大小<strong>固定</strong></li>
+<li><strong>问题</strong>：当高概率词很集中时，会强行保留一些不必要的低质量词；当概率很分散时，可能会截断合理选项</li>
+</ul>
+<p><strong>举例（Top-k=3）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>概率分布</th>
+<th>保留的词</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>确定性高</td>
+<td>Python(85%), Java(10%), C++(3%), Rust(2%)</td>
+<td>前3个</td>
+<td>C++(3%)质量很低但被保留</td>
+</tr>
+<tr>
+<td>不确定性高</td>
+<td>Python(20%), Java(18%), C++(15%), Rust(12%), Go(10%)</td>
+<td>仅前3个</td>
+<td>Rust、Go合理但被排除</td>
+</tr>
+</tbody></table>
+<h4 id="Top-p：动态数量截断"><a href="#Top-p：动态数量截断" class="headerlink" title="Top-p：动态数量截断"></a>Top-p：动态数量截断</h4><ul>
+<li><strong>逻辑</strong>：保留累加概率达到 <strong>p% 的词</strong>（如 p=0.9）</li>
+<li><strong>特点</strong>：候选池大小<strong>动态调整</strong></li>
+<li><strong>优势</strong>：自适应当前的确定性程度，更灵活</li>
+</ul>
+<p><strong>同样场景（Top-p=0.9）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>概率分布</th>
+<th>保留的词</th>
+<th>优势</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>确定性高</td>
+<td>Python(85%), Java(10%), …</td>
+<td>仅2个</td>
+<td>自动排除低质量词</td>
+</tr>
+<tr>
+<td>不确定性高</td>
+<td>Python(20%), Java(18%), C++(15%), Rust(12%), Go(10%),…</td>
+<td>前5个</td>
+<td>保留更多合理选择</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>推荐</strong>：现代 LLM（如 GPT、Claude）普遍推荐 Top-p，因为它更智能。Top-k 已经较少单独使用。</p>
+</blockquote>
+<h2 id="终极问题：应该怎么调？"><a href="#终极问题：应该怎么调？" class="headerlink" title="终极问题：应该怎么调？"></a>终极问题：应该怎么调？</h2><p>现在我们明白，Temperature 和 Top-p 虽然殊途同归（都是控制随机性），但路径不同：</p>
+<ul>
+<li><strong>Temperature</strong> 调整的是<strong>概率分布的形状</strong>（陡峭 vs 平缓）。</li>
+<li><strong>Top-p</strong> 调整的是<strong>候选词的截断范围</strong>（去长尾）。</li>
+</ul>
+<h3 id="黄金法则：Alter-one-not-both"><a href="#黄金法则：Alter-one-not-both" class="headerlink" title="黄金法则：Alter one, not both"></a>黄金法则：Alter one, not both</h3><p>OpenAI 官方文档和大多数开发者建议：<strong>通常情况下，只调整其中一个即可，不要同时大幅调整两个。</strong></p>
+<p>因为这两个参数同时调整会产生复杂的耦合效应，使得调试变得非常困难。</p>
+<h3 id="为什么不建议同时调整？深入解析"><a href="#为什么不建议同时调整？深入解析" class="headerlink" title="为什么不建议同时调整？深入解析"></a>为什么不建议同时调整？深入解析</h3><p>虽然官方建议”不要同时调整”，但理解它们的交互效应能帮你避免踩坑。</p>
+<h4 id="高Temperature-低Top-p-自相矛盾"><a href="#高Temperature-低Top-p-自相矛盾" class="headerlink" title="高Temperature + 低Top-p = 自相矛盾"></a>高Temperature + 低Top-p = 自相矛盾</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">temperature = <span class="number">1.5</span>  <span class="comment"># 拉平概率分布，让更多词有机会</span></span><br><span class="line">top_p = <span class="number">0.1</span>        <span class="comment"># 只保留最头部的词</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>结果</strong>：Temperature 好不容易提升了长尾词的概率，却被 Top-p 一刀切掉。<strong>两者互相抵消，白白浪费计算资源。</strong></p>
+<h4 id="低Temperature-高Top-p-后者无用"><a href="#低Temperature-高Top-p-后者无用" class="headerlink" title="低Temperature + 高Top-p = 后者无用"></a>低Temperature + 高Top-p = 后者无用</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">temperature = <span class="number">0.1</span>  <span class="comment"># 概率分布极度尖锐</span></span><br><span class="line">top_p = <span class="number">0.95</span>       <span class="comment"># 保留95%累加概率的词</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>结果</strong>：因为 Temperature 已经让概率极度集中（如 Top 1 占99%），Top-p 实际只保留了1-2个词，<strong>设置 0.95 和 0.5 效果一样</strong>。</p>
+<h4 id="那什么时候可以同时调整？"><a href="#那什么时候可以同时调整？" class="headerlink" title="那什么时候可以同时调整？"></a>那什么时候可以同时调整？</h4><p><strong>唯一合理场景</strong>：高Temperature + 高Top-p（如 Temp=1.2, Top-p=0.95）</p>
+<ul>
+<li>Temperature 拉平分布，释放创造力</li>
+<li>Top-p 兜底，防止生成垃圾内容</li>
+<li>两者形成 <strong>“加速器+刹车”</strong> 的配合</li>
+</ul>
+<blockquote>
+<p><strong>工程建议</strong>：先固定一个参数（通常是 Top-p=0.9），只调整 Temperature。达到预期后，再考虑微调 Top-p。</p>
+</blockquote>
+<h3 id="真实案例：同一个-Prompt-的不同”面孔”"><a href="#真实案例：同一个-Prompt-的不同”面孔”" class="headerlink" title="真实案例：同一个 Prompt 的不同”面孔”"></a>真实案例：同一个 Prompt 的不同”面孔”</h3><p>让我们用一个实际例子来直观感受参数的影响。</p>
+<p><strong>Prompt</strong>：”请用一句话描述人工智能”</p>
+<table>
+<thead>
+<tr>
+<th>参数设置</th>
+<th>实际输出示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Temp=0</strong></td>
+<td>人工智能是计算机科学的一个分支，致力于创建能够模拟人类智能行为的系统。</td>
+</tr>
+<tr>
+<td><strong>Temp=0.5</strong></td>
+<td>人工智能是一种让机器具备学习、推理和解决问题能力的技术。</td>
+</tr>
+<tr>
+<td><strong>Temp=1.0</strong></td>
+<td>人工智能是赋予计算机”思考”能力的科学，它正在重塑我们的世界。</td>
+</tr>
+<tr>
+<td><strong>Temp=1.5</strong></td>
+<td>人工智能是硅基生命的黎明，是人类智慧在数字世界的延伸与映射。</td>
+</tr>
+</tbody></table>
+<p><strong>观察</strong>：</p>
+<ul>
+<li>Temperature 越低，用词越<strong>学术化、标准化</strong></li>
+<li>Temperature 越高，表达越<strong>诗意化、个性化</strong></li>
+<li>但当 Temp&gt;1.5 时，可能出现”硅基生命”这种过于跳跃的词汇</li>
+</ul>
+<h3 id="✅-最佳实践指南"><a href="#✅-最佳实践指南" class="headerlink" title="✅ 最佳实践指南"></a>✅ 最佳实践指南</h3><table>
+<thead>
+<tr>
+<th align="left">应用场景</th>
+<th align="left">建议参数设置</th>
+<th align="left">预期效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>代码生成 / 数学解题</strong></td>
+<td align="left"><strong>Temp = 0 (或 0.1)</strong></td>
+<td align="left"><strong>极度精准</strong>。此时 Top-p 的影响几乎可以忽略，因为概率分布已经极度尖锐，模型几乎只选 Top 1。</td>
+</tr>
+<tr>
+<td align="left"><strong>事实性问答 / 客服</strong></td>
+<td align="left"><strong>Temp = 0.3 ~ 0.5</strong></td>
+<td align="left"><strong>稳健且自然</strong>。在保持准确性的同时，允许措辞有微小的变化，不至于像机器人一样死板。</td>
+</tr>
+<tr>
+<td align="left"><strong>创意文案 / 小说续写</strong></td>
+<td align="left"><strong>Temp = 0.8 ~ 1.0</strong><br><strong>Top-p = 0.9</strong></td>
+<td align="left"><strong>平衡之选</strong>。既有足够的随机性带来惊喜，又有 Top-p 兜底，防止生成完全不通顺的乱码。</td>
+</tr>
+<tr>
+<td align="left"><strong>头脑风暴 / 寻找灵感</strong></td>
+<td align="left"><strong>Temp = 1.2+</strong><br><strong>Top-p = 0.95</strong></td>
+<td align="left"><strong>疯狂模式</strong>。此时必须配合较高的 Top-p，否则高温带来的多样性会被 Top-p 截断。准备好迎接极其跳跃的思维吧。</td>
+</tr>
+</tbody></table>
+<h2 id="⚠️-常见误区与澄清"><a href="#⚠️-常见误区与澄清" class="headerlink" title="⚠️ 常见误区与澄清"></a>⚠️ 常见误区与澄清</h2><p>在实际使用中，很多开发者对这两个参数存在误解。让我们澄清几个最常见的误区：</p>
+<h3 id="误区1：”Temperature-越高，模型越聪明”"><a href="#误区1：”Temperature-越高，模型越聪明”" class="headerlink" title="误区1：”Temperature 越高，模型越聪明”"></a>误区1：”Temperature 越高，模型越聪明”</h3><p>❌ <strong>错误</strong>：Temperature 不影响模型的智能水平，只影响输出的<strong>随机性</strong>。</p>
+<p>✅ <strong>真相</strong>：高 Temperature 可能让模型选择本不该选的词，反而降低输出质量。模型的”聪明程度”取决于预训练质量，而非采样参数。</p>
+<h3 id="误区2：”Top-p-能提高输出质量”"><a href="#误区2：”Top-p-能提高输出质量”" class="headerlink" title="误区2：”Top-p 能提高输出质量”"></a>误区2：”Top-p 能提高输出质量”</h3><p>❌ <strong>错误</strong>：Top-p 只是<strong>过滤器</strong>，不会让模型生成更好的内容。</p>
+<p>✅ <strong>真相</strong>：它只是防止模型选择低概率垃圾词，质量提升的本质是”避免犯低级错误”，而非”变聪明”。</p>
+<h3 id="误区3：”Temperature-2-比-1-更有创造力”"><a href="#误区3：”Temperature-2-比-1-更有创造力”" class="headerlink" title="误区3：”Temperature=2 比 1 更有创造力”"></a>误区3：”Temperature=2 比 1 更有创造力”</h3><p>❌ <strong>错误</strong>：Temperature 过高会让概率分布过于平坦，导致<strong>随机噪声</strong>而非创造力。</p>
+<p>✅ <strong>真相</strong>：实践中很少超过 1.5，因为再高就是”瞎蒙”了。真正的创造力来自模型对上下文的理解，而非随机性。</p>
+<h3 id="误区4：”设置了-Temp-0-就完全没有随机性”"><a href="#误区4：”设置了-Temp-0-就完全没有随机性”" class="headerlink" title="误区4：”设置了 Temp=0 就完全没有随机性”"></a>误区4：”设置了 Temp=0 就完全没有随机性”</h3><p>⚠️ <strong>部分正确</strong>：在单次生成中确实确定，但：</p>
+<ul>
+<li>如果 Prompt 轻微变化（如多个空格），输出可能不同</li>
+<li>模型版本更新后，即使 Temp=0 输出也可能变化</li>
+<li>某些实现中，浮点运算精度可能带来微小差异</li>
+</ul>
+<h3 id="误区5：”Top-p-1-0-就是不限制”"><a href="#误区5：”Top-p-1-0-就是不限制”" class="headerlink" title="误区5：”Top-p=1.0 就是不限制”"></a>误区5：”Top-p=1.0 就是不限制”</h3><p>✅ <strong>正确</strong>：Top-p=1.0 确实保留所有词，但这通常不是好主意。</p>
+<p>⚠️ <strong>注意</strong>：即使是高温创作，也建议保持 Top-p≤0.95，否则极低概率的荒谬词汇可能污染输出。</p>
+<h2 id="进阶：其他影响生成的参数"><a href="#进阶：其他影响生成的参数" class="headerlink" title="进阶：其他影响生成的参数"></a>进阶：其他影响生成的参数</h2><p>虽然 Temperature 和 Top-p 是核心参数，但在实际开发中，你还会遇到这些”配角”：</p>
+<h3 id="frequency-penalty（频率惩罚，范围-2-0-2-0）"><a href="#frequency-penalty（频率惩罚，范围-2-0-2-0）" class="headerlink" title="frequency_penalty（频率惩罚，范围 -2.0 ~ 2.0）"></a>frequency_penalty（频率惩罚，范围 -2.0 ~ 2.0）</h3><ul>
+<li><strong>作用</strong>：降低模型<strong>重复使用已出现词汇</strong>的概率</li>
+<li><strong>机制</strong>：根据词在当前文本中出现的次数，线性降低其 logits</li>
+<li><strong>应用</strong>：防止”车轱辘话”，让输出更多样化</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 适合长文本生成，避免重复</span></span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">"gpt-4"</span>,</span><br><span class="line">    temperature=<span class="number">0.8</span>,</span><br><span class="line">    frequency_penalty=<span class="number">0.5</span>,  <span class="comment"># 降低重复</span></span><br><span class="line">    messages=[...]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="presence-penalty（存在惩罚，范围-2-0-2-0）"><a href="#presence-penalty（存在惩罚，范围-2-0-2-0）" class="headerlink" title="presence_penalty（存在惩罚，范围 -2.0 ~ 2.0）"></a>presence_penalty（存在惩罚，范围 -2.0 ~ 2.0）</h3><ul>
+<li><strong>作用</strong>：降低模型<strong>使用任何已出现过的词</strong>的概率（不看次数，只看是否出现过）</li>
+<li><strong>机制</strong>：对所有已出现的词一视同仁地降低 logits</li>
+<li><strong>应用</strong>：鼓励模型探索新话题</li>
+</ul>
+<p><strong>两者区别</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>惩罚机制</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>frequency_penalty</td>
+<td>出现越多次，惩罚越重</td>
+<td>避免特定词高频重复（如”然后”、”非常”）</td>
+</tr>
+<tr>
+<td>presence_penalty</td>
+<td>出现过就惩罚，不看次数</td>
+<td>鼓励话题多样性（如头脑风暴）</td>
+</tr>
+</tbody></table>
+<h3 id="max-tokens（最大token数）"><a href="#max-tokens（最大token数）" class="headerlink" title="max_tokens（最大token数）"></a>max_tokens（最大token数）</h3><ul>
+<li>虽然不影响概率分布，但会截断生成</li>
+<li>与 Temperature 配合：高 Temp 时建议设置合理上限，防止”刹不住车”</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创意模式 + 长度限制</span></span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">"gpt-4"</span>,</span><br><span class="line">    temperature=<span class="number">1.2</span>,</span><br><span class="line">    top_p=<span class="number">0.95</span>,</span><br><span class="line">    max_tokens=<span class="number">300</span>,  <span class="comment"># 防止无限发散</span></span><br><span class="line">    messages=[...]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="seed（随机种子，部分平台支持）"><a href="#seed（随机种子，部分平台支持）" class="headerlink" title="seed（随机种子，部分平台支持）"></a>seed（随机种子，部分平台支持）</h3><ul>
+<li><strong>作用</strong>：在相同输入下尽可能复现输出（配合 Temperature&gt;0 使用）</li>
+<li><strong>注意</strong>：并非所有平台都支持，且不保证100%复现</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># OpenAI API 支持 seed 参数</span></span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">"gpt-4"</span>,</span><br><span class="line">    temperature=<span class="number">0.7</span>,</span><br><span class="line">    seed=<span class="number">42</span>,  <span class="comment"># 固定随机种子</span></span><br><span class="line">    messages=[...]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>让我们回顾一下核心要点：</p>
+<h3 id="核心原理"><a href="#核心原理" class="headerlink" title="核心原理"></a>核心原理</h3><ul>
+<li><strong>Temperature</strong> 作用于 Softmax 阶段，改变概率分布的形状（陡峭 vs 平缓）</li>
+<li><strong>Top-p</strong> 作用于采样阶段，动态截断低概率长尾词</li>
+<li>两者分工明确：一个调形状，一个切范围</li>
+</ul>
+<h3 id="实用建议"><a href="#实用建议" class="headerlink" title="实用建议"></a>实用建议</h3><ul>
+<li>想让 AI <strong>“更专注”</strong>，优先调低 <strong>Temperature</strong></li>
+<li>想让 AI <strong>“不跑题”</strong>，优先微调 <strong>Top-p</strong></li>
+<li><strong>避免同时大幅调整两者</strong>，除非你清楚知道自己在做什么</li>
+</ul>
+<h3 id="快速查询表"><a href="#快速查询表" class="headerlink" title="快速查询表"></a>快速查询表</h3><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>推荐设置</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>极度精准</td>
+<td>Temp=0</td>
+<td>代码生成、数学题、测试</td>
+</tr>
+<tr>
+<td>稳健准确</td>
+<td>Temp=0.3-0.5</td>
+<td>问答、客服、知识查询</td>
+</tr>
+<tr>
+<td>平衡创意</td>
+<td>Temp=0.8-1.0, Top-p=0.9</td>
+<td>文案、博客、对话</td>
+</tr>
+<tr>
+<td>疯狂脑暴</td>
+<td>Temp=1.2+, Top-p=0.95</td>
+<td>创意激发、艺术创作</td>
+</tr>
+</tbody></table>
+<p>掌握了这两个参数，你就掌握了大模型的”情绪调节器”。下次在使用 API 或 Playground 时，不妨试着动手调一调，你会发现同一个模型也能展现出截然不同的两副面孔！</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/02/05/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90LLM%E7%9A%84Temperature%E4%B8%8ETop-p%E5%8F%82%E6%95%B0/" title="深度解析LLM的Temperature与Top-p参数" target="_blank" rel="external">https://www.silenceboy.com/2026/02/05/深度解析LLM的Temperature与Top-p参数/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2026/02/12/Lora%E4%B8%BA%E4%BD%95%E8%83%BD%E5%A4%A7%E5%B9%85%E5%87%8F%E5%B0%91%E8%AE%AD%E7%BB%83%E5%8F%82%E6%95%B0/" title="Lora为何能大幅减少训练参数"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2026/02/04/LLM%E6%98%AF%E5%A6%82%E4%BD%95%E8%AF%BB%E6%87%82%E6%96%87%E5%AD%97%E7%9A%84/" title="LLM是如何读懂文字的"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

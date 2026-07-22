@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>RAG系统中如何实现租户隔离 | morty的个人博客</title>
+  <meta name="description" content="随着企业级 AI 应用的爆发，RAG（Retrieval-Augmented Generation）已成为连接私有数据与大模型的标准架构。然而，当我们将 RAG 从 Demo 推向 SaaS 生产环境时，最大的挑战并非来自模型的智能程度，而是 数据安全与多租户隔离。 想象一下，用户 A 询问”我的合同条款是什么？”，RAG 系统检索到的却是用户 B 的工资单。这不仅是 Bug，更是灾难性的合规事故">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAG系统中如何实现租户隔离">
+<meta property="og:url" content="https://www.silenceboy.com/2026/03/03/RAG%E7%B3%BB%E7%BB%9F%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="随着企业级 AI 应用的爆发，RAG（Retrieval-Augmented Generation）已成为连接私有数据与大模型的标准架构。然而，当我们将 RAG 从 Demo 推向 SaaS 生产环境时，最大的挑战并非来自模型的智能程度，而是 数据安全与多租户隔离。 想象一下，用户 A 询问”我的合同条款是什么？”，RAG 系统检索到的却是用户 B 的工资单。这不仅是 Bug，更是灾难性的合规事故">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-03T11:15:33.000Z">
+<meta property="article:modified_time" content="2026-07-22T01:25:54.682Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/03/03/RAG%E7%B3%BB%E7%BB%9F%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">27</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 14px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.8px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 13.9px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/07/">七月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/04/">四月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/03/">三月 2026</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" class="title">MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-07-22T01:40:42.000Z" itemprop="datePublished">2026-07-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/04/01/Harness-Engineering%E4%BB%8B%E7%BB%8D/" class="title">Harness Engineering介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-04-01T09:58:03.000Z" itemprop="datePublished">2026-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-LLM-%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E5%88%A9%E5%99%A8%EF%BC%9AKV-Cache-%E8%AF%A6%E8%A7%A3/" class="title">深入浅出 LLM 推理加速利器：KV Cache 详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T17:14:42.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" class="title">QMD记忆系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T16:57:22.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" class="title">AI核心术语介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-20T15:06:50.000Z" itemprop="datePublished">2026-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#RAG-%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BB%B4%E5%BA%A6"><span class="toc-number">1.</span> <span class="toc-text">RAG 的隔离维度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88%E8%AF%A6%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">技术方案详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%96%E7%95%A5%E4%B8%80%EF%BC%9A%E9%80%BB%E8%BE%91%E9%9A%94%E7%A6%BB-%E2%80%94%E2%80%94-%E7%BB%8F%E6%B5%8E%E9%AB%98%E6%95%88"><span class="toc-number">2.1.</span> <span class="toc-text">策略一：逻辑隔离 —— 经济高效</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%96%E7%95%A5%E4%BA%8C%EF%BC%9A%E5%91%BD%E5%90%8D%E7%A9%BA%E9%97%B4%E9%9A%94%E7%A6%BB-%E2%80%94%E2%80%94-%E6%80%A7%E8%83%BD%E5%B9%B3%E8%A1%A1"><span class="toc-number">2.2.</span> <span class="toc-text">策略二：命名空间隔离 —— 性能平衡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%96%E7%95%A5%E4%B8%89%EF%BC%9A%E7%89%A9%E7%90%86%E9%9A%94%E7%A6%BB-%E2%80%94%E2%80%94-%E6%9E%81%E8%87%B4%E5%AE%89%E5%85%A8"><span class="toc-number">2.3.</span> <span class="toc-text">策略三：物理隔离 —— 极致安全</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E9%98%B6%EF%BC%9A%E6%9E%84%E5%BB%BA%E9%9B%B6%E4%BF%A1%E4%BB%BB-RAG-%E6%9E%B6%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">进阶：构建零信任 RAG 架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E5%B1%82%E7%9A%84%E4%B8%AD%E9%97%B4%E4%BB%B6%E6%8B%A6%E6%88%AA"><span class="toc-number">3.1.</span> <span class="toc-text">应用层的中间件拦截</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E5%A7%8B%E6%96%87%E6%A1%A3%E5%AD%98%E5%82%A8%E9%9A%94%E7%A6%BB"><span class="toc-number">3.2.</span> <span class="toc-text">原始文档存储隔离</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%86%E9%92%A5%E7%AE%A1%E7%90%86"><span class="toc-number">3.3.</span> <span class="toc-text">密钥管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LLM-%E4%B8%8A%E4%B8%8B%E6%96%87%E9%9A%94%E7%A6%BB"><span class="toc-number">3.4.</span> <span class="toc-text">LLM 上下文隔离</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A1%E8%AE%A1%E6%97%A5%E5%BF%97"><span class="toc-number">3.5.</span> <span class="toc-text">审计日志</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9F%E7%8E%87%E9%99%90%E5%88%B6%E4%B8%8E%E9%85%8D%E9%A2%9D%E7%AE%A1%E7%90%86"><span class="toc-number">3.6.</span> <span class="toc-text">速率限制与配额管理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E9%80%89%E5%9E%8B%E5%BB%BA%E8%AE%AE%E8%A1%A8"><span class="toc-number">4.</span> <span class="toc-text">架构选型建议表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%E6%B8%85%E5%8D%95"><span class="toc-number">5.</span> <span class="toc-text">最佳实践清单</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">6.</span> <span class="toc-text">结语</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-RAG系统中如何实现租户隔离" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      RAG系统中如何实现租户隔离
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/03/03/RAG%E7%B3%BB%E7%BB%9F%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB/" class="article-date">
+	  <time datetime="2026-03-03T11:15:33.000Z" itemprop="datePublished">2026-03-03</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/03/03/RAG%E7%B3%BB%E7%BB%9F%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 11(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>随着企业级 AI 应用的爆发，RAG（Retrieval-Augmented Generation）已成为连接私有数据与大模型的标准架构。然而，当我们将 RAG 从 Demo 推向 SaaS 生产环境时，最大的挑战并非来自模型的智能程度，而是 <strong>数据安全与多租户隔离</strong>。</p>
+<p>想象一下，用户 A 询问”我的合同条款是什么？”，RAG 系统检索到的却是用户 B 的工资单。这不仅是 Bug，更是灾难性的合规事故。</p>
+<p>如何在保证系统性能和成本效益的同时，实现”滴水不漏”的严格多租户隔离？本文将深入拆解 RAG 系统中多租户隔离的技术手段与最佳实践。</p>
+<hr>
+<h2 id="RAG-的隔离维度"><a href="#RAG-的隔离维度" class="headerlink" title="RAG 的隔离维度"></a>RAG 的隔离维度</h2><p>在传统 CRUD 应用中，多租户隔离通常通过数据库字段 <code>tenant_id</code> 解决。但在 RAG 系统中，链路更长、组件更复杂，隔离需要在以下三个层面同时生效：</p>
+<ol>
+<li><strong>存储层（Storage Layer）：</strong> 向量数据库与原始文档的物理或逻辑隔离。</li>
+<li><strong>检索层（Retrieval Layer）：</strong> 确保语义搜索范围严格限定在租户命名空间内。</li>
+<li><strong>生成层（Generation Layer）：</strong> 防止 Prompt 注入导致的跨租户数据泄露，以及上下文污染。</li>
+</ol>
+<p>下图展示了一次多租户 RAG 请求的完整链路，以及隔离机制发生的关键节点：</p>
+<pre class="mermaid">sequenceDiagram
+    actor User as 用户 (Tenant A)
+    participant GW as API Gateway<br/>(Auth Middleware)
+    participant App as RAG Application
+    participant VDB as Vector DB<br/>(Namespace: tenant_a)
+    participant ObjStore as Object Storage<br/>(Path Prefix: /tenant_a/)
+    participant LLM as LLM Service
+
+    User->>GW: 发送查询请求 (携带 JWT Token)
+    GW->>GW: 验证身份，解析 tenant_id
+    GW->>App: 注入 tenant_id 到请求上下文
+    App->>App: 对查询文本进行 Embedding
+    App->>VDB: similarity_search(query_vec, namespace=tenant_a)
+    VDB-->>App: 返回相关 Chunks（严格限于 Tenant A 数据）
+    App->>ObjStore: 按需获取原始文档 (路径前缀: /tenant_a/)
+    ObjStore-->>App: 返回原始内容
+    App->>App: PII 过滤 & 组装 Prompt
+    App->>LLM: 发送 Prompt（含 System 隔离指令）
+    LLM-->>App: 生成回答
+    App->>App: 写入审计日志（tenant_id + query + doc_ids）
+    App-->>User: 返回最终响应</pre>
+
+<hr>
+<h2 id="技术方案详解"><a href="#技术方案详解" class="headerlink" title="技术方案详解"></a>技术方案详解</h2><p>我们将隔离方案由轻量到严格分为三个等级，企业应根据业务场景（如：内部工具 vs 金融级 SaaS）选择合适的策略。</p>
+<h3 id="策略一：逻辑隔离-——-经济高效"><a href="#策略一：逻辑隔离-——-经济高效" class="headerlink" title="策略一：逻辑隔离 —— 经济高效"></a>策略一：逻辑隔离 —— 经济高效</h3><p>这是最常见的 SaaS 模式。所有租户的数据存储在同一个向量索引（Index）或集合（Collection）中，通过元数据（Metadata）进行区分。</p>
+<ul>
+<li><strong>实现方式：</strong><ul>
+<li>在 Data Ingestion（数据写入）阶段，为每个 Document Chunk 强制附加 <code>tenant_id</code> 标签。</li>
+<li>在 Query（检索）阶段，通过向量数据库的 <code>filter</code> 参数强制进行预过滤（Pre-filtering）。</li>
+</ul>
+</li>
+<li><strong>代码示例 (伪代码)：</strong><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 写入时</span></span><br><span class="line">vector_store.add_documents(</span><br><span class="line">    texts=[<span class="string">&quot;合同内容...&quot;</span>], </span><br><span class="line">    metadatas=[&#123;<span class="string">&quot;tenant_id&quot;</span>: <span class="string">&quot;tenant_001&quot;</span>, <span class="string">&quot;doc_type&quot;</span>: <span class="string">&quot;contract&quot;</span>&#125;]</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检索时（必须强制注入 Filter）</span></span><br><span class="line">results = vector_store.similarity_search(</span><br><span class="line">    query=<span class="string">&quot;我的合同规定&quot;</span>,</span><br><span class="line">    <span class="built_in">filter</span>=&#123;<span class="string">&quot;tenant_id&quot;</span>: <span class="string">&quot;tenant_001&quot;</span>&#125; <span class="comment"># 核心隔离逻辑</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
+<li><strong>优点：</strong> 资源利用率极高，运维成本低，无需频繁创建资源。</li>
+<li><strong>缺点：</strong> 属于”软隔离”。如果代码逻辑出现 Bug（如忘记加 Filter），会导致数据泄露。且当 Collection&#x2F;Index 的数据量达到亿级时，过滤性能可能下降（需要在检索结果上做后置过滤，降低 ANN 召回效率）。</li>
+<li><strong>适用场景：</strong> 中小企业 SaaS，非敏感数据场景。</li>
+</ul>
+<h3 id="策略二：命名空间隔离-——-性能平衡"><a href="#策略二：命名空间隔离-——-性能平衡" class="headerlink" title="策略二：命名空间隔离 —— 性能平衡"></a>策略二：命名空间隔离 —— 性能平衡</h3><p>许多现代向量数据库提供了 Namespace 或 Partition 的概念，这是一种介于逻辑和物理之间的隔离。不同数据库的实现机制略有差异：</p>
+<ul>
+<li><p><strong>Pinecone Namespace：</strong> 在同一 Index 的底层存储中按 Namespace 做数据分片，查询时必须指定 Namespace，引擎仅在该分片内执行 ANN 搜索，有效缩小搜索范围。</p>
+</li>
+<li><p><strong>Milvus Partition：</strong> 将一个 Collection 物理切分为多个分区，查询时加载指定分区，资源隔离效果更明显，内存占用可精确控制。</p>
+</li>
+<li><p><strong>Weaviate Tenant（Multi-tenancy API）：</strong> 从 v1.20 起原生支持 Multi-tenancy，每个租户的数据存储在独立的磁盘分片上，可按需冷热切换（active&#x2F;inactive）。</p>
+</li>
+<li><p><strong>实现方式：</strong></p>
+<ul>
+<li>在同一个物理索引（Index）下，为每个租户创建一个独立的 Namespace。</li>
+<li>查询时必须指定 Namespace，否则无法访问任何数据，这一约束由数据库层强制执行。</li>
+</ul>
+</li>
+<li><p><strong>技术优势：</strong></p>
+<ul>
+<li><strong>查询速度：</strong> 引擎只需在特定分区内进行 ANN（近似最近邻）搜索，有效减少参与计算的向量数量。</li>
+<li><strong>安全性：</strong> 比纯元数据过滤更安全，查询范围由数据库层而非应用层决定。</li>
+</ul>
+</li>
+<li><p><strong>适用场景：</strong> 大多数企业级 RAG 应用，租户数量在千&#x2F;万级别。</p>
+</li>
+</ul>
+<h3 id="策略三：物理隔离-——-极致安全"><a href="#策略三：物理隔离-——-极致安全" class="headerlink" title="策略三：物理隔离 —— 极致安全"></a>策略三：物理隔离 —— 极致安全</h3><p>为每个租户创建独立的 Collection，甚至独立的 Database 实例&#x2F;集群。</p>
+<ul>
+<li><strong>实现方式：</strong><ul>
+<li>租户 A 使用 <code>Collection_A</code>，租户 B 使用 <code>Collection_B</code>。</li>
+<li>配合 RBAC（基于角色的访问控制），为不同租户分配不同的数据库连接凭证（User&#x2F;Password）。</li>
+</ul>
+</li>
+<li><strong>优点：</strong> 物理层面的”硬隔离”。即使应用层代码写错，也不可能查到隔壁租户的数据。支持针对大客户做独立的资源扩容和性能调优。</li>
+<li><strong>缺点：</strong> <ul>
+<li><strong>资源浪费：</strong> 即使是空闲租户也会占用索引内存资源。</li>
+<li><strong>运维噩梦：</strong> 维护数万个 Collection 的 Schema 变更和版本升级非常困难；同时需要管理大量数据库连接，连接池爆炸问题需要专门的连接代理（如 PgBouncer 类方案）来处理。</li>
+<li><strong>冷启动问题：</strong> 新租户需要动态创建资源，有一定初始化延迟。</li>
+</ul>
+</li>
+<li><strong>适用场景：</strong> 银行、医疗、政府项目，或付费意愿极高的 VIP 客户。</li>
+</ul>
+<hr>
+<h2 id="进阶：构建零信任-RAG-架构"><a href="#进阶：构建零信任-RAG-架构" class="headerlink" title="进阶：构建零信任 RAG 架构"></a>进阶：构建零信任 RAG 架构</h2><p>仅仅依靠数据库隔离是不够的，我们需要在架构层面实施纵深防御。</p>
+<h3 id="应用层的中间件拦截"><a href="#应用层的中间件拦截" class="headerlink" title="应用层的中间件拦截"></a>应用层的中间件拦截</h3><p>不要在每个业务函数里手动写 <code>filter=&#123;&quot;tenant_id&quot;: ...&#125;</code>，这是 Bug 的温床。<br>应在 Service 层或 DAO 层实现拦截器：</p>
+<ul>
+<li><strong>Context 传递：</strong> 从 HTTP Request Header（JWT）中解析 <code>tenant_id</code>，并存入请求上下文。在 Python 中，同步服务使用 <code>threading.local()</code>，异步服务（FastAPI&#x2F;asyncio）应使用 <code>contextvars.ContextVar</code> 以避免协程间上下文串扰。</li>
+<li><strong>自动注入：</strong> 封装向量数据库 Client，重写 <code>search</code> 方法，自动从上下文读取 <code>tenant_id</code> 并注入过滤条件，业务代码完全无感知。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> contextvars</span><br><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> wraps</span><br><span class="line"></span><br><span class="line"><span class="comment"># 请求上下文变量（适用于 asyncio）</span></span><br><span class="line">_current_tenant: contextvars.ContextVar[<span class="built_in">str</span>] = contextvars.ContextVar(<span class="string">&quot;current_tenant&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TenantAwareVectorStore</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, client</span>):</span><br><span class="line">        <span class="variable language_">self</span>._client = client</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">search</span>(<span class="params">self, query_vec, **kwargs</span>):</span><br><span class="line">        tenant_id = _current_tenant.get()  <span class="comment"># 自动从上下文获取，无需调用方传入</span></span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>._client.search(query_vec, <span class="built_in">filter</span>=&#123;<span class="string">&quot;tenant_id&quot;</span>: tenant_id&#125;, **kwargs)</span><br></pre></td></tr></table></figure>
+
+<h3 id="原始文档存储隔离"><a href="#原始文档存储隔离" class="headerlink" title="原始文档存储隔离"></a>原始文档存储隔离</h3><p>RAG 系统中除向量数据库外，还需存储原始文档（PDF、Word 等）用于引用或 Re-ranking。对象存储（如 S3、OSS）的隔离同样不可忽视：</p>
+<ul>
+<li><strong>路径前缀隔离：</strong> 所有文档写入 <code>s3://your-bucket/&#123;tenant_id&#125;/...</code>，通过 IAM Policy 或 Presigned URL 限制跨前缀访问。</li>
+<li><strong>独立 Bucket（高安全）：</strong> 为 VIP 租户分配独立 Bucket，配置独立的加密 Key 和访问策略，满足 GDPR&#x2F;数据本地化合规要求。</li>
+<li><strong>删除联动：</strong> 租户注销时，向量数据和原始文档需要同步清理，建议通过任务队列异步执行，并记录清理审计日志。</li>
+</ul>
+<h3 id="密钥管理"><a href="#密钥管理" class="headerlink" title="密钥管理"></a>密钥管理</h3><p>针对高敏感场景，可以结合加密技术：</p>
+<ul>
+<li><strong>静态加密（at-rest encryption）：</strong> 每个租户拥有独立的数据加密 Key（DEK），DEK 由租户自己的主密钥（KEK）加密后存储，即 BYOK 模式。云厂商（AWS KMS、阿里云 KMS）原生支持此模式。</li>
+<li><strong>向量层加密：</strong> 向量本身理论上难以精确还原原文，但在极高安全等级下，仍需关注成员推断攻击（Membership Inference Attack）风险。高安全场景可在向量入库前结合租户 Key 进行加盐混淆（需定制算法，成本较高，需权衡必要性）。</li>
+</ul>
+<h3 id="LLM-上下文隔离"><a href="#LLM-上下文隔离" class="headerlink" title="LLM 上下文隔离"></a>LLM 上下文隔离</h3><p>虽然 LLM 本身是无状态的，但必须防止 Prompt 注入攻击窃取上下文。</p>
+<ul>
+<li><strong>系统提示词（System Prompt）：</strong> 明确指令模型”仅使用提供的上下文回答，严禁通过已知训练数据回答其他租户信息”。</li>
+<li><strong>PII 过滤：</strong> 在将检索到的 Chunks 发送给 LLM 之前，使用 NLP 模型识别并掩盖敏感信息（如身份证号、手机号），防止其出现在公有云 LLM 的服务日志中。</li>
+</ul>
+<h3 id="审计日志"><a href="#审计日志" class="headerlink" title="审计日志"></a>审计日志</h3><p>审计日志是合规（GDPR、SOC2、等保）的刚性要求，也是事后溯源的唯一依据：</p>
+<ul>
+<li><strong>记录内容：</strong> 每次检索应记录 <code>tenant_id</code>、<code>user_id</code>、查询原文（或其哈希）、命中的 <code>doc_id</code> 列表、响应时间、时间戳。</li>
+<li><strong>存储要求：</strong> 审计日志必须与业务数据物理隔离，写入专用的不可篡改存储（如 append-only 日志系统），并设置合理的保留期（通常 ≥ 6 个月）。</li>
+<li><strong>异常告警：</strong> 对异常访问模式（如高频跨文档访问、深夜批量查询）设置实时告警，及早发现数据侦察行为。</li>
+</ul>
+<h3 id="速率限制与配额管理"><a href="#速率限制与配额管理" class="headerlink" title="速率限制与配额管理"></a>速率限制与配额管理</h3><p>多租户场景下，”嘈杂邻居”（Noisy Neighbor）问题会导致一个租户的突发流量影响其他租户的服务质量：</p>
+<ul>
+<li><strong>Query 级限流：</strong> 在 API Gateway 层按 <code>tenant_id</code> 做请求速率限制（如 Token Bucket 算法）。</li>
+<li><strong>存储配额：</strong> 限制每个租户可写入的向量数量上限，防止恶意或失控的数据写入。</li>
+<li><strong>资源隔离（高级）：</strong> 对 VIP 租户分配独立的推理资源（如独立 Embedding 服务实例），从根本上消除资源竞争。</li>
+</ul>
+<hr>
+<h2 id="架构选型建议表"><a href="#架构选型建议表" class="headerlink" title="架构选型建议表"></a>架构选型建议表</h2><table>
+<thead>
+<tr>
+<th align="left">维度</th>
+<th align="left">方案 A：元数据过滤</th>
+<th align="left">方案 B：命名空间&#x2F;分区</th>
+<th align="left">方案 C：物理分库&#x2F;分表</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>隔离级别</strong></td>
+<td align="left">低 (代码级)</td>
+<td align="left">中 (数据库逻辑级)</td>
+<td align="left">高 (资源级)</td>
+</tr>
+<tr>
+<td align="left"><strong>成本</strong></td>
+<td align="left">$</td>
+<td align="left">$$</td>
+<td align="left">$$$$</td>
+</tr>
+<tr>
+<td align="left"><strong>性能</strong></td>
+<td align="left">数据量大时下降</td>
+<td align="left">稳定</td>
+<td align="left">极佳 (无干扰)</td>
+</tr>
+<tr>
+<td align="left"><strong>运维复杂度</strong></td>
+<td align="left">低</td>
+<td align="left">中</td>
+<td align="left">极高</td>
+</tr>
+<tr>
+<td align="left"><strong>推荐场景</strong></td>
+<td align="left">免费用户、小微企业</td>
+<td align="left">标准企业版 SaaS</td>
+<td align="left">金融&#x2F;政企私有化部署</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="最佳实践清单"><a href="#最佳实践清单" class="headerlink" title="最佳实践清单"></a>最佳实践清单</h2><p>在上线你的多租户 RAG 系统前，请核对以下几点：</p>
+<ul>
+<li><input disabled="" type="checkbox"> <strong>强制性 Filter：</strong> 是否在最底层的数据访问代码中强制注入了 Tenant ID？（通过中间件自动注入，禁止业务层手动传参）</li>
+<li><input disabled="" type="checkbox"> <strong>索引设计：</strong> 向量数据库的索引是否对 <code>tenant_id</code> 字段建立了过滤索引？（能显著提升元数据过滤性能）</li>
+<li><input disabled="" type="checkbox"> <strong>Object Storage：</strong> 原始文档存储是否也按租户进行了路径&#x2F;Bucket 隔离，并配置了相应的访问策略？</li>
+<li><input disabled="" type="checkbox"> <strong>数据清理：</strong> 当租户注销时，是否有机制能通过 <code>tenant_id</code> 快速物理删除其所有向量数据与原始文档？</li>
+<li><input disabled="" type="checkbox"> <strong>审计日志：</strong> 每次检索操作是否写入了包含 tenant_id、user_id、命中 doc_id 的不可篡改审计日志？</li>
+<li><input disabled="" type="checkbox"> <strong>速率限制：</strong> 是否在 API Gateway 层按 <code>tenant_id</code> 配置了请求速率限制，防止嘈杂邻居问题？</li>
+<li><input disabled="" type="checkbox"> <strong>渗透测试：</strong> 是否尝试过构造恶意 Query 试图检索其他租户数据？（包括 Prompt 注入攻击测试）</li>
+<li><input disabled="" type="checkbox"> <strong>权限隔离：</strong> 知识库的管理接口（上传、删除）是否也校验了租户权限？</li>
+</ul>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>RAG 的多租户隔离不是一个单一的功能，而是一套贯穿数据存储、检索逻辑和模型交互的防御体系。在设计之初选择正确的隔离策略（通常推荐 <strong>命名空间&#x2F;分区隔离</strong> 作为默认起点），辅以应用层中间件、审计日志和速率限制，可以避免后期重构的巨大痛苦。</p>
+<p><strong>安全是 AI 落地的基石，别让你的 RAG 系统成为数据泄露的漏洞。</strong></p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/03/03/RAG%E7%B3%BB%E7%BB%9F%E4%B8%AD%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB/" title="RAG系统中如何实现租户隔离" target="_blank" rel="external">https://www.silenceboy.com/2026/03/03/RAG系统中如何实现租户隔离/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2026/03/11/%E5%91%8A%E5%88%AB%E5%8D%95%E4%B8%80%E6%A3%80%E7%B4%A2%EF%BC%9ABM25%E4%B8%8E%E7%A8%80%E7%96%8F%E5%90%91%E9%87%8F%E6%B7%B1%E5%BA%A6%E5%AF%B9%E6%AF%94%EF%BC%8C%E5%8F%8ARAG%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E6%8C%87%E5%8D%97/" title="告别单一检索：BM25与稀疏向量深度对比，及RAG混合检索策略指南"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2026/02/12/Lora%E4%B8%BA%E4%BD%95%E8%83%BD%E5%A4%A7%E5%B9%85%E5%87%8F%E5%B0%91%E8%AE%AD%E7%BB%83%E5%8F%82%E6%95%B0/" title="Lora为何能大幅减少训练参数"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

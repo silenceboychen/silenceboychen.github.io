@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>传统RAG与Agentic RAG的架构演进与差异分析 | morty的个人博客</title>
+  <meta name="description" content="摘要检索增强生成（RAG）技术最初的目的是为了解决大型语言模型（LLM）的幻觉问题并接入外部私有知识。然而，随着业务需求从”简单的知识问答”演进为”复杂的任务解决”，传统RAG暴露出线性流程的局限性。Agentic RAG 应运而生，它不仅仅是RAG的升级版，而是将传统RAG的”单向流水线（Pipeline）”重构为了一个基于智能体（AI Agent）的”动态控制循环（Control Loop）”">
+<meta property="og:type" content="article">
+<meta property="og:title" content="传统RAG与Agentic RAG的架构演进与差异分析">
+<meta property="og:url" content="https://www.silenceboy.com/2026/03/18/%E4%BC%A0%E7%BB%9FRAG%E4%B8%8EAgentic-RAG%E7%9A%84%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%B7%AE%E5%BC%82%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="摘要检索增强生成（RAG）技术最初的目的是为了解决大型语言模型（LLM）的幻觉问题并接入外部私有知识。然而，随着业务需求从”简单的知识问答”演进为”复杂的任务解决”，传统RAG暴露出线性流程的局限性。Agentic RAG 应运而生，它不仅仅是RAG的升级版，而是将传统RAG的”单向流水线（Pipeline）”重构为了一个基于智能体（AI Agent）的”动态控制循环（Control Loop）”">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-18T15:56:24.000Z">
+<meta property="article:modified_time" content="2026-07-22T01:25:54.686Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/03/18/%E4%BC%A0%E7%BB%9FRAG%E4%B8%8EAgentic-RAG%E7%9A%84%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%B7%AE%E5%BC%82%E5%88%86%E6%9E%90/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    <link href="//cdn.jsdelivr.net/npm/katex@0.9.0/dist/katex.min.css" rel="stylesheet">
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"><style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">27</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 14px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.8px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 13.9px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/07/">七月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/04/">四月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/03/">三月 2026</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" class="title">MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-07-22T01:40:42.000Z" itemprop="datePublished">2026-07-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/04/01/Harness-Engineering%E4%BB%8B%E7%BB%8D/" class="title">Harness Engineering介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-04-01T09:58:03.000Z" itemprop="datePublished">2026-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-LLM-%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E5%88%A9%E5%99%A8%EF%BC%9AKV-Cache-%E8%AF%A6%E8%A7%A3/" class="title">深入浅出 LLM 推理加速利器：KV Cache 详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T17:14:42.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" class="title">QMD记忆系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T16:57:22.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" class="title">AI核心术语介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-20T15:06:50.000Z" itemprop="datePublished">2026-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RAG-%E6%8A%80%E6%9C%AF%E6%BC%94%E8%BF%9B%E8%B7%AF%E5%BE%84"><span class="toc-number">2.</span> <span class="toc-text">RAG 技术演进路径</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5%E7%95%8C%E5%AE%9A"><span class="toc-number">3.</span> <span class="toc-text">概念界定</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E7%BB%9F-RAG"><span class="toc-number">3.1.</span> <span class="toc-text">传统 RAG</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Agentic-RAG"><span class="toc-number">3.2.</span> <span class="toc-text">Agentic RAG</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E5%B7%AE%E5%BC%82%E5%AF%B9%E6%A0%87%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">核心差异对标分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E5%AF%B9%E6%AF%94"><span class="toc-number">5.</span> <span class="toc-text">架构对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E7%BB%9F-RAG-%E6%9E%B6%E6%9E%84"><span class="toc-number">5.1.</span> <span class="toc-text">传统 RAG 架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Agentic-RAG-%E6%9E%B6%E6%9E%84"><span class="toc-number">5.2.</span> <span class="toc-text">Agentic RAG 架构</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Agentic-RAG-%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="toc-number">6.</span> <span class="toc-text">Agentic RAG 核心设计模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-ReAct%EF%BC%88Reason-Act%EF%BC%89"><span class="toc-number">6.1.</span> <span class="toc-text">1. ReAct（Reason + Act）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-CRAG%EF%BC%88Corrective-RAG%EF%BC%89"><span class="toc-number">6.2.</span> <span class="toc-text">2. CRAG（Corrective RAG）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Self-RAG%EF%BC%88Self-Reflective-RAG%EF%BC%89"><span class="toc-number">6.3.</span> <span class="toc-text">3. Self-RAG（Self-Reflective RAG）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Plan-and-Execute%EF%BC%88%E8%AE%A1%E5%88%92-%E6%89%A7%E8%A1%8C%E5%88%86%E7%A6%BB%EF%BC%89"><span class="toc-number">6.4.</span> <span class="toc-text">4. Plan-and-Execute（计划-执行分离）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%EF%BC%88Multi-Agent%EF%BC%89RAG-%E6%9E%B6%E6%9E%84"><span class="toc-number">7.</span> <span class="toc-text">多智能体（Multi-Agent）RAG 架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B4%A8%E9%87%8F%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%EF%BC%9ARAGAS-%E6%8C%87%E6%A0%87%E5%AF%B9%E6%AF%94"><span class="toc-number">8.</span> <span class="toc-text">质量评估体系：RAGAS 指标对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%BF%90%E7%BB%B4%E4%BB%A3%E4%BB%B7"><span class="toc-number">9.</span> <span class="toc-text">工程与运维代价</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%E5%BB%BA%E8%AE%AE"><span class="toc-number">10.</span> <span class="toc-text">适用场景建议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E5%90%88%E3%80%90%E4%BC%A0%E7%BB%9F-RAG%E3%80%91%E7%9A%84%E5%9C%BA%E6%99%AF%EF%BC%9A"><span class="toc-number">10.1.</span> <span class="toc-text">适合【传统 RAG】的场景：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%82%E5%90%88%E3%80%90Agentic-RAG%E3%80%91%E7%9A%84%E5%9C%BA%E6%99%AF%EF%BC%9A"><span class="toc-number">10.2.</span> <span class="toc-text">适合【Agentic RAG】的场景：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E3%80%90%E6%B7%B7%E5%90%88%E6%9E%B6%E6%9E%84%EF%BC%88Hybrid%EF%BC%89%E3%80%91%EF%BC%9A%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5%E4%B8%AD%E7%9A%84%E8%BF%87%E6%B8%A1%E6%96%B9%E6%A1%88"><span class="toc-number">10.3.</span> <span class="toc-text">【混合架构（Hybrid）】：工程实践中的过渡方案</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">11.</span> <span class="toc-text">结论</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-传统RAG与Agentic-RAG的架构演进与差异分析" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      传统RAG与Agentic RAG的架构演进与差异分析
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/03/18/%E4%BC%A0%E7%BB%9FRAG%E4%B8%8EAgentic-RAG%E7%9A%84%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%B7%AE%E5%BC%82%E5%88%86%E6%9E%90/" class="article-date">
+	  <time datetime="2026-03-18T15:56:24.000Z" itemprop="datePublished">2026-03-18</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/03/18/%E4%BC%A0%E7%BB%9FRAG%E4%B8%8EAgentic-RAG%E7%9A%84%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%B7%AE%E5%BC%82%E5%88%86%E6%9E%90/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 4.1k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 15(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>检索增强生成（RAG）技术最初的目的是为了解决大型语言模型（LLM）的幻觉问题并接入外部私有知识。然而，随着业务需求从”简单的知识问答”演进为”复杂的任务解决”，传统RAG暴露出线性流程的局限性。<strong>Agentic RAG</strong> 应运而生，它不仅仅是RAG的升级版，而是将传统RAG的”单向流水线（Pipeline）”重构为了一个基于智能体（AI Agent）的”动态控制循环（Control Loop）”。通过引入推理、规划、记忆和多工具调用能力，Agentic RAG 能够实现更高质量的回答和自主的任务执行。</p>
+<hr>
+<h2 id="RAG-技术演进路径"><a href="#RAG-技术演进路径" class="headerlink" title="RAG 技术演进路径"></a>RAG 技术演进路径</h2><p>在深入对比两种架构之前，有必要先明确 RAG 技术的完整演进脉络，以便准确理解”传统 RAG”和”Agentic RAG”各自处于哪个阶段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Naive RAG  →  Advanced RAG  →  Modular RAG  →  Agentic RAG</span><br><span class="line">（基础检索）  （Pre/Post处理）  （模块化组合）   （Agent控制循环）</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">阶段</th>
+<th align="left">核心特征</th>
+<th align="left">代表改进</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Naive RAG</strong></td>
+<td align="left">最基础的”检索-生成”管道，一次检索、一次生成</td>
+<td align="left">最早期实现，奠定基本范式</td>
+</tr>
+<tr>
+<td align="left"><strong>Advanced RAG</strong></td>
+<td align="left">在检索前后引入增强步骤</td>
+<td align="left">Pre-retrieval（Query Rewrite）、Post-retrieval（Reranking）</td>
+</tr>
+<tr>
+<td align="left"><strong>Modular RAG</strong></td>
+<td align="left">将各环节模块化，可灵活组合替换</td>
+<td align="left">Hybrid Search、Routing、自定义 Pipeline</td>
+</tr>
+<tr>
+<td align="left"><strong>Agentic RAG</strong></td>
+<td align="left">引入 Agent 控制循环，具备自主决策与多步执行能力</td>
+<td align="left">ReAct、Self-RAG、CRAG、Plan-and-Execute</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>本文中”传统 RAG”泛指 Naive RAG 至 Advanced RAG 阶段，与 Agentic RAG 形成对比。</p>
+</blockquote>
+<hr>
+<h2 id="概念界定"><a href="#概念界定" class="headerlink" title="概念界定"></a>概念界定</h2><h3 id="传统-RAG"><a href="#传统-RAG" class="headerlink" title="传统 RAG"></a>传统 RAG</h3><p>传统RAG是一种<strong>被动式、线性的检索系统</strong>。其核心逻辑是：接收用户查询 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 在向量数据库中进行一次性相似度检索 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 将检索到的文档片段（Context）与原问题拼接 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 交由LLM生成最终回答。</p>
+<ul>
+<li><strong>特点</strong>：单次传递（One-pass）、无记忆、流程固定、完全依赖单次检索的质量。</li>
+<li><strong>瓶颈</strong>：流程中没有任何反馈机制，一旦检索结果质量差，下游生成质量几乎无法挽救，即”垃圾进，垃圾出（Garbage In, Garbage Out）”。</li>
+</ul>
+<h3 id="Agentic-RAG"><a href="#Agentic-RAG" class="headerlink" title="Agentic RAG"></a>Agentic RAG</h3><p>Agentic RAG 是一种<strong>主动式、自主的决策系统</strong>。它将LLM视为具备”大脑”的智能体（Agent），在检索和生成过程中引入了自主规划（Planning）、工具使用（Tool Use）、反思（Reflection）和迭代重试（Iteration）机制。</p>
+<ul>
+<li><strong>特点</strong>：多步推理（Multi-step reasoning）、支持多种检索策略（向量、图谱、SQL等）、具备自我纠错与长效记忆（Memory）。</li>
+<li><strong>本质区别</strong>：从”数据流”转变为”控制流”，LLM 不再只是最后的生成器，而是整个任务的调度者和决策者。</li>
+</ul>
+<hr>
+<h2 id="核心差异对标分析"><a href="#核心差异对标分析" class="headerlink" title="核心差异对标分析"></a>核心差异对标分析</h2><table>
+<thead>
+<tr>
+<th align="left">维度</th>
+<th align="left">传统 RAG (Traditional RAG)</th>
+<th align="left">Agentic RAG</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>工作流模式</strong></td>
+<td align="left"><strong>静态单向管道</strong> (Pipeline)：查询 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 检索 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 生成</td>
+<td align="left"><strong>动态控制循环</strong> (Control Loop)：查询 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 思考 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 规划 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 检索/工具调用 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> 评估 <mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="1.181ex" role="img" focusable="false" viewBox="0 -511 1000 522"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mo"><path data-c="2192" d="M56 237T56 250T70 270H835Q719 357 692 493Q692 494 692 496T691 499Q691 511 708 511H711Q720 511 723 510T729 506T732 497T735 481T743 456Q765 389 816 336T935 261Q944 258 944 250Q944 244 939 241T915 231T877 212Q836 186 806 152T761 85T740 35T732 4Q730 -6 727 -8T711 -11Q691 -11 691 0Q691 7 696 25Q728 151 835 230H70Q56 237 56 250Z"></path></g></g></g></svg></mjx-container> (循环或输出)</td>
+</tr>
+<tr>
+<td align="left"><strong>任务拆解与推理</strong></td>
+<td align="left">无。将整个用户问题作为一个查询语句直接去检索。</td>
+<td align="left">强。面对复杂问题（如多跳查询），Agent会将其拆解为多个子任务逐步解决。</td>
+</tr>
+<tr>
+<td align="left"><strong>信息源与工具</strong></td>
+<td align="left">通常局限于单一的向量数据库（Vector DB）。</td>
+<td align="left">支持多工具调度：可同时调用向量库、图数据库、SQL数据库、Web搜索、外部API（如CRM系统）等。</td>
+</tr>
+<tr>
+<td align="left"><strong>容错与纠错机制</strong></td>
+<td align="left"><strong>“垃圾进，垃圾出”</strong>：如果检索到无关信息，LLM大概率会生成错误回答。</td>
+<td align="left"><strong>闭环评估</strong>：Agent会评估检索到的信息是否足够。如果置信度低，它会修改检索词或更换数据源重新检索（Re-query）。</td>
+</tr>
+<tr>
+<td align="left"><strong>上下文与记忆</strong></td>
+<td align="left">通常是无状态的（Stateless）：会话内可维持短期上下文，但无法跨会话保留用户历史。</td>
+<td align="left">具备持久化记忆层（如 Mem0、Zep 等），能够跨会话记住用户偏好和历史交互，实现持续学习与个性化。</td>
+</tr>
+<tr>
+<td align="left"><strong>人工干预</strong></td>
+<td align="left">高度依赖开发者预设好的提示词模板和检索策略（如Top-K设置）。</td>
+<td align="left">高度自主（Autonomy），由AI动态决定如何执行检索、何时停止检索。</td>
+</tr>
+<tr>
+<td align="left"><strong>幻觉率（Hallucination）</strong></td>
+<td align="left">较高，无法识别”检索到的内容与问题无关”的情形。</td>
+<td align="left">显著更低，反思机制可主动过滤低相关性内容后再生成。</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="架构对比"><a href="#架构对比" class="headerlink" title="架构对比"></a>架构对比</h2><h3 id="传统-RAG-架构"><a href="#传统-RAG-架构" class="headerlink" title="传统 RAG 架构"></a>传统 RAG 架构</h3><p>传统 RAG 由<strong>离线构建</strong>和<strong>在线查询</strong>两个阶段组成，文档必须先经过 Ingestion Pipeline 写入向量库，才能在查询时被检索到。</p>
+<p><strong>阶段一：离线 Ingestion Pipeline（数据构建）</strong></p>
+<pre class="mermaid">flowchart LR
+    A[📄 原始文档\nPDF/Word/Web] --&gt; B[Document Loader\n文档加载]
+    B --&gt; C[Text Splitter\n分块 Chunking]
+    C --&gt; D[Embedding Model\n向量化]
+    D --&gt; E[(Vector DB\n写入索引)]</pre>
+
+<blockquote>
+<p>Chunking 策略（如固定大小、语义分块、递归分块）对最终检索质量有决定性影响，是传统 RAG 调优的核心抓手之一。</p>
+</blockquote>
+<p><strong>阶段二：在线 Query Pipeline（推理查询）</strong></p>
+<pre class="mermaid">flowchart LR
+    A[用户输入 Query] --&gt; B[Embedding Model\n查询向量化]
+    B --&gt; C[(Vector DB\n相似度检索 Top-K)]
+    C --&gt; D[Context Stuffing\n拼接上下文到 Prompt]
+    D --&gt; E[LLM\n生成回答]
+    E --&gt; F[最终答案]</pre>
+
+<p><strong>架构特点</strong>：流程清晰、延迟低、成本可预测，但检索结果与生成质量之间没有任何反馈回路。</p>
+<hr>
+<h3 id="Agentic-RAG-架构"><a href="#Agentic-RAG-架构" class="headerlink" title="Agentic RAG 架构"></a>Agentic RAG 架构</h3><p>Agentic RAG 的架构复杂度显著提升，通常基于 LangChain、LlamaIndex 或专用平台（如 Vellum）构建。其本质是将检索过程嵌入到 Agent 的”思考-行动-观察”循环中。</p>
+<p><strong>核心控制循环：</strong></p>
+<pre class="mermaid">flowchart TD
+    A[用户 Query] --&gt; B[Planner\n意图理解 &amp; 任务拆解]
+    B --&gt; C{Router\n工具选择器}
+    C --&gt;|结构化数据| D[(SQL Database)]
+    C --&gt;|非结构化文档| E[(Vector DB)]
+    C --&gt;|实时信息| F[Web Search / API]
+    C --&gt;|关联推理| G[(Knowledge Graph)]
+    D &amp; E &amp; F &amp; G --&gt; H[Evaluator\n自我反思 Self-Reflection]
+    H --&gt;|置信度低\nInsufficient| C
+    H --&gt;|置信度足够\nSufficient| I[Generator\n最终合成]
+    I --&gt; J[答案 / 实质性动作\nAnswer / Action]</pre>
+
+<p><strong>核心模块说明：</strong></p>
+<ol>
+<li><strong>Query Understanding &amp; Planner（意图理解与规划器）</strong>：识别用户意图，重构问题或拆分多步任务（Sub-tasks）。这是 Agentic RAG 与传统 RAG 的第一个本质分叉点。</li>
+<li><strong>Router / Tool Selector（路由与工具选择）</strong>：决定去哪里找信息（如：财报查SQL，规章制度查向量库，实时股价查API）。</li>
+<li><strong>Iterative Execution（迭代执行）</strong>：执行工具调用并获取返回结果。</li>
+<li><strong>Evaluator（验证与反思器）</strong>：Agent 对获得的数据进行自我提问（Self-reflection）：<em>“这些信息足以回答用户的问题吗？”</em> 如果置信度不足，修改策略重新回到路由步骤。</li>
+<li><strong>Generator &amp; Action（生成与行动）</strong>：最终合成高精度答案，甚至可以触发实质性动作（如替用户发送邮件、在系统中提交申请）。</li>
+</ol>
+<hr>
+<h2 id="Agentic-RAG-核心设计模式"><a href="#Agentic-RAG-核心设计模式" class="headerlink" title="Agentic RAG 核心设计模式"></a>Agentic RAG 核心设计模式</h2><p>Agentic RAG 并非单一实现，而是一类架构模式的统称。以下是四种主流设计模式，代表了工程实现的不同侧重点：</p>
+<h3 id="1-ReAct（Reason-Act）"><a href="#1-ReAct（Reason-Act）" class="headerlink" title="1. ReAct（Reason + Act）"></a>1. ReAct（Reason + Act）</h3><p><strong>最基础、最通用</strong>的 Agentic RAG 实现范式，出自论文 <em>“ReAct: Synergizing Reasoning and Acting in Language Models”（Yao et al., 2022）</em>。</p>
+<p>LLM 在每一步交替进行三种操作，形成闭环：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Thought（思考）→ Action（执行工具调用）→ Observation（观察结果）→ Thought（继续思考）→ ...</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例轨迹：</strong></p>
+<blockquote>
+<p><strong>Thought</strong>: 用户问”2023年Q4苹果的营收增长率”，需要先查财报数据再计算。<br><strong>Action</strong>: <code>search_database(query="Apple Q4 2023 revenue")</code><br><strong>Observation</strong>: <code>{"Q4 2023": 119.6B, "Q4 2022": 117.2B}</code><br><strong>Thought</strong>: 增长率 = (119.6 - 117.2) / 117.2 ≈ 2.05%，可以回答了。<br><strong>Final Answer</strong>: 苹果2023年Q4营收同比增长约2.05%。</p>
+</blockquote>
+<h3 id="2-CRAG（Corrective-RAG）"><a href="#2-CRAG（Corrective-RAG）" class="headerlink" title="2. CRAG（Corrective RAG）"></a>2. CRAG（Corrective RAG）</h3><p><strong>核心创新</strong>：在检索结果进入 LLM 之前，引入一个轻量级 <strong>相关性评估器（Relevance Evaluator）</strong> 对每个检索到的文档打分，根据置信度决定下一步行动：</p>
+<table>
+<thead>
+<tr>
+<th align="left">置信度</th>
+<th align="left">决策</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>高（Correct）</strong></td>
+<td align="left">直接使用检索结果生成</td>
+</tr>
+<tr>
+<td align="left"><strong>中（Ambiguous）</strong></td>
+<td align="left">对文档进行知识精炼（Knowledge Refinement）后使用</td>
+</tr>
+<tr>
+<td align="left"><strong>低（Incorrect）</strong></td>
+<td align="left">降级到 Web Search 获取实时信息</td>
+</tr>
+</tbody></table>
+<p>CRAG 相比 Naive RAG 显著降低了因”检索到错误文档”导致的幻觉率，同时比完整的 ReAct 循环有更低的延迟。</p>
+<h3 id="3-Self-RAG（Self-Reflective-RAG）"><a href="#3-Self-RAG（Self-Reflective-RAG）" class="headerlink" title="3. Self-RAG（Self-Reflective RAG）"></a>3. Self-RAG（Self-Reflective RAG）</h3><p><strong>核心创新</strong>：训练 LLM 在生成过程中主动发出特殊的<strong>反思 Token（Reflection Tokens）</strong>，对自身的检索决策和生成内容进行批判性评分：</p>
+<ul>
+<li><code>[Retrieve]</code>：是否需要检索（动态决定是否触发检索，而非每次强制检索）</li>
+<li><code>[IsRel]</code>：检索到的段落是否与问题相关</li>
+<li><code>[IsSup]</code>：生成的内容是否被检索结果支撑</li>
+<li><code>[IsUse]</code>：最终答案对用户是否有用</li>
+</ul>
+<p>Self-RAG 将”评估”内化到模型参数本身，而非依赖外部评估器，推理效率更高，但需要专门的微调（Fine-tuning）。</p>
+<h3 id="4-Plan-and-Execute（计划-执行分离）"><a href="#4-Plan-and-Execute（计划-执行分离）" class="headerlink" title="4. Plan-and-Execute（计划-执行分离）"></a>4. Plan-and-Execute（计划-执行分离）</h3><p><strong>适用于长链路、多阶段任务</strong>。与 ReAct 的”边想边做”不同，Plan-and-Execute 将任务明确分为两个角色：</p>
+<ul>
+<li><strong>Planner（规划器）</strong>：一次性生成完整的任务分解计划，列出所有子任务和执行顺序。</li>
+<li><strong>Executor（执行器）</strong>：按照计划逐步调用工具并执行，每步结果可反馈给 Planner 进行计划修订。</li>
+</ul>
+<p><strong>优势</strong>：任务逻辑更清晰，适合需要人工审查中间步骤的企业场景（Human-in-the-loop）。</p>
+<hr>
+<h2 id="多智能体（Multi-Agent）RAG-架构"><a href="#多智能体（Multi-Agent）RAG-架构" class="headerlink" title="多智能体（Multi-Agent）RAG 架构"></a>多智能体（Multi-Agent）RAG 架构</h2><p>当任务复杂度进一步提升时，单 Agent 内部循环已经不够，需要引入<strong>多 Agent 协作架构</strong>。这是 Agentic RAG 的最高阶形态：</p>
+<pre class="mermaid">flowchart TD
+    U[用户 Query] --&gt; O[Orchestrator Agent\n任务分发 &amp; 汇总]
+    O --&gt; R[Retrieval Agent\n专职检索]
+    O --&gt; C[Critique Agent\n专职质量评估]
+    O --&gt; S[Synthesis Agent\n专职答案合成]
+    R --&gt;|检索结果| C
+    C --&gt;|评估反馈| R
+    C --&gt;|通过验证| S
+    S --&gt; O
+    O --&gt; A[最终答案 / 动作]</pre>
+
+<p><strong>各 Agent 职责分工：</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">Agent</th>
+<th align="left">职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Orchestrator Agent</strong></td>
+<td align="left">接收用户任务，拆解后分发给各专职 Agent，最终汇总结果</td>
+</tr>
+<tr>
+<td align="left"><strong>Retrieval Agent</strong></td>
+<td align="left">专门负责多源检索（向量库 + SQL + Web），不做推理</td>
+</tr>
+<tr>
+<td align="left"><strong>Critique Agent</strong></td>
+<td align="left">专门负责对检索结果进行 RAGAS 评分，决定是否需要重新检索</td>
+</tr>
+<tr>
+<td align="left"><strong>Synthesis Agent</strong></td>
+<td align="left">专门负责将多路检索结果合并，生成结构化最终答案</td>
+</tr>
+</tbody></table>
+<p>这种架构的核心优势在于<strong>职责隔离</strong>：每个 Agent 只做一件事，便于独立优化和替换，系统整体鲁棒性大幅提升。</p>
+<hr>
+<h2 id="质量评估体系：RAGAS-指标对比"><a href="#质量评估体系：RAGAS-指标对比" class="headerlink" title="质量评估体系：RAGAS 指标对比"></a>质量评估体系：RAGAS 指标对比</h2><p>量化两种架构的质量差异，需要借助 <strong>RAGAS（RAG Assessment）</strong> 评估框架。RAGAS 提供了四个正交的核心指标，覆盖检索和生成两个维度：</p>
+<table>
+<thead>
+<tr>
+<th align="left">指标</th>
+<th align="left">说明</th>
+<th align="center">传统 RAG</th>
+<th align="center">Agentic RAG</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Faithfulness（忠实度）</strong></td>
+<td align="left">答案中的每一个声明是否都能从检索上下文中找到依据，衡量幻觉率</td>
+<td align="center">一般</td>
+<td align="center"><strong>显著更高</strong>（反思机制主动过滤不相关内容）</td>
+</tr>
+<tr>
+<td align="left"><strong>Answer Relevancy（答案相关性）</strong></td>
+<td align="left">生成的答案对用户提出的问题的回答程度</td>
+<td align="center">对简单问题良好</td>
+<td align="center"><strong>显著更高</strong>（多步推理后更准确理解意图）</td>
+</tr>
+<tr>
+<td align="left"><strong>Context Precision（上下文精准率）</strong></td>
+<td align="left">所有检索到的文档中，真正与问题相关的文档占比</td>
+<td align="center">较低（Top-K 中混有噪声）</td>
+<td align="center"><strong>更高</strong>（路由器过滤 + 评估器剔除低质量文档）</td>
+</tr>
+<tr>
+<td align="left"><strong>Context Recall（上下文召回率）</strong></td>
+<td align="left">回答问题所需的所有关键信息是否都被检索到</td>
+<td align="center">对单跳问题尚可</td>
+<td align="center"><strong>显著更高</strong>（迭代检索弥补单次遗漏）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>实践建议</strong>：在上线 Agentic RAG 系统前，应建立基于 RAGAS 的 Offline Evaluation Pipeline，定期使用测试集对系统进行回归测试，防止因 Prompt 调整或模型升级引入质量退化（Quality Regression）。</p>
+</blockquote>
+<hr>
+<h2 id="工程与运维代价"><a href="#工程与运维代价" class="headerlink" title="工程与运维代价"></a>工程与运维代价</h2><p>企业在选择从传统RAG升级到Agentic RAG时，必须考量以下工程代价：</p>
+<ul>
+<li><p><strong>成本 (Cost)</strong>：</p>
+<ul>
+<li><strong>传统 RAG</strong>：成本可控且具有高度可预测性。每次查询固定消耗一次大模型请求（Token数量固定）。</li>
+<li><strong>Agentic RAG</strong>：由于内部包含循环思考（Reasoning）、多次调用工具和反复验证，Token 消耗量倍增，且单次查询的成本难以精准预测。以 GPT-4o 为例，一次 Agentic RAG 查询的 Token 消耗通常是传统 RAG 的 3-8 倍。</li>
+</ul>
+</li>
+<li><p><strong>延迟 (Latency)</strong>：</p>
+<ul>
+<li><strong>传统 RAG</strong>：响应速度快，通常在数百毫秒到几秒之间。</li>
+<li><strong>Agentic RAG</strong>：存在长尾延迟（P95 Latency 较高）。因为大模型需要”思考（Thinking）”并经历多轮往返操作（Round-trips），可能会导致用户需要等待更长时间（通常需要搭配流式输出（Streaming）或过程步骤展示来缓解用户等待焦虑）。</li>
+</ul>
+</li>
+<li><p><strong>系统复杂性与调试 (Debugging)</strong>：</p>
+<ul>
+<li><strong>传统 RAG</strong>：出错点明确（要么是检索命中率低，要么是Prompt没写好），易于调试。</li>
+<li><strong>Agentic RAG</strong>：是一个复杂的黑盒状态机。失败可能源于：规划失败、工具调用失败、陷入死循环等。需要引入专业的<strong>可观测性工具</strong>（如 <strong>LangSmith</strong>、<strong>Langfuse</strong>）追踪多步 Agent 的执行轨迹（Trace），以及 <strong>LLM 评估框架</strong>（如 <strong>RAGAS</strong>、<strong>Patronus AI</strong>）对答案质量进行定量评估。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="适用场景建议"><a href="#适用场景建议" class="headerlink" title="适用场景建议"></a>适用场景建议</h2><h3 id="适合【传统-RAG】的场景："><a href="#适合【传统-RAG】的场景：" class="headerlink" title="适合【传统 RAG】的场景："></a>适合【传统 RAG】的场景：</h3><ul>
+<li><strong>静态文档问答</strong>：如内部员工手册查询、固定流程的FAQ机器人。</li>
+<li><strong>对延迟极度敏感的应用</strong>：需要在1-2秒内必须返回结果的实时C端应用。</li>
+<li><strong>开发预算与算力有限</strong>：不需要复杂的逻辑推理，仅需基础知识锚定。</li>
+</ul>
+<h3 id="适合【Agentic-RAG】的场景："><a href="#适合【Agentic-RAG】的场景：" class="headerlink" title="适合【Agentic RAG】的场景："></a>适合【Agentic RAG】的场景：</h3><ul>
+<li><strong>复杂的企业级跨域检索</strong>：如金融合规助手（需要调取财报数据库、比对内部政策文档、抓取最新监管网页，并交叉验证以生成研报）。</li>
+<li><strong>主动式客户支持 (Action-oriented Support)</strong>：不仅要回答”退货政策是什么”，还需要Agent根据用户的账户权限，自主调取CRM数据，判断是否符合退换条件，并<strong>直接在系统内触发退货工单</strong>。</li>
+<li><strong>模糊查询与多跳推理 (Multi-hop Queries)</strong>：如”对比过去三年我们在亚太区和欧洲区遇到最多的客诉问题及解决方案”，传统RAG无法一次性拼凑这些分散数据，而Agentic RAG可以分步拆解执行。</li>
+</ul>
+<h3 id="【混合架构（Hybrid）】：工程实践中的过渡方案"><a href="#【混合架构（Hybrid）】：工程实践中的过渡方案" class="headerlink" title="【混合架构（Hybrid）】：工程实践中的过渡方案"></a>【混合架构（Hybrid）】：工程实践中的过渡方案</h3><p>在”成本/延迟”与”智能水平”之间寻求最优平衡的企业，往往会采用<strong>混合部署策略</strong>：</p>
+<pre class="mermaid">flowchart LR
+    A[用户 Query] --&gt; B{Query 复杂度判断}
+    B --&gt;|简单/高频| C[传统 RAG\n快速返回初步答案]
+    B --&gt;|复杂/低频| D[Agentic RAG\n深度推理与多步检索]
+    C --&gt;|置信度低| D
+    D --&gt; E[高质量最终答案]
+    C --&gt; E</pre>
+
+<p><strong>核心思路</strong>：先由传统 RAG 快速返回初步答案（解决延迟问题），同时在后台判断该问题是否需要 Agent 深度处理。若 Agent 的结果置信度更高，则通过流式更新替换初步答案。这种”先出草稿，再精修”的模式在 C 端产品中用户体验更佳。</p>
+<hr>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>传统RAG解决的是AI的 <strong>“信息获取问题（What）”</strong>，它将大模型变成了开卷考试的学生；而Agentic RAG解决的则是 <strong>“问题解决能力（How）”</strong>，它将大模型升级为一个具备思考能力、拥有工具箱并懂得自我检查的”研究员兼执行者”。</p>
+<p>两者并非简单的替代关系，而是面向不同任务复杂度的<strong>工程选择</strong>。在实际落地中，企业需要根据具体的<strong>容错率（Error Tolerance，即业务能接受多少比例的错误答案）<strong>和</strong>任务复杂度（Query Complexity）</strong>，在成本、延迟与智能水平之间做出合理的工程取舍。</p>
+<p>随着大模型基础推理能力的不断提升和推理成本（Inference Cost）的持续下降（GPT-4 级别模型的推理成本在过去两年已下降超过90%），<strong>Agentic RAG 将成为企业级复杂 AI 应用的必然架构趋势</strong>，而今天的工程权衡，将随着成本曲线的下降而逐渐消解。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/03/18/%E4%BC%A0%E7%BB%9FRAG%E4%B8%8EAgentic-RAG%E7%9A%84%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%B7%AE%E5%BC%82%E5%88%86%E6%9E%90/" title="传统RAG与Agentic RAG的架构演进与差异分析" target="_blank" rel="external">https://www.silenceboy.com/2026/03/18/传统RAG与Agentic-RAG的架构演进与差异分析/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2026/03/20/MoE%EF%BC%88Mixture-of-Experts%EF%BC%89%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3/" title="MoE（Mixture of Experts）架构详解"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2026/03/17/MMR%E5%9C%A8Agent%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/" title="MMR在Agent系统中的应用"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

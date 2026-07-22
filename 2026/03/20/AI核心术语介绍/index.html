@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>AI核心术语介绍 | morty的个人博客</title>
+  <meta name="description" content="为了让团队中无论技术背景深浅的成员都能在同一套话语体系下交流，我将这些词汇分成了七大类，并为每个词提供了 “标准定义” 和 “通俗比喻”，让你和团队一看就懂。  第一部分：模型基础概念（Model Fundamentals）这一部分是理解一切AI技术的地基，建议优先掌握。 LLM（Large Language Model &#x2F; 大语言模型） 标准定义：基于Transformer架构、经过海">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI核心术语介绍">
+<meta property="og:url" content="https://www.silenceboy.com/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="为了让团队中无论技术背景深浅的成员都能在同一套话语体系下交流，我将这些词汇分成了七大类，并为每个词提供了 “标准定义” 和 “通俗比喻”，让你和团队一看就懂。  第一部分：模型基础概念（Model Fundamentals）这一部分是理解一切AI技术的地基，建议优先掌握。 LLM（Large Language Model &#x2F; 大语言模型） 标准定义：基于Transformer架构、经过海">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-20T15:06:50.000Z">
+<meta property="article:modified_time" content="2026-07-22T01:25:54.679Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">27</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 14px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.8px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 13.9px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/07/">七月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/04/">四月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/03/">三月 2026</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" class="title">MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-07-22T01:40:42.000Z" itemprop="datePublished">2026-07-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/04/01/Harness-Engineering%E4%BB%8B%E7%BB%8D/" class="title">Harness Engineering介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-04-01T09:58:03.000Z" itemprop="datePublished">2026-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-LLM-%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E5%88%A9%E5%99%A8%EF%BC%9AKV-Cache-%E8%AF%A6%E8%A7%A3/" class="title">深入浅出 LLM 推理加速利器：KV Cache 详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T17:14:42.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" class="title">QMD记忆系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T16:57:22.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" class="title">AI核心术语介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-20T15:06:50.000Z" itemprop="datePublished">2026-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%EF%BC%9A%E6%A8%A1%E5%9E%8B%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%EF%BC%88Model-Fundamentals%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">第一部分：模型基础概念（Model Fundamentals）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#LLM%EF%BC%88Large-Language-Model-%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">LLM（Large Language Model &#x2F; 大语言模型）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Foundation-Model%EF%BC%88%E5%9F%BA%E7%A1%80%E6%A8%A1%E5%9E%8B-%E5%A4%A7%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="toc-number">1.2.</span> <span class="toc-text">Foundation Model（基础模型 &#x2F; 大模型）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Multimodal%EF%BC%88%E5%A4%9A%E6%A8%A1%E6%80%81%EF%BC%89"><span class="toc-number">1.3.</span> <span class="toc-text">Multimodal（多模态）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hallucination%EF%BC%88%E5%B9%BB%E8%A7%89%EF%BC%89"><span class="toc-number">1.4.</span> <span class="toc-text">Hallucination（幻觉）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Grounding%EF%BC%88%E8%90%BD%E5%9C%B0-%E6%8E%A5%E5%9C%B0%EF%BC%89"><span class="toc-number">1.5.</span> <span class="toc-text">Grounding（落地 &#x2F; 接地）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Inference%EF%BC%88%E6%8E%A8%E7%90%86-%E6%A8%A1%E5%9E%8B%E6%9C%8D%E5%8A%A1%EF%BC%89"><span class="toc-number">1.6.</span> <span class="toc-text">Inference（推理 &#x2F; 模型服务）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Benchmark%EF%BC%88%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%EF%BC%89"><span class="toc-number">1.7.</span> <span class="toc-text">Benchmark（基准测试）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%EF%BC%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%AE%B6%E6%97%8F%EF%BC%88Agent-Ecosystem%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">第二部分：智能体家族（Agent Ecosystem）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Agent%EF%BC%88%E6%99%BA%E8%83%BD%E4%BD%93%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">Agent（智能体）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SubAgent%EF%BC%88%E5%AD%90%E6%99%BA%E8%83%BD%E4%BD%93%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">SubAgent（子智能体）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Multi-Agent%EF%BC%88%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E7%B3%BB%E7%BB%9F%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">Multi-Agent（多智能体系统）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Copilot%EF%BC%88%E5%89%AF%E9%A9%BE%E9%A9%B6-%E5%8A%A9%E6%89%8B%EF%BC%89"><span class="toc-number">2.4.</span> <span class="toc-text">Copilot（副驾驶 &#x2F; 助手）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Agentic%EF%BC%88%E6%99%BA%E8%83%BD%E4%BD%93%E5%8C%96%EF%BC%89"><span class="toc-number">2.5.</span> <span class="toc-text">Agentic（智能体化）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Orchestration%EF%BC%88%E7%BC%96%E6%8E%92%EF%BC%89"><span class="toc-number">2.6.</span> <span class="toc-text">Orchestration（编排）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Human-in-the-Loop%EF%BC%88%E4%BA%BA%E6%9C%BA%E5%8D%8F%E4%BD%9C%E5%9B%9E%E8%B7%AF%EF%BC%89"><span class="toc-number">2.7.</span> <span class="toc-text">Human-in-the-Loop（人机协作回路）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Guardrails%EF%BC%88%E6%8A%A4%E6%A0%8F%EF%BC%89"><span class="toc-number">2.8.</span> <span class="toc-text">Guardrails（护栏）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#A2A%EF%BC%88Agent-to-Agent-Protocol-%E6%99%BA%E8%83%BD%E4%BD%93%E9%97%B4%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%EF%BC%89"><span class="toc-number">2.9.</span> <span class="toc-text">A2A（Agent-to-Agent Protocol &#x2F; 智能体间通信协议）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ACP%EF%BC%88Agent-Communication-Protocol-%E6%99%BA%E8%83%BD%E4%BD%93%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%EF%BC%89"><span class="toc-number">2.10.</span> <span class="toc-text">ACP（Agent Communication Protocol &#x2F; 智能体通信协议）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%EF%BC%9A%E8%83%BD%E5%8A%9B%E4%B8%8E%E5%B7%A5%E5%85%B7%EF%BC%88Capabilities-Tools%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">第三部分：能力与工具（Capabilities &amp; Tools）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SKILLS%EF%BC%88%E6%8A%80%E8%83%BD-%E6%8A%80%E8%83%BD%E6%96%87%E4%BB%B6%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">SKILLS（技能&#x2F;技能文件）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Plugin%EF%BC%88%E6%8F%92%E4%BB%B6%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">Plugin（插件）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Function-Calling-Tool-Use%EF%BC%88%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8-%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">Function Calling &#x2F; Tool Use（工具调用 &#x2F; 函数调用）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Embedding%EF%BC%88%E5%90%91%E9%87%8F%E5%B5%8C%E5%85%A5%EF%BC%89"><span class="toc-number">3.4.</span> <span class="toc-text">Embedding（向量嵌入）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RAG%EF%BC%88Retrieval-Augmented-Generation-%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%EF%BC%89"><span class="toc-number">3.5.</span> <span class="toc-text">RAG（Retrieval-Augmented Generation &#x2F; 检索增强生成）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Agentic-RAG%EF%BC%88%E6%99%BA%E8%83%BD%E4%BD%93%E5%8C%96%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90%EF%BC%89"><span class="toc-number">3.6.</span> <span class="toc-text">Agentic RAG（智能体化检索增强生成）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AIGC%EF%BC%88AI-Generated-Content-AI%E7%94%9F%E6%88%90%E5%86%85%E5%AE%B9%EF%BC%89"><span class="toc-number">3.7.</span> <span class="toc-text">AIGC（AI Generated Content &#x2F; AI生成内容）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%EF%BC%9A%E7%B3%BB%E7%BB%9F%E8%BF%9E%E6%8E%A5%E4%B8%8E%E5%B7%A5%E7%A8%8B%EF%BC%88System-Engineering%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">第四部分：系统连接与工程（System &amp; Engineering）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MCP%EF%BC%88Model-Context-Protocol-%E6%A8%A1%E5%9E%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%8D%8F%E8%AE%AE%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">MCP（Model Context Protocol &#x2F; 模型上下文协议）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HOOK%EF%BC%88%E9%92%A9%E5%AD%90%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">HOOK（钩子）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Memory%EF%BC%88%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%EF%BC%89"><span class="toc-number">4.3.</span> <span class="toc-text">Memory（记忆机制）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Token%EF%BC%88%E4%BB%A4%E7%89%8C%EF%BC%89"><span class="toc-number">4.4.</span> <span class="toc-text">Token（令牌）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Context-Window%EF%BC%88%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%EF%BC%89"><span class="toc-number">4.5.</span> <span class="toc-text">Context Window（上下文窗口）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Streaming%EF%BC%88%E6%B5%81%E5%BC%8F%E8%BE%93%E5%87%BA%EF%BC%89"><span class="toc-number">4.6.</span> <span class="toc-text">Streaming（流式输出）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Latency-Throughput%EF%BC%88%E5%BB%B6%E8%BF%9F-%E5%90%9E%E5%90%90%E9%87%8F%EF%BC%89"><span class="toc-number">4.7.</span> <span class="toc-text">Latency &#x2F; Throughput（延迟 &#x2F; 吞吐量）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Temperature%EF%BC%88%E6%B8%A9%E5%BA%A6-%E9%9A%8F%E6%9C%BA%E6%80%A7%EF%BC%89"><span class="toc-number">4.8.</span> <span class="toc-text">Temperature（温度 &#x2F; 随机性）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TOP-P%EF%BC%88%E6%A0%B8%E9%87%87%E6%A0%B7%EF%BC%89"><span class="toc-number">4.9.</span> <span class="toc-text">TOP-P（核采样）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%EF%BC%9A%E4%BA%A4%E4%BA%92%E4%B8%8E%E7%94%A8%E6%88%B7%E7%95%8C%E9%9D%A2%EF%BC%88Interaction-UI%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">第五部分：交互与用户界面（Interaction &amp; UI）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Slash-command%EF%BC%88%E6%96%9C%E6%9D%A0%E5%91%BD%E4%BB%A4%EF%BC%89"><span class="toc-number">5.1.</span> <span class="toc-text">Slash command（斜杠命令）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Prompt%EF%BC%88%E6%8F%90%E7%A4%BA%E8%AF%8D%EF%BC%89"><span class="toc-number">5.2.</span> <span class="toc-text">Prompt（提示词）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#User-Prompt%EF%BC%88%E7%94%A8%E6%88%B7%E6%8F%90%E7%A4%BA%E8%AF%8D%EF%BC%89"><span class="toc-number">5.3.</span> <span class="toc-text">User Prompt（用户提示词）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#System-Prompt%EF%BC%88%E7%B3%BB%E7%BB%9F%E6%8F%90%E7%A4%BA%E8%AF%8D%EF%BC%89"><span class="toc-number">5.4.</span> <span class="toc-text">System Prompt（系统提示词）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Prompt-Engineering%EF%BC%88%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%B7%A5%E7%A8%8B%EF%BC%89"><span class="toc-number">5.5.</span> <span class="toc-text">Prompt Engineering（提示词工程）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Few-shot%EF%BC%88%E5%B0%91%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0%EF%BC%89"><span class="toc-number">5.6.</span> <span class="toc-text">Few-shot（少样本学习）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Zero-shot%EF%BC%88%E9%9B%B6%E6%A0%B7%E6%9C%AC%E5%AD%A6%E4%B9%A0%EF%BC%89"><span class="toc-number">5.7.</span> <span class="toc-text">Zero-shot（零样本学习）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Workflow%EF%BC%88%E5%B7%A5%E4%BD%9C%E6%B5%81%EF%BC%89"><span class="toc-number">5.8.</span> <span class="toc-text">Workflow（工作流）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%EF%BC%9A%E6%8E%A8%E7%90%86%E7%AD%96%E7%95%A5%E4%B8%8E%E6%8A%80%E5%B7%A7%EF%BC%88Reasoning-Strategies%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">第六部分：推理策略与技巧（Reasoning Strategies）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CoT%EF%BC%88Chain-of-Thought-%E6%80%9D%E7%BB%B4%E9%93%BE%EF%BC%89"><span class="toc-number">6.1.</span> <span class="toc-text">CoT（Chain of Thought &#x2F; 思维链）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ToT%EF%BC%88Tree-of-Thought-%E6%80%9D%E7%BB%B4%E6%A0%91%EF%BC%89"><span class="toc-number">6.2.</span> <span class="toc-text">ToT（Tree of Thought &#x2F; 思维树）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ReACT%EF%BC%88Reasoning-and-Acting-%E6%8E%A8%E7%90%86%E4%B8%8E%E8%A1%8C%E5%8A%A8%EF%BC%89"><span class="toc-number">6.3.</span> <span class="toc-text">ReACT（Reasoning and Acting &#x2F; 推理与行动）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Extended-Thinking%EF%BC%88%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83-%E6%89%A9%E5%B1%95%E6%8E%A8%E7%90%86%EF%BC%89"><span class="toc-number">6.4.</span> <span class="toc-text">Extended Thinking（深度思考 &#x2F; 扩展推理）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%EF%BC%9A%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E4%B8%8E%E4%BC%98%E5%8C%96%EF%BC%88Model-Training-Optimization%EF%BC%89"><span class="toc-number">7.</span> <span class="toc-text">第七部分：模型训练与优化（Model Training &amp; Optimization）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Pre-training%EF%BC%88%E9%A2%84%E8%AE%AD%E7%BB%83%EF%BC%89"><span class="toc-number">7.1.</span> <span class="toc-text">Pre-training（预训练）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SFT%EF%BC%88Supervised-Fine-Tuning-%E7%9B%91%E7%9D%A3%E5%BE%AE%E8%B0%83%EF%BC%89"><span class="toc-number">7.2.</span> <span class="toc-text">SFT（Supervised Fine-Tuning &#x2F; 监督微调）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fine-tuning%EF%BC%88%E5%BE%AE%E8%B0%83%EF%BC%89"><span class="toc-number">7.3.</span> <span class="toc-text">Fine-tuning（微调）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LoRA%EF%BC%88Low-Rank-Adaptation-%E4%BD%8E%E7%A7%A9%E9%80%82%E5%BA%94%EF%BC%89"><span class="toc-number">7.4.</span> <span class="toc-text">LoRA（Low-Rank Adaptation &#x2F; 低秩适应）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RLHF%EF%BC%88Reinforcement-Learning-from-Human-Feedback-%E4%BA%BA%E7%B1%BB%E5%8F%8D%E9%A6%88%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0%EF%BC%89"><span class="toc-number">7.5.</span> <span class="toc-text">RLHF（Reinforcement Learning from Human Feedback &#x2F; 人类反馈强化学习）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DPO%EF%BC%88Direct-Preference-Optimization-%E7%9B%B4%E6%8E%A5%E5%81%8F%E5%A5%BD%E4%BC%98%E5%8C%96%EF%BC%89"><span class="toc-number">7.6.</span> <span class="toc-text">DPO（Direct Preference Optimization &#x2F; 直接偏好优化）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Distillation%EF%BC%88%E7%9F%A5%E8%AF%86%E8%92%B8%E9%A6%8F%EF%BC%89"><span class="toc-number">7.7.</span> <span class="toc-text">Distillation（知识蒸馏）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MoE%EF%BC%88Mixture-of-Experts-%E6%B7%B7%E5%90%88%E4%B8%93%E5%AE%B6%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="toc-number">7.8.</span> <span class="toc-text">MoE（Mixture of Experts &#x2F; 混合专家模型）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Quantization%EF%BC%88%E9%87%8F%E5%8C%96%EF%BC%89"><span class="toc-number">7.9.</span> <span class="toc-text">Quantization（量化）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%92%A1-%E6%80%BB%E7%BB%93%E4%B8%80%E5%8F%A5%E8%AF%9D%E9%80%9F%E8%AE%B0%EF%BC%9A"><span class="toc-number">8.</span> <span class="toc-text">💡 总结一句话速记：</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-AI核心术语介绍" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      AI核心术语介绍
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" class="article-date">
+	  <time datetime="2026-03-20T15:06:50.000Z" itemprop="datePublished">2026-03-20</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 8.4k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 29(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>为了让团队中无论技术背景深浅的成员都能在同一套话语体系下交流，我将这些词汇分成了七大类，并为每个词提供了 <strong>“标准定义”</strong> 和 <strong>“通俗比喻”</strong>，让你和团队一看就懂。</p>
+<hr>
+<h2 id="第一部分：模型基础概念（Model-Fundamentals）"><a href="#第一部分：模型基础概念（Model-Fundamentals）" class="headerlink" title="第一部分：模型基础概念（Model Fundamentals）"></a>第一部分：模型基础概念（Model Fundamentals）</h2><p><em>这一部分是理解一切AI技术的地基，建议优先掌握。</em></p>
+<h3 id="LLM（Large-Language-Model-大语言模型）"><a href="#LLM（Large-Language-Model-大语言模型）" class="headerlink" title="LLM（Large Language Model &#x2F; 大语言模型）"></a>LLM（Large Language Model &#x2F; 大语言模型）</h3><ul>
+<li><strong>标准定义</strong>：基于Transformer架构、经过海量文本数据预训练的大规模神经网络模型，能够理解和生成自然语言。GPT、Claude、Gemini等现代AI产品的核心技术基础均属此类。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的大脑本体”</strong>。我们平时说的”问AI”，背后就是在调用一个LLM。它不是某个具体产品，而是一类技术的统称，就像说”汽车的发动机”而不是”某辆车”。</li>
+</ul>
+<h3 id="Foundation-Model（基础模型-大模型）"><a href="#Foundation-Model（基础模型-大模型）" class="headerlink" title="Foundation Model（基础模型 &#x2F; 大模型）"></a>Foundation Model（基础模型 &#x2F; 大模型）</h3><ul>
+<li><strong>标准定义</strong>：在极大规模数据上预训练的通用模型，可作为各类下游任务的起点，通过微调适配不同场景。LLM是Foundation Model的一个子集（专指语言模型），视觉大模型、多模态大模型也属此类。</li>
+<li><strong>通俗比喻</strong>：<strong>“乐高底座”</strong>。Foundation Model就是那块大底板，上面可以搭出医疗AI、法律AI、客服AI……各种形态的应用，而不用每次从零开始搭。</li>
+</ul>
+<h3 id="Multimodal（多模态）"><a href="#Multimodal（多模态）" class="headerlink" title="Multimodal（多模态）"></a>Multimodal（多模态）</h3><ul>
+<li><strong>标准定义</strong>：能够同时理解和处理多种类型信息（文字、图像、音频、视频等）的AI能力。与只能处理文字的纯语言模型相区别。</li>
+<li><strong>通俗比喻</strong>：<strong>“五感俱全的AI”</strong>。早期AI只能”读字”，多模态AI能同时”看图、听声音、读文字”。你可以给它发一张菜单照片，问它”这家餐厅有没有适合素食者的菜”，它直接看图回答。</li>
+</ul>
+<h3 id="Hallucination（幻觉）"><a href="#Hallucination（幻觉）" class="headerlink" title="Hallucination（幻觉）"></a>Hallucination（幻觉）</h3><ul>
+<li><strong>标准定义</strong>：AI模型生成看似合理但实际上不准确、无中生有甚至完全错误信息的现象。这是当前大语言模型的主要缺陷之一，源于模型基于统计概率生成文本而非真实理解。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI在一本正经地胡说八道”</strong>。AI会自信地编造不存在的论文引用、错误的历史事件、假冒的统计数据。RAG、Grounding等技术的核心目标之一，就是减少幻觉的发生。</li>
+</ul>
+<h3 id="Grounding（落地-接地）"><a href="#Grounding（落地-接地）" class="headerlink" title="Grounding（落地 &#x2F; 接地）"></a>Grounding（落地 &#x2F; 接地）</h3><ul>
+<li><strong>标准定义</strong>：将AI的生成内容与真实、可验证的信息来源绑定的能力和过程，确保模型输出有据可查，而非凭空捏造。是解决Hallucination问题的核心手段。</li>
+<li><strong>通俗比喻</strong>：<strong>“让AI说话有出处”</strong>。未接地的AI像没有参考资料的学生，靠感觉写答案；Grounding就是要求AI每句话都注明”来源于哪份文件第几页”，确保输出可信、可追溯。</li>
+</ul>
+<h3 id="Inference（推理-模型服务）"><a href="#Inference（推理-模型服务）" class="headerlink" title="Inference（推理 &#x2F; 模型服务）"></a>Inference（推理 &#x2F; 模型服务）</h3><ul>
+<li><strong>标准定义</strong>：使用已训练好的模型对新输入进行处理并生成输出的过程，与”训练”阶段相对。工程层面通常指将模型部署为服务（Inference Service），供应用调用。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI上班干活”</strong>。训练是AI”读书学习”，Inference是AI”学完了正式上岗接活”。你每次发消息给ChatGPT，触发的就是一次Inference，不会改变模型本身。</li>
+</ul>
+<h3 id="Benchmark（基准测试）"><a href="#Benchmark（基准测试）" class="headerlink" title="Benchmark（基准测试）"></a>Benchmark（基准测试）</h3><ul>
+<li><strong>标准定义</strong>：用于客观、标准化地衡量和比较AI模型能力的测试集合，通常包含特定任务的题目和评分标准。常见的有MMLU（综合知识）、HumanEval（代码能力）、GSM8K（数学推理）等。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的高考成绩单”</strong>。不同AI厂商都说自己的模型”最强”，Benchmark就是用统一的试卷让所有模型参加同一场考试，用分数说话。发布新模型时，厂商通常会附上一堆Benchmark得分证明实力。</li>
+</ul>
+<hr>
+<h2 id="第二部分：智能体家族（Agent-Ecosystem）"><a href="#第二部分：智能体家族（Agent-Ecosystem）" class="headerlink" title="第二部分：智能体家族（Agent Ecosystem）"></a>第二部分：智能体家族（Agent Ecosystem）</h2><p><em>这一部分描述的是AI”打工人”的不同形态和组织架构。</em></p>
+<h3 id="Agent（智能体）"><a href="#Agent（智能体）" class="headerlink" title="Agent（智能体）"></a>Agent（智能体）</h3><ul>
+<li><p><strong>标准定义</strong>：具备自主感知环境、进行决策并执行动作的AI系统。它不仅能”陪聊”，还能使用工具自动完成特定目标。一个完整的Agent由以下部分组成：</p>
+<table>
+<thead>
+<tr>
+<th align="left">组成要素</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">LLM</td>
+<td align="left">推理大脑，负责理解意图、规划步骤、生成输出</td>
+</tr>
+<tr>
+<td align="left">Memory</td>
+<td align="left">短期记忆（上下文窗口）+ 长期记忆（向量数据库检索）</td>
+</tr>
+<tr>
+<td align="left">Tools</td>
+<td align="left">Agent 可调用的能力，如搜索、代码执行、数据库查询</td>
+</tr>
+<tr>
+<td align="left">MCP</td>
+<td align="left">工具的标准化接入协议，统一定义工具的描述、调用方式和权限边界</td>
+</tr>
+<tr>
+<td align="left">Skills</td>
+<td align="left">结构化行为指南，告诉 Agent”在特定场景下应该怎么做”，类似 SOP</td>
+</tr>
+<tr>
+<td align="left">RAG</td>
+<td align="left">知识检索增强，在推理前注入领域知识，弥补 LLM 训练数据的盲区</td>
+</tr>
+<tr>
+<td align="left">State&#x2F;Context</td>
+<td align="left">Agent 当前任务的工作状态，驱动多步骤执行的”中间记忆”</td>
+</tr>
+<tr>
+<td align="left">A2A</td>
+<td align="left">Agent 之间的通信标准，用于跨系统发现能力和委托任务</td>
+</tr>
+</tbody></table>
+<p>一句话类比：</p>
+<ul>
+<li>LLM &#x3D; 大脑</li>
+<li>Tools&#x2F;MCP &#x3D; 双手（能做什么）</li>
+<li>Skills &#x3D; 工作手册（怎么做）</li>
+<li>Memory&#x2F;RAG &#x3D; 笔记本（知道什么）</li>
+<li>State &#x3D; 便利贴（正在做什么）</li>
+<li>A2A &#x3D; 对讲机（和其他 Agent 协作）</li>
+</ul>
+</li>
+<li><p><strong>通俗比喻</strong>：<strong>“独立打工人”</strong>。你给它一个任务（比如”帮我策划一场三亚旅行并订票”），它能自己上网查攻略、比对价格、最终完成预订，而不是每次都需要你手把手教。</p>
+</li>
+</ul>
+<h3 id="SubAgent（子智能体）"><a href="#SubAgent（子智能体）" class="headerlink" title="SubAgent（子智能体）"></a>SubAgent（子智能体）</h3><ul>
+<li><strong>标准定义</strong>：在复杂任务中，由主Agent衍生或调用的，专门负责解决某一特定子任务的轻量级智能体。</li>
+<li><strong>通俗比喻</strong>：<strong>“外包小弟”</strong>。主Agent是项目经理，当遇到需要写代码的环节时，它把任务派给专门负责写代码的”SubAgent”，SubAgent写完后再把结果交还给主Agent。</li>
+</ul>
+<h3 id="Multi-Agent（多智能体系统）"><a href="#Multi-Agent（多智能体系统）" class="headerlink" title="Multi-Agent（多智能体系统）"></a>Multi-Agent（多智能体系统）</h3><ul>
+<li><strong>标准定义</strong>：由多个Agent组成的系统，它们具有不同的角色和设定，通过相互交流、协作或竞争来完成复杂的宏大任务。</li>
+<li><strong>通俗比喻</strong>：<strong>“一个项目团队”</strong>。比如一个写代码的AI团队里，有”产品经理Agent”提需求，”程序员Agent”写代码，”测试员Agent”找Bug。大家在同一个群里互相协作。</li>
+</ul>
+<h3 id="Copilot（副驾驶-助手）"><a href="#Copilot（副驾驶-助手）" class="headerlink" title="Copilot（副驾驶 &#x2F; 助手）"></a>Copilot（副驾驶 &#x2F; 助手）</h3><ul>
+<li><strong>标准定义</strong>：一种辅助型AI，需要人类主导，AI在其侧提供建议、补全或草稿生成。</li>
+<li><strong>通俗比喻</strong>：<strong>“坐在副驾的导航员”</strong>。方向盘在你手里，它只负责帮你指路和递水（比如帮你自动补全一行代码，或帮你润色一封邮件）。</li>
+</ul>
+<h3 id="Agentic（智能体化）"><a href="#Agentic（智能体化）" class="headerlink" title="Agentic（智能体化）"></a>Agentic（智能体化）</h3><ul>
+<li><strong>标准定义</strong>：描述AI系统具备自主规划、多步骤执行和工具调用能力的特性，强调AI从被动”问答”转向主动”行动”的范式转变。</li>
+<li><strong>通俗比喻</strong>：<strong>“从收银员到店长”</strong>。普通AI就像收银员，只负责回答你的问题；Agentic AI则像店长，会主动帮你安排进货、排班、处理投诉，全程不用你操心每一步。</li>
+</ul>
+<h3 id="Orchestration（编排）"><a href="#Orchestration（编排）" class="headerlink" title="Orchestration（编排）"></a>Orchestration（编排）</h3><ul>
+<li><strong>标准定义</strong>：协调多个Agent、工具或处理步骤按照特定逻辑（顺序、并行、条件分支）自动执行的能力，是Multi-Agent系统和复杂Workflow的核心控制机制。</li>
+<li><strong>通俗比喻</strong>：<strong>“乐队指挥”</strong>。多个Agent就像乐手，各有其职；Orchestration就是那位指挥，决定谁先演奏、谁同时演奏、某个乐手出错了下一步怎么应对，保证整体节奏协调一致。</li>
+</ul>
+<h3 id="Human-in-the-Loop（人机协作回路）"><a href="#Human-in-the-Loop（人机协作回路）" class="headerlink" title="Human-in-the-Loop（人机协作回路）"></a>Human-in-the-Loop（人机协作回路）</h3><ul>
+<li><strong>标准定义</strong>：在AI自动化流程中的关键节点引入人工审核、确认或干预的设计模式，确保高风险决策或重要步骤经过人类把关，而非完全依赖AI自主执行。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI先起草，人再签字”</strong>。比如AI写好合同草案后，不直接发出，而是暂停等待法务人员审核确认。这套机制在金融、医疗、法律等高风险场景中至关重要，平衡了效率与安全。</li>
+</ul>
+<h3 id="Guardrails（护栏）"><a href="#Guardrails（护栏）" class="headerlink" title="Guardrails（护栏）"></a>Guardrails（护栏）</h3><ul>
+<li><strong>标准定义</strong>：约束AI系统行为边界的安全机制，包括内容过滤、输出格式校验、禁止特定话题、防止越权操作等，确保AI在预设的安全范围内运行。</li>
+<li><strong>通俗比喻</strong>：<strong>“给AI装的保险装置”</strong>。就像汽车有安全带、防撞系统，Guardrails是给AI加的”护栏”——防止它说出有害内容、泄露敏感数据或执行危险操作。System Prompt中的边界规定和HOOK拦截，都是Guardrails的实现形式。</li>
+</ul>
+<h3 id="A2A（Agent-to-Agent-Protocol-智能体间通信协议）"><a href="#A2A（Agent-to-Agent-Protocol-智能体间通信协议）" class="headerlink" title="A2A（Agent-to-Agent Protocol &#x2F; 智能体间通信协议）"></a>A2A（Agent-to-Agent Protocol &#x2F; 智能体间通信协议）</h3><ul>
+<li><strong>标准定义</strong>：由Google等公司推动的开放协议标准，定义了不同AI智能体之间如何互相发现、通信和委托任务，实现跨系统、跨平台的Agent协作。</li>
+<li><strong>通俗比喻</strong>：<strong>“Agent界的外交协议”</strong>。就像不同国家之间需要统一的外交礼仪才能沟通，不同公司的AI Agent也需要A2A这套”通用语言”，才能互相认识、分配任务、传递结果。</li>
+</ul>
+<h3 id="ACP（Agent-Communication-Protocol-智能体通信协议）"><a href="#ACP（Agent-Communication-Protocol-智能体通信协议）" class="headerlink" title="ACP（Agent Communication Protocol &#x2F; 智能体通信协议）"></a>ACP（Agent Communication Protocol &#x2F; 智能体通信协议）</h3><ul>
+<li><strong>标准定义</strong>：由IBM等公司推动的智能体通信协议，侧重于本地&#x2F;局域网环境中多个智能体之间的消息格式规范与通信方式，与A2A互为补充。</li>
+<li><strong>通俗比喻</strong>：<strong>“公司内部通讯系统”</strong>。如果A2A是国际外交协议，ACP更像是公司内部的对讲机或飞书系统，专门负责同一个”园区”内的Agent快速沟通，效率更高，安全性更强。</li>
+</ul>
+<hr>
+<h2 id="第三部分：能力与工具（Capabilities-Tools）"><a href="#第三部分：能力与工具（Capabilities-Tools）" class="headerlink" title="第三部分：能力与工具（Capabilities &amp; Tools）"></a>第三部分：能力与工具（Capabilities &amp; Tools）</h2><p><em>这一部分描述的是AI如何与外部世界互动，以及它的”武器库”。</em></p>
+<h3 id="SKILLS（技能-技能文件）"><a href="#SKILLS（技能-技能文件）" class="headerlink" title="SKILLS（技能&#x2F;技能文件）"></a>SKILLS（技能&#x2F;技能文件）</h3><ul>
+<li><strong>标准定义</strong>：Agent Skills 是一种以 Markdown 文件形式定义的、面向特定任务类型的<strong>行为指引与工作流程模板</strong>。它不是可执行代码，而是告诉 AI Agent “遇到这类任务时，应该按照哪套步骤、以什么方式去处理”的结构化指令集。当 Agent 识别出当前任务与某个 Skill 匹配时，便会主动加载并遵循该 Skill 中定义的流程。</li>
+<li><strong>通俗比喻</strong>：<strong>“新员工入职时拿到的SOP手册”</strong>。公司不会口头告诉每个新人”遇到客诉怎么办”，而是提前写好一本《客诉处理标准流程》。同理，给 AI Agent 配上一个”代码审查 Skill”，它每次做 Code Review 时就会自动翻出这本”操作手册”，按章办事，而不是每次靠自己临场发挥。</li>
+</ul>
+<h3 id="Plugin（插件）"><a href="#Plugin（插件）" class="headerlink" title="Plugin（插件）"></a>Plugin（插件）</h3><ul>
+<li><strong>标准定义</strong>：一种可插拔的软件组件，允许AI系统连接到第三方的应用程序或服务中，从而扩展AI的原生能力。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的App Store”</strong>。就像你的手机安装了”美团”App就能点外卖一样，AI安装了”携程插件”就能查机票，安装了”PDF阅读插件”就能读长文档。</li>
+</ul>
+<h3 id="Function-Calling-Tool-Use（工具调用-函数调用）"><a href="#Function-Calling-Tool-Use（工具调用-函数调用）" class="headerlink" title="Function Calling &#x2F; Tool Use（工具调用 &#x2F; 函数调用）"></a>Function Calling &#x2F; Tool Use（工具调用 &#x2F; 函数调用）</h3><ul>
+<li><strong>标准定义</strong>：允许LLM在生成回答时，识别出需要调用外部工具（如搜索引擎、数据库、API、代码解释器）的时机，生成结构化的调用指令，并将工具返回的结果整合进最终回答的能力。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI学会使用工具了”</strong>。没有Tool Use的AI只能凭记忆回答；有了Tool Use，AI发现”这个问题需要查最新股价”时，能自己调出股票API查询，再把结果告诉你。Plugin的底层实现机制，正是Function Calling。</li>
+</ul>
+<h3 id="Embedding（向量嵌入）"><a href="#Embedding（向量嵌入）" class="headerlink" title="Embedding（向量嵌入）"></a>Embedding（向量嵌入）</h3><ul>
+<li><strong>标准定义</strong>：将文字、图像等非结构化信息转化为高维数值向量的技术。语义相近的内容在向量空间中距离更近，使得计算机能够通过数学运算来衡量语义相似度。</li>
+<li><strong>通俗比喻</strong>：<strong>“把意思翻译成坐标”</strong>。”苹果”和”梨”的向量坐标会很接近，”苹果”和”火箭”的坐标会相距很远。RAG检索时，系统正是通过比较向量之间的”距离”，来判断哪些文档与问题最相关。</li>
+</ul>
+<h3 id="RAG（Retrieval-Augmented-Generation-检索增强生成）"><a href="#RAG（Retrieval-Augmented-Generation-检索增强生成）" class="headerlink" title="RAG（Retrieval-Augmented Generation &#x2F; 检索增强生成）"></a>RAG（Retrieval-Augmented Generation &#x2F; 检索增强生成）</h3><ul>
+<li><strong>标准定义</strong>：在让大模型回答问题前，先从外部知识库中检索出相关信息，然后把这些信息喂给模型，让它基于这些信息生成答案。</li>
+<li><strong>通俗比喻</strong>：<strong>“开卷考试”</strong>。AI的记忆力有限且可能会过时，RAG就是让AI在回答前，先去翻阅你给它的内部资料库，然后再作答，避免它产生”幻觉（Hallucination）”。</li>
+</ul>
+<h3 id="Agentic-RAG（智能体化检索增强生成）"><a href="#Agentic-RAG（智能体化检索增强生成）" class="headerlink" title="Agentic RAG（智能体化检索增强生成）"></a>Agentic RAG（智能体化检索增强生成）</h3><ul>
+<li><strong>标准定义</strong>：将Agent的主动决策能力与RAG的知识检索能力结合，使AI能够根据问题复杂度，自主决定是否检索、检索什么、检索多少次，而非被动地一次性检索。</li>
+<li><strong>通俗比喻</strong>：<strong>“会主动查资料的研究员”</strong>。普通RAG像一个助手，你问什么它就查什么，查一次给你答案；Agentic RAG更像一个研究员，它能自己判断”这个问题需要查三个方向的资料”，然后分多次查阅、综合分析后再给你结论。</li>
+</ul>
+<h3 id="AIGC（AI-Generated-Content-AI生成内容）"><a href="#AIGC（AI-Generated-Content-AI生成内容）" class="headerlink" title="AIGC（AI Generated Content &#x2F; AI生成内容）"></a>AIGC（AI Generated Content &#x2F; AI生成内容）</h3><ul>
+<li><strong>标准定义</strong>：泛指由人工智能模型自主生成的所有类型内容，包括文本、图像、音频、视频、代码等，是当前AI应用的核心价值输出形式。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的作品集”</strong>。以前内容都是人创作的（PGC）或用户创作的（UGC），现在AI也能独立产出内容了。你让它写稿、画图、作曲、生成视频，这些产出物统称为AIGC。</li>
+</ul>
+<hr>
+<h2 id="第四部分：系统连接与工程（System-Engineering）"><a href="#第四部分：系统连接与工程（System-Engineering）" class="headerlink" title="第四部分：系统连接与工程（System &amp; Engineering）"></a>第四部分：系统连接与工程（System &amp; Engineering）</h2><p><em>这一部分稍微偏技术，但对理解目前的AI产品架构至关重要。</em></p>
+<h3 id="MCP（Model-Context-Protocol-模型上下文协议）"><a href="#MCP（Model-Context-Protocol-模型上下文协议）" class="headerlink" title="MCP（Model Context Protocol &#x2F; 模型上下文协议）"></a>MCP（Model Context Protocol &#x2F; 模型上下文协议）</h3><ul>
+<li><strong>标准定义</strong>：由Anthropic（Claude背后的公司）等推出的一种开源标准协议，旨在标准化AI模型连接外部数据源、本地文件和工具的方式。</li>
+<li><strong>通俗比喻</strong>：<strong>“万能插座&#x2F;Type-C接口”</strong>。以前每个AI想读取你的本地文件或数据库，都要写一套专门的接口；有了MCP，就像统一了Type-C接口，无论什么AI，只要插上这个”数据线”，就能安全、无缝地读取你的工作环境和数据。</li>
+</ul>
+<h3 id="HOOK（钩子）"><a href="#HOOK（钩子）" class="headerlink" title="HOOK（钩子）"></a>HOOK（钩子）</h3><ul>
+<li><strong>标准定义</strong>：在AI处理流程（如接收用户输入、生成回答之前&#x2F;之后）中预设的拦截点。开发者可以在这些点”挂载”自定义的代码逻辑。</li>
+<li><strong>通俗比喻</strong>：<strong>“流水线上的安检站”</strong>。比如用户输入了一句话，在交给AI处理之前，先被一个”Hook”拦住，检查里面有没有敏感词；如果有，Hook就直接驳回。它能让系统更加灵活可控。</li>
+</ul>
+<h3 id="Memory（记忆机制）"><a href="#Memory（记忆机制）" class="headerlink" title="Memory（记忆机制）"></a>Memory（记忆机制）</h3><ul>
+<li><strong>标准定义</strong>：AI系统保存、检索和利用历史对话信息的能力。分为短期记忆（当前对话上下文）和长期记忆（跨越多次对话的用户画像和历史记录）。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的记事本”</strong>。没有记忆的AI就像拥有”金鱼的记忆”，每次聊天都是初次见面；有了记忆机制，它就会记住你喜欢喝无糖咖啡，下次帮你点单时会自动备注。</li>
+</ul>
+<h3 id="Token（令牌）"><a href="#Token（令牌）" class="headerlink" title="Token（令牌）"></a>Token（令牌）</h3><ul>
+<li><strong>标准定义</strong>：AI语言模型处理和生成文本的基本单位。一个Token大约对应英文中3-4个字符或中文中1-2个汉字，模型的计费和上下文长度都以Token为单位计算。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的原子&#x2F;乐高颗粒”</strong>。AI读取和生成内容时，不是逐字处理，而是把文本切成一小块一小块的Token来理解。就像乐高积木，无论多复杂的建筑，都是由基础颗粒拼成的；AI的所有输入输出，都是Token的组合与生成。</li>
+</ul>
+<h3 id="Context-Window（上下文窗口）"><a href="#Context-Window（上下文窗口）" class="headerlink" title="Context Window（上下文窗口）"></a>Context Window（上下文窗口）</h3><ul>
+<li><strong>标准定义</strong>：AI模型在单次交互中能够同时”看到”和处理的最大Token数量。超出这个窗口的内容，模型将无法感知和引用。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的工作桌面大小”</strong>。想象AI的注意力是一张桌子，上下文窗口就是桌面面积。桌子越大（如200K Tokens），能同时摊开的资料越多；桌子太小，先放上去的资料就会被推下去，AI就”忘了”之前说过什么。</li>
+</ul>
+<h3 id="Streaming（流式输出）"><a href="#Streaming（流式输出）" class="headerlink" title="Streaming（流式输出）"></a>Streaming（流式输出）</h3><ul>
+<li><strong>标准定义</strong>：AI模型边生成边向客户端推送输出内容的技术，用户能看到文字逐字出现，而无需等待模型生成全部内容后再显示，显著提升交互体验。</li>
+<li><strong>通俗比喻</strong>：<strong>“打字机效果”</strong>。你问AI一个问题，它不是思考5秒后一次性弹出500字，而是像有人在实时打字一样，字一个个出现。基于WebSocket或SSE协议实现，是几乎所有AI对话产品的标配体验。</li>
+</ul>
+<h3 id="Latency-Throughput（延迟-吞吐量）"><a href="#Latency-Throughput（延迟-吞吐量）" class="headerlink" title="Latency &#x2F; Throughput（延迟 &#x2F; 吞吐量）"></a>Latency &#x2F; Throughput（延迟 &#x2F; 吞吐量）</h3><ul>
+<li><strong>标准定义</strong>：衡量AI服务性能的两个核心指标。**延迟（Latency）**指从发送请求到收到第一个Token的时间（首字延迟&#x2F;TTFT），反映响应速度；**吞吐量（Throughput）**指系统单位时间内能处理的Token总量，反映并发处理能力。</li>
+<li><strong>通俗比喻</strong>：<strong>“外卖的出餐速度 vs 厨房产能”</strong>。延迟是”你下单到拿到第一道菜要等多久”；吞吐量是”这家厨房每小时最多能出多少份菜”。高延迟影响单个用户体验，低吞吐量则限制同时服务的用户数量。</li>
+</ul>
+<h3 id="Temperature（温度-随机性）"><a href="#Temperature（温度-随机性）" class="headerlink" title="Temperature（温度 &#x2F; 随机性）"></a>Temperature（温度 &#x2F; 随机性）</h3><ul>
+<li><strong>标准定义</strong>：控制AI输出随机性的参数。Temperature越高（如1.0-2.0），输出越多样、富有创意但不稳定；Temperature越低（如0-0.3），输出越稳定、确定但缺乏变化。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的创意旋钮”</strong>。想让AI写出奇思妙想的故事？把旋钮拧高；想让AI严格按照格式输出固定的数据报告？把旋钮调低。同一个问题，低温度AI每次回答几乎相同，高温度AI则充满惊喜（或惊吓）。</li>
+</ul>
+<h3 id="TOP-P（核采样）"><a href="#TOP-P（核采样）" class="headerlink" title="TOP-P（核采样）"></a>TOP-P（核采样）</h3><ul>
+<li><strong>标准定义</strong>：另一种控制AI输出多样性的参数。模型每次生成下一个词时，只在累积概率达到P值（如0.9）的候选词集合中随机选择，避免选到概率极低的”奇怪词汇”。</li>
+<li><strong>通俗比喻</strong>：<strong>“给候选答案划定范围”</strong>。AI下一个词有成千上万种可能，TOP-P就像规定”只从可能性前90%的候选词里挑”，把那些”匪夷所思”的极低概率选项排除在外。它与Temperature配合使用，共同调节AI输出的质量与多样性。</li>
+</ul>
+<hr>
+<h2 id="第五部分：交互与用户界面（Interaction-UI）"><a href="#第五部分：交互与用户界面（Interaction-UI）" class="headerlink" title="第五部分：交互与用户界面（Interaction &amp; UI）"></a>第五部分：交互与用户界面（Interaction &amp; UI）</h2><p><em>这一部分关乎用户如何更高效地给AI下指令。</em></p>
+<h3 id="Slash-command（斜杠命令）"><a href="#Slash-command（斜杠命令）" class="headerlink" title="Slash command（斜杠命令）"></a>Slash command（斜杠命令）</h3><ul>
+<li><strong>标准定义</strong>：一种基于文本的快捷输入方式。用户在输入框键入”&#x2F;“加上特定词汇（如 <code>/search</code>, <code>/image</code>），即可快速唤起AI的特定功能或切换模式，而无需用自然语言赘述。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的快捷键”</strong>。当你想要AI帮你画图时，与其打字说”请帮我画一张……的图”，不如直接输入 <code>/画图</code>，系统立刻秒懂并切换到画图模式。它能消除自然语言的模糊性，做到精准指挥。</li>
+</ul>
+<h3 id="Prompt（提示词）"><a href="#Prompt（提示词）" class="headerlink" title="Prompt（提示词）"></a>Prompt（提示词）</h3><ul>
+<li><strong>标准定义</strong>：人类向AI模型输入的自然语言文本，用于指导模型输出特定的内容或执行特定的任务。</li>
+<li><strong>通俗比喻</strong>：<strong>“给AI的任务简书”</strong>。你对AI说的话就是Prompt。如果指令太模糊（”写篇稿子”），AI就乱写；如果指令清晰（”用幽默的语气，写一篇关于咖啡的300字科普文章”），AI就能精准完成任务。</li>
+</ul>
+<h3 id="User-Prompt（用户提示词）"><a href="#User-Prompt（用户提示词）" class="headerlink" title="User Prompt（用户提示词）"></a>User Prompt（用户提示词）</h3><ul>
+<li><strong>标准定义</strong>：对话中由用户实时输入的消息部分，代表用户的具体请求、问题或指令，是AI模型进行当前轮次响应的直接依据。</li>
+<li><strong>通俗比喻</strong>：<strong>“你当场说的话”</strong>。每次你在对话框里打的那句”帮我翻译这段话”或”分析一下这份数据”，就是User Prompt。它是你与AI实时沟通的”话筒”。</li>
+</ul>
+<h3 id="System-Prompt（系统提示词）"><a href="#System-Prompt（系统提示词）" class="headerlink" title="System Prompt（系统提示词）"></a>System Prompt（系统提示词）</h3><ul>
+<li><strong>标准定义</strong>：在对话开始前，由开发者或产品方预先设定的隐藏指令，用于规定AI的角色身份、行为边界、回答风格和任务目标。用户通常看不到，但它持续影响AI的每一个回答。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI上岗前的入职培训手册”</strong>。在你和AI聊天之前，开发者已经悄悄告诉AI：”你是一名专业的法律顾问，只回答法律相关问题，语气要严谨正式，不得提供投资建议。”你说的每句话，AI都会在这套规则框架下进行回答。</li>
+</ul>
+<h3 id="Prompt-Engineering（提示词工程）"><a href="#Prompt-Engineering（提示词工程）" class="headerlink" title="Prompt Engineering（提示词工程）"></a>Prompt Engineering（提示词工程）</h3><ul>
+<li><strong>标准定义</strong>：通过系统性地设计、优化和迭代输入给AI的提示词，以提升模型输出质量、准确性和可控性的技术与方法论。</li>
+<li><strong>通俗比喻</strong>：<strong>“学会跟AI说话的艺术”</strong>。同样是问”写个营销方案”，高手的Prompt会写成”请以某品牌市场总监的身份，针对18-25岁女性用户，用AIDA模型写一份……”。Prompt Engineering就是这门把模糊需求变成精准指令的学问。</li>
+</ul>
+<h3 id="Few-shot（少样本学习）"><a href="#Few-shot（少样本学习）" class="headerlink" title="Few-shot（少样本学习）"></a>Few-shot（少样本学习）</h3><ul>
+<li><strong>标准定义</strong>：在Prompt中提供少量（通常2-5个）示例，让AI通过模式识别来理解任务格式和期望输出风格，无需重新训练模型。</li>
+<li><strong>通俗比喻</strong>：<strong>“举例子教学”</strong>。你想让AI按照特定格式写东西，与其反复描述，不如直接给它看2-3个例子：”就像这样写：[示例1]，[示例2]……现在轮到你了。” AI看完例子就能举一反三。</li>
+</ul>
+<h3 id="Zero-shot（零样本学习）"><a href="#Zero-shot（零样本学习）" class="headerlink" title="Zero-shot（零样本学习）"></a>Zero-shot（零样本学习）</h3><ul>
+<li><strong>标准定义</strong>：不提供任何示例，直接用自然语言描述任务，让AI依靠自身预训练的知识和理解能力完成任务。</li>
+<li><strong>通俗比喻</strong>：<strong>“直接考试，不给例题”</strong>。你直接告诉AI”帮我把这句话翻译成法语”，不给任何范例，AI就凭借自己的知识储备来完成。能力越强的模型，Zero-shot表现越好。</li>
+</ul>
+<h3 id="Workflow（工作流）"><a href="#Workflow（工作流）" class="headerlink" title="Workflow（工作流）"></a>Workflow（工作流）</h3><ul>
+<li><strong>标准定义</strong>：将一个复杂的任务拆解成多个节点（如大模型处理、条件判断、代码执行等），并按照固定的顺序连接起来执行的过程。</li>
+<li><strong>通俗比喻</strong>：<strong>“工厂的流水线”</strong>。当你发现每天都要做”查阅新闻 -&gt; 提取摘要 -&gt; 翻译成中文 -&gt; 发送到飞书”这件事时，你可以用Workflow把这些步骤固化下来，以后一键就能跑完整个流水线。</li>
+</ul>
+<hr>
+<h2 id="第六部分：推理策略与技巧（Reasoning-Strategies）"><a href="#第六部分：推理策略与技巧（Reasoning-Strategies）" class="headerlink" title="第六部分：推理策略与技巧（Reasoning Strategies）"></a>第六部分：推理策略与技巧（Reasoning Strategies）</h2><p><em>这一部分介绍如何让AI”思考得更好”的方法论。</em></p>
+<h3 id="CoT（Chain-of-Thought-思维链）"><a href="#CoT（Chain-of-Thought-思维链）" class="headerlink" title="CoT（Chain of Thought &#x2F; 思维链）"></a>CoT（Chain of Thought &#x2F; 思维链）</h3><ul>
+<li><strong>标准定义</strong>：一种提示技术，通过在Prompt中加入”请一步一步思考”或提供推理步骤示例，引导AI在给出最终答案前，先展示完整的中间推理过程。</li>
+<li><strong>通俗比喻</strong>：<strong>“要求AI展示解题过程”</strong>。就像老师要求学生”不能只写答案，要写出解题步骤”，CoT让AI把”思考过程”写出来，不仅最终答案更准确，还能让你看出它是否真的”理解了”问题。</li>
+</ul>
+<h3 id="ToT（Tree-of-Thought-思维树）"><a href="#ToT（Tree-of-Thought-思维树）" class="headerlink" title="ToT（Tree of Thought &#x2F; 思维树）"></a>ToT（Tree of Thought &#x2F; 思维树）</h3><ul>
+<li><strong>标准定义</strong>：CoT的进阶版本，引导AI在思考过程中探索多个平行的推理分支，并对每条路径进行评估和回溯，最终选出最优解路径。</li>
+<li><strong>通俗比喻</strong>：<strong>“下棋时的多步预判”</strong>。CoT是一条直线往下想，ToT则像下棋高手，同时考虑”如果走这步棋……””如果走那步棋……”，在脑中构建多条候选路径并比较优劣，最终选最好的那条。</li>
+</ul>
+<h3 id="ReACT（Reasoning-and-Acting-推理与行动）"><a href="#ReACT（Reasoning-and-Acting-推理与行动）" class="headerlink" title="ReACT（Reasoning and Acting &#x2F; 推理与行动）"></a>ReACT（Reasoning and Acting &#x2F; 推理与行动）</h3><ul>
+<li><strong>标准定义</strong>：一种Agent推理框架，让AI交替进行”思考（Reasoning）”和”行动（Acting）”两个步骤——先想清楚要做什么，执行工具调用后，再根据结果继续思考下一步，形成循环。</li>
+<li><strong>通俗比喻</strong>：<strong>“边做边想的侦探”</strong>。就像侦探破案：先推理（”凶器可能在卧室”）→ 行动（搜查卧室）→ 根据新发现再推理（”有血迹，但没有凶器”）→ 继续行动……ReACT就是让AI像侦探一样，思考和行动交替推进，直到找到答案。</li>
+</ul>
+<h3 id="Extended-Thinking（深度思考-扩展推理）"><a href="#Extended-Thinking（深度思考-扩展推理）" class="headerlink" title="Extended Thinking（深度思考 &#x2F; 扩展推理）"></a>Extended Thinking（深度思考 &#x2F; 扩展推理）</h3><ul>
+<li><strong>标准定义</strong>：AI模型在给出最终回答前，进行大量内部推理和自我反思的能力模式。模型会花更多计算资源”想清楚”再回答，类似人类的慢思考，尤其适合复杂数学、逻辑推理和多步骤规划任务。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI从抢答模式切换到深思熟虑模式”</strong>。平时AI像快速口答，Extended Thinking模式是把AI放进考场，让它打草稿、验算、反复检查后再写答案。Claude 3.7的”思考模式”、OpenAI o1&#x2F;o3系列，都是这一技术的代表产品。</li>
+</ul>
+<hr>
+<h2 id="第七部分：模型训练与优化（Model-Training-Optimization）"><a href="#第七部分：模型训练与优化（Model-Training-Optimization）" class="headerlink" title="第七部分：模型训练与优化（Model Training &amp; Optimization）"></a>第七部分：模型训练与优化（Model Training &amp; Optimization）</h2><p><em>这一部分解释AI模型是如何被”教会”的，以及常见的改进方法。</em></p>
+<h3 id="Pre-training（预训练）"><a href="#Pre-training（预训练）" class="headerlink" title="Pre-training（预训练）"></a>Pre-training（预训练）</h3><ul>
+<li><strong>标准定义</strong>：在海量通用文本数据（互联网、书籍等）上对大语言模型进行的初始大规模训练阶段。模型在此阶段习得语言规律、世界知识和通用推理能力，是所有后续能力的基础。</li>
+<li><strong>通俗比喻</strong>：<strong>“AI的九年义务教育”</strong>。把互联网上几乎所有公开文字都读了一遍，掌握了语言、常识、各学科基础知识。这个阶段耗资巨大（动辄数千万甚至数亿美元），由大型AI公司（OpenAI、Anthropic等）完成。</li>
+</ul>
+<h3 id="SFT（Supervised-Fine-Tuning-监督微调）"><a href="#SFT（Supervised-Fine-Tuning-监督微调）" class="headerlink" title="SFT（Supervised Fine-Tuning &#x2F; 监督微调）"></a>SFT（Supervised Fine-Tuning &#x2F; 监督微调）</h3><ul>
+<li><strong>标准定义</strong>：使用人工标注的高质量”输入-输出”配对数据对预训练模型进行微调的方法，是RLHF流程的第一步，也是最常用的基础微调方式。</li>
+<li><strong>通俗比喻</strong>：<strong>“用标准答案做习题册”</strong>。给AI一大本”问题+标准答案”的练习册，让它反复做题对照答案，逐渐学会按照你期望的方式回答。预训练之后先SFT，再RLHF，是目前训练对话AI的标准流程。</li>
+</ul>
+<h3 id="Fine-tuning（微调）"><a href="#Fine-tuning（微调）" class="headerlink" title="Fine-tuning（微调）"></a>Fine-tuning（微调）</h3><ul>
+<li><strong>标准定义</strong>：在预训练模型基础上，使用特定领域的小规模数据集继续训练，使模型在特定任务或领域上表现更好，同时保留通用能力。SFT是最常见的Fine-tuning方式。</li>
+<li><strong>通俗比喻</strong>：<strong>“毕业后的岗位专项培训”</strong>。预训练让AI成了”全科生”，而Fine-tuning就是入职后的”专业培训”——让医疗AI额外学10万份病历，让法律AI读遍判决书。成本远低于预训练，企业可以自己做。</li>
+</ul>
+<h3 id="LoRA（Low-Rank-Adaptation-低秩适应）"><a href="#LoRA（Low-Rank-Adaptation-低秩适应）" class="headerlink" title="LoRA（Low-Rank Adaptation &#x2F; 低秩适应）"></a>LoRA（Low-Rank Adaptation &#x2F; 低秩适应）</h3><ul>
+<li><strong>标准定义</strong>：一种高效的参数微调方法。不修改原始模型的巨量参数，而是在模型的关键层旁边并联一组小型矩阵（适配器），只训练这些小矩阵，以极低的计算成本实现特定任务的适配。</li>
+<li><strong>通俗比喻</strong>：<strong>“给模型装一个外挂小芯片”</strong>。不用花大钱重新改造整个AI大脑，只需在旁边加一块专门针对你业务的”小芯片”。想换风格？换芯片就行，原始模型不动。LoRA让普通公司也能用有限GPU完成模型微调。</li>
+</ul>
+<h3 id="RLHF（Reinforcement-Learning-from-Human-Feedback-人类反馈强化学习）"><a href="#RLHF（Reinforcement-Learning-from-Human-Feedback-人类反馈强化学习）" class="headerlink" title="RLHF（Reinforcement Learning from Human Feedback &#x2F; 人类反馈强化学习）"></a>RLHF（Reinforcement Learning from Human Feedback &#x2F; 人类反馈强化学习）</h3><ul>
+<li><strong>标准定义</strong>：通过收集人类对AI输出结果的排名和评分，训练一个”奖励模型”，再以此奖励模型为信号，用强化学习方法持续优化AI的输出，使其更符合人类偏好。</li>
+<li><strong>通俗比喻</strong>：<strong>“让人给AI的作业打分来训练它”</strong>。AI产出两个答案，让真人标注员选哪个更好，用这些评分训练AI的品味。ChatGPT&#x2F;Claude等主流模型能说话”像人”、不乱说话，主要归功于RLHF这道关键工序。</li>
+</ul>
+<h3 id="DPO（Direct-Preference-Optimization-直接偏好优化）"><a href="#DPO（Direct-Preference-Optimization-直接偏好优化）" class="headerlink" title="DPO（Direct Preference Optimization &#x2F; 直接偏好优化）"></a>DPO（Direct Preference Optimization &#x2F; 直接偏好优化）</h3><ul>
+<li><strong>标准定义</strong>：RLHF的简化替代方案。无需单独训练奖励模型，直接利用人类偏好数据（”更好的答案”vs”更差的答案”对）对语言模型进行优化，训练流程更简单，效果相当。</li>
+<li><strong>通俗比喻</strong>：<strong>“RLHF的简装版”</strong>。RLHF是三步走（收集偏好→训练奖励模型→再训练语言模型），DPO把流程压缩成一步走，直接告诉模型”这样回答更好，那样回答更差”，更快更省资源。目前大量开源模型（如Llama系列）都用DPO做对齐。</li>
+</ul>
+<h3 id="Distillation（知识蒸馏）"><a href="#Distillation（知识蒸馏）" class="headerlink" title="Distillation（知识蒸馏）"></a>Distillation（知识蒸馏）</h3><ul>
+<li><strong>标准定义</strong>：将一个大型、高性能的”教师模型”的知识迁移到一个小型、轻量的”学生模型”中。学生模型通过学习教师模型的输出分布（而非原始训练数据），实现以小博大的效果。</li>
+<li><strong>通俗比喻</strong>：<strong>“让小模型拜大模型为师”</strong>。GPT-4这样的大模型能力强但很贵，Distillation就是让GPT-4大量做题并写出解题思路，再用这些思路训练一个小模型。小模型学会了大模型的”思维方式”，在特定任务上以1%的成本实现80%的大模型效果。</li>
+</ul>
+<h3 id="MoE（Mixture-of-Experts-混合专家模型）"><a href="#MoE（Mixture-of-Experts-混合专家模型）" class="headerlink" title="MoE（Mixture of Experts &#x2F; 混合专家模型）"></a>MoE（Mixture of Experts &#x2F; 混合专家模型）</h3><ul>
+<li><strong>标准定义</strong>：一种模型架构，将大模型的参数分成若干”专家”模块，每次处理输入时只激活其中最相关的少数专家（通常2-8个），而非全部参数，在保持高能力的同时大幅降低计算成本。</li>
+<li><strong>通俗比喻</strong>：<strong>“公司有100个专家，每次只叫2个开会”</strong>。传统模型像开全体大会，MoE像精准派单——这个问题和代码有关，就叫代码专家和逻辑专家；和翻译有关，就叫语言专家。GPT-4、Gemini、Mixtral等主流模型均采用MoE架构。</li>
+</ul>
+<h3 id="Quantization（量化）"><a href="#Quantization（量化）" class="headerlink" title="Quantization（量化）"></a>Quantization（量化）</h3><ul>
+<li><strong>标准定义</strong>：将模型参数从高精度浮点数（如32位&#x2F;16位）压缩为低精度整数（如8位&#x2F;4位）的技术，可大幅减少模型内存占用和计算量，使大模型能在消费级显卡或移动设备上运行。</li>
+<li><strong>通俗比喻</strong>：<strong>“给模型瘦身减肥”</strong>。原始模型动辄几百GB，普通电脑根本跑不起来；量化后精度略有损失，但体积缩小4-8倍，让70B参数的大模型也能在个人电脑上流畅运行。Ollama等本地部署工具，核心就依赖量化技术。</li>
+</ul>
+<hr>
+<h2 id="💡-总结一句话速记："><a href="#💡-总结一句话速记：" class="headerlink" title="💡 总结一句话速记："></a>💡 总结一句话速记：</h2><ul>
+<li><strong>LLM</strong> 是AI大脑的技术统称，<strong>Foundation Model</strong> 是它的上位概念，<strong>Multimodal</strong> 让它同时拥有”眼睛和耳朵”；</li>
+<li>AI最大的缺陷是<strong>Hallucination（幻觉）</strong>，<strong>Grounding</strong> 是解法，<strong>Benchmark</strong> 是衡量能力的标准考卷；</li>
+<li><strong>Prompt</strong> 是你给AI布置的任务（<strong>User Prompt</strong> 是你说的话，<strong>System Prompt</strong> 是开发者预设的规则）；</li>
+<li><strong>Slash command</strong> 是最快速下达任务的快捷键；</li>
+<li><strong>Prompt Engineering</strong> 是把Prompt写好的学问；教AI时可以举例子（<strong>Few-shot</strong>）或直接考（<strong>Zero-shot</strong>）；</li>
+<li>接收任务的是 <strong>Agent</strong>（或者辅助你的 <strong>Copilot</strong>），<strong>Agentic</strong> 描述它主动干活的特性；</li>
+<li>多个Agent的协同靠 <strong>Orchestration（编排）</strong> 调度，<strong>Human-in-the-Loop</strong> 在关键节点引入人工审核，<strong>Guardrails</strong> 确保AI不越界；</li>
+<li>不同系统的Agent之间用 <strong>A2A</strong> 或 <strong>ACP</strong> 协议通信；</li>
+<li>干活时需要用到 <strong>SKILLS</strong>、<strong>Plugin</strong> 和 <strong>Function Calling（工具调用）</strong>；</li>
+<li>干活的数据用 <strong>Embedding</strong> 向量化后存入知识库，通过 <strong>RAG</strong>（或更智能的 <strong>Agentic RAG</strong>）检索，再经 <strong>MCP</strong> 接入本地数据；</li>
+<li>AI产出的一切内容统称为 <strong>AIGC</strong>；</li>
+<li>系统层面，<strong>HOOK</strong> 负责拦截，<strong>Memory</strong> 负责记忆，<strong>Streaming</strong> 让回答实时可见，<strong>Latency&#x2F;Throughput</strong> 是衡量性能的两把尺子；</li>
+<li>AI处理的基本单位是 <strong>Token</strong>，能处理多少取决于 <strong>Context Window</strong>；<strong>Temperature</strong> 和 <strong>TOP-P</strong> 控制输出的发散程度；</li>
+<li>让AI思考得更好：<strong>CoT</strong>（逐步推理）→ <strong>ToT</strong>（多路径探索）→ <strong>ReACT</strong>（边想边做）→ <strong>Extended Thinking</strong>（深度慢想）；</li>
+<li>复杂任务固化成 <strong>Workflow</strong> 自动运行；</li>
+<li>AI的能力来自 <strong>Pre-training</strong>，用 <strong>SFT</strong> 和 <strong>Fine-tuning&#x2F;LoRA</strong> 定制，用 <strong>RLHF&#x2F;DPO</strong> 对齐人类偏好，用 <strong>Distillation</strong> 压缩，用 <strong>MoE</strong> 架构提效，用 <strong>Quantization</strong> 让大模型跑在普通电脑上！</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" title="AI核心术语介绍" target="_blank" rel="external">https://www.silenceboy.com/2026/03/20/AI核心术语介绍/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" title="QMD记忆系统"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2026/03/20/OpenClaw-%E4%B8%8E%E8%87%AA%E7%A0%94-Multi-Agent-%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90/" title="OpenClaw 与自研 Multi-Agent 平台的对比分析"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

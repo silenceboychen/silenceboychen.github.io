@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>跨越&#34;语义鸿沟&#34;：为什么RAG系统离不开Query重写 | morty的个人博客</title>
+  <meta name="description" content="核心摘要在RAG系统中，检索质量直接决定了最终生成的回答质量，即所谓的”Garbage in, garbage out（垃圾进，垃圾出）”。然而，人类用户的真实提问往往是口语化、简略、缺乏上下文或包含多重意图的。 Query重写（Query Rewriting） 就是在用户的原始提问和检索系统（如向量数据库）之间加入一个”翻译&#x2F;优化”层，利用大模型（LLM）将低质量的原始提问转化为更适合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="跨越&quot;语义鸿沟&quot;：为什么RAG系统离不开Query重写">
+<meta property="og:url" content="https://www.silenceboy.com/2026/03/12/%E8%B7%A8%E8%B6%8A%E2%80%9C%E8%AF%AD%E4%B9%89%E9%B8%BF%E6%B2%9F%E2%80%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88RAG%E7%B3%BB%E7%BB%9F%E7%A6%BB%E4%B8%8D%E5%BC%80Query%E9%87%8D%E5%86%99/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="核心摘要在RAG系统中，检索质量直接决定了最终生成的回答质量，即所谓的”Garbage in, garbage out（垃圾进，垃圾出）”。然而，人类用户的真实提问往往是口语化、简略、缺乏上下文或包含多重意图的。 Query重写（Query Rewriting） 就是在用户的原始提问和检索系统（如向量数据库）之间加入一个”翻译&#x2F;优化”层，利用大模型（LLM）将低质量的原始提问转化为更适合">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-12T11:21:07.000Z">
+<meta property="article:modified_time" content="2026-07-22T01:25:54.688Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/03/12/%E8%B7%A8%E8%B6%8A%E2%80%9C%E8%AF%AD%E4%B9%89%E9%B8%BF%E6%B2%9F%E2%80%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88RAG%E7%B3%BB%E7%BB%9F%E7%A6%BB%E4%B8%8D%E5%BC%80Query%E9%87%8D%E5%86%99/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">27</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 14px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.8px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 13.9px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/07/">七月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/04/">四月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/03/">三月 2026</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" class="title">MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-07-22T01:40:42.000Z" itemprop="datePublished">2026-07-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/04/01/Harness-Engineering%E4%BB%8B%E7%BB%8D/" class="title">Harness Engineering介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-04-01T09:58:03.000Z" itemprop="datePublished">2026-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-LLM-%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E5%88%A9%E5%99%A8%EF%BC%9AKV-Cache-%E8%AF%A6%E8%A7%A3/" class="title">深入浅出 LLM 推理加速利器：KV Cache 详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T17:14:42.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" class="title">QMD记忆系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T16:57:22.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" class="title">AI核心术语介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-20T15:06:50.000Z" itemprop="datePublished">2026-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">核心摘要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81Query%E9%87%8D%E5%86%99%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">为什么我们需要Query重写？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E8%BD%AE%E5%AF%B9%E8%AF%9D%E4%B8%AD%E7%9A%84%E2%80%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E7%BC%BA%E5%A4%B1%E2%80%9D%E4%B8%8E%E2%80%9D%E6%8C%87%E4%BB%A3%E4%B8%8D%E6%B8%85%E2%80%9D"><span class="toc-number">2.1.</span> <span class="toc-text">多轮对话中的”上下文缺失”与”指代不清”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%8D%E6%B1%87%E4%B8%8D%E5%8C%B9%E9%85%8D%EF%BC%88%E8%AF%AD%E4%B9%89%E9%B8%BF%E6%B2%9F%E4%B8%8E%E8%A1%A8%E8%BE%BE%E4%B9%A0%E6%83%AF%E5%B7%AE%E5%BC%82%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">词汇不匹配（语义鸿沟与表达习惯差异）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E6%9D%82%E9%97%AE%E9%A2%98%E4%B8%8E%E5%A4%9A%E8%B7%B3%E6%8E%A8%E7%90%86%EF%BC%88Multi-hop-Reasoning%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">复杂问题与多跳推理（Multi-hop Reasoning）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E9%97%AE%E8%BF%87%E4%BA%8E%E5%AE%BD%E6%B3%9B%E6%88%96%E6%8A%BD%E8%B1%A1"><span class="toc-number">2.4.</span> <span class="toc-text">提问过于宽泛或抽象</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%9A%E7%95%8C%E4%B8%BB%E6%B5%81%E7%9A%84Query%E9%87%8D%E5%86%99%E6%8A%80%E6%9C%AF%E4%B8%8E%E6%96%B9%E6%A1%88"><span class="toc-number">3.</span> <span class="toc-text">业界主流的Query重写技术与方案</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%87%E4%BB%A3%E6%B6%88%E8%A7%A3%E4%B8%8E%E4%B8%8A%E4%B8%8B%E6%96%87%E9%87%8D%E5%86%99"><span class="toc-number">3.1.</span> <span class="toc-text">指代消解与上下文重写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%89%A9%E5%B1%95-Query-Expansion-Multi-Query"><span class="toc-number">3.2.</span> <span class="toc-text">查询扩展 (Query Expansion &#x2F; Multi-Query)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RAG-Fusion"><span class="toc-number">3.3.</span> <span class="toc-text">RAG-Fusion</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HyDE-Hypothetical-Document-Embeddings-%E5%81%87%E8%AE%BE%E6%80%A7%E6%96%87%E6%A1%A3%E5%B5%8C%E5%85%A5"><span class="toc-number">3.4.</span> <span class="toc-text">HyDE (Hypothetical Document Embeddings - 假设性文档嵌入)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%80%E4%B8%80%E6%AD%A5%E6%8F%90%E7%A4%BA-Step-back-Prompting"><span class="toc-number">3.5.</span> <span class="toc-text">退一步提示 (Step-back Prompting)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FLARE-Forward-Looking-Active-REtrieval"><span class="toc-number">3.6.</span> <span class="toc-text">FLARE (Forward-Looking Active REtrieval)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88%E6%A8%AA%E5%90%91%E5%AF%B9%E6%AF%94"><span class="toc-number">4.</span> <span class="toc-text">技术方案横向对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E5%9E%8B%E5%86%B3%E7%AD%96%E6%A1%86%E6%9E%B6"><span class="toc-number">5.</span> <span class="toc-text">选型决策框架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E4%BD%BF%E7%94%A8%EF%BC%9A%E5%AE%9E%E9%99%85%E5%B7%A5%E7%A8%8B%E4%B8%AD%E5%A6%82%E4%BD%95%E5%8F%A0%E5%8A%A0"><span class="toc-number">6.</span> <span class="toc-text">组合使用：实际工程中如何叠加</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%95%E6%97%B6%E4%B8%8D%E5%BC%95%E5%85%A5Query%E9%87%8D%E5%86%99"><span class="toc-number">7.</span> <span class="toc-text">何时不引入Query重写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Query%E9%87%8D%E5%86%99%E7%9A%84%E4%BB%A3%E4%BB%B7%E4%B8%8E%E6%8C%91%E6%88%98"><span class="toc-number">8.</span> <span class="toc-text">Query重写的代价与挑战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E8%A1%A1%E9%87%8FQuery%E9%87%8D%E5%86%99%E7%9A%84%E6%95%88%E6%9E%9C"><span class="toc-number">9.</span> <span class="toc-text">如何衡量Query重写的效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">10.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-跨越“语义鸿沟”：为什么RAG系统离不开Query重写" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      跨越&#34;语义鸿沟&#34;：为什么RAG系统离不开Query重写
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/03/12/%E8%B7%A8%E8%B6%8A%E2%80%9C%E8%AF%AD%E4%B9%89%E9%B8%BF%E6%B2%9F%E2%80%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88RAG%E7%B3%BB%E7%BB%9F%E7%A6%BB%E4%B8%8D%E5%BC%80Query%E9%87%8D%E5%86%99/" class="article-date">
+	  <time datetime="2026-03-12T11:21:07.000Z" itemprop="datePublished">2026-03-12</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/03/12/%E8%B7%A8%E8%B6%8A%E2%80%9C%E8%AF%AD%E4%B9%89%E9%B8%BF%E6%B2%9F%E2%80%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88RAG%E7%B3%BB%E7%BB%9F%E7%A6%BB%E4%B8%8D%E5%BC%80Query%E9%87%8D%E5%86%99/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.7k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 13(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <h2 id="核心摘要"><a href="#核心摘要" class="headerlink" title="核心摘要"></a>核心摘要</h2><p>在RAG系统中，检索质量直接决定了最终生成的回答质量，即所谓的”Garbage in, garbage out（垃圾进，垃圾出）”。然而，<strong>人类用户的真实提问往往是口语化、简略、缺乏上下文或包含多重意图的</strong>。</p>
+<p><strong>Query重写（Query Rewriting）</strong> 就是在用户的原始提问和检索系统（如向量数据库）之间加入一个”翻译&#x2F;优化”层，利用大模型（LLM）将低质量的原始提问转化为更适合检索的高质量Query。</p>
+<p>本文将系统梳理 Query 重写的核心价值、主流技术方案，并提供一套可直接落地的<strong>选型决策框架</strong>。</p>
+<hr>
+<h2 id="为什么我们需要Query重写？"><a href="#为什么我们需要Query重写？" class="headerlink" title="为什么我们需要Query重写？"></a>为什么我们需要Query重写？</h2><p>在理想状态下，用户会输入完美的、关键词精准的提问，但这在现实应用中几乎不存在。RAG系统引入Query重写主要为了解决以下四个痛点：</p>
+<h3 id="多轮对话中的”上下文缺失”与”指代不清”"><a href="#多轮对话中的”上下文缺失”与”指代不清”" class="headerlink" title="多轮对话中的”上下文缺失”与”指代不清”"></a>多轮对话中的”上下文缺失”与”指代不清”</h3><p>在Chatbot场景中，用户习惯于连续追问。</p>
+<ul>
+<li><strong>User 第一轮:</strong> “特斯拉目前的CEO是谁？”（系统回答：马斯克）</li>
+<li><strong>User 第二轮:</strong> “他今年多大了？”</li>
+<li><strong>灾难发生:</strong> 如果直接把”他今年多大了？”转化为向量去数据库中检索，向量数据库会匹配到无数包含”他”、”多大”的无关文档。因为检索系统本身没有记忆。</li>
+<li><strong>重写的价值:</strong> 通过Query重写（上下文压缩&#x2F;指代消解），系统会将第二轮问题重写为：<strong>“埃隆·马斯克今年多大了？”</strong>，从而实现精准检索。</li>
+</ul>
+<h3 id="词汇不匹配（语义鸿沟与表达习惯差异）"><a href="#词汇不匹配（语义鸿沟与表达习惯差异）" class="headerlink" title="词汇不匹配（语义鸿沟与表达习惯差异）"></a>词汇不匹配（语义鸿沟与表达习惯差异）</h3><p>用户提问的用词，往往与专业文档中的用词存在巨大差异。</p>
+<ul>
+<li><strong>User提问:</strong> “吃完饭肚子疼怎么回事？”</li>
+<li><strong>医学文档内容:</strong> “餐后腹痛可能由胃溃疡或胆囊炎引起……”</li>
+<li><strong>灾难发生:</strong> 传统的关键词检索（BM25）会直接在词汇层面失配。<strong>向量检索理论上可以捕捉语义相似性，但当嵌入模型未经医疗等专业领域微调时，口语表达与专业术语在向量空间中的距离依然可能偏大</strong>，同样导致检索不准。</li>
+<li><strong>重写的价值:</strong> 将Query扩展为包含同义词和专业术语的形式：<strong>“饭后肚子疼 餐后腹痛 消化不良 症状 原因”</strong>，覆盖更多可能命中的表达方式。</li>
+</ul>
+<h3 id="复杂问题与多跳推理（Multi-hop-Reasoning）"><a href="#复杂问题与多跳推理（Multi-hop-Reasoning）" class="headerlink" title="复杂问题与多跳推理（Multi-hop Reasoning）"></a>复杂问题与多跳推理（Multi-hop Reasoning）</h3><p>用户经常在一个句子里提出需要综合多方信息才能回答的问题。</p>
+<ul>
+<li><p><strong>User提问:</strong> “对比一下2023年第三季度苹果和微软的营收增长率。”</p>
+</li>
+<li><p><strong>灾难发生:</strong> 数据库里通常没有一篇文档正好把这两者放在一起对比。直接检索这个长句，可能只搜到苹果的财报，或者只搜到微软的财报。</p>
+</li>
+<li><p><strong>重写的价值:</strong> 将复杂问题拆解（Decomposition）为多个子查询：</p>
+<ul>
+<li>子查询 1: “2023年第三季度苹果的营收增长率”</li>
+<li>子查询 2: “2023年第三季度微软的营收增长率”</li>
+</ul>
+<p>系统分别检索这两条信息，再交给LLM进行综合对比。</p>
+</li>
+</ul>
+<h3 id="提问过于宽泛或抽象"><a href="#提问过于宽泛或抽象" class="headerlink" title="提问过于宽泛或抽象"></a>提问过于宽泛或抽象</h3><ul>
+<li><strong>User提问:</strong> “讲讲人工智能。”</li>
+<li><strong>灾难发生:</strong> 这种提问在包含数百万文档的企业知识库中会触发海量毫无关联的匹配。</li>
+<li><strong>重写的价值:</strong> 结合系统设定的角色或当前业务场景（如HR系统），重写为：<strong>“人工智能在人力资源和招聘领域的应用案例”</strong>，使检索更有针对性。</li>
+</ul>
+<hr>
+<h2 id="业界主流的Query重写技术与方案"><a href="#业界主流的Query重写技术与方案" class="headerlink" title="业界主流的Query重写技术与方案"></a>业界主流的Query重写技术与方案</h2><p>了解了”为什么”，我们来看看在工程实践中（如LangChain、LlamaIndex等框架中）常用的几种Query重写策略：</p>
+<h3 id="指代消解与上下文重写"><a href="#指代消解与上下文重写" class="headerlink" title="指代消解与上下文重写"></a>指代消解与上下文重写</h3><ul>
+<li><strong>原理:</strong> 把历史对话记录和当前问题一起发给LLM，让LLM生成一个脱离上下文也能看懂的独立问题（Standalone Query）。</li>
+<li><strong>应用场景:</strong> 所有具备多轮对话能力的RAG系统（最基础也是最必要的重写）。</li>
+<li><strong>LangChain支持:</strong> <code>create_history_aware_retriever</code> 原生支持，开箱即用。</li>
+</ul>
+<h3 id="查询扩展-Query-Expansion-Multi-Query"><a href="#查询扩展-Query-Expansion-Multi-Query" class="headerlink" title="查询扩展 (Query Expansion &#x2F; Multi-Query)"></a>查询扩展 (Query Expansion &#x2F; Multi-Query)</h3><ul>
+<li><strong>原理:</strong> LLM针对原始问题，从不同的角度生成多个相关的问题（通常是3-5个）。</li>
+<li><strong>机制:</strong> 将这多个问题分别进行向量检索，取检索结果的并集，再通过 <strong>RRF（Reciprocal Rank Fusion，倒数排名融合）算法</strong> 将多路结果合并排序，从而大大提高检索的<strong>召回率（Recall）</strong>。</li>
+<li><strong>注意:</strong> RRF 是一种<strong>排名融合</strong>算法，与基于 Cross-Encoder 的语义重排序（Reranking）是两个不同的概念，切勿混淆。</li>
+<li><strong>例子:</strong><ul>
+<li>原问题：”气候变化对北极熊有什么影响？”</li>
+<li>扩展问题：”全球变暖如何改变北极熊的栖息地？”、”海冰融化对北极熊觅食的威胁有哪些？”</li>
+</ul>
+</li>
+<li><strong>LangChain支持:</strong> <code>MultiQueryRetriever</code> 原生支持。</li>
+</ul>
+<h3 id="RAG-Fusion"><a href="#RAG-Fusion" class="headerlink" title="RAG-Fusion"></a>RAG-Fusion</h3><ul>
+<li><strong>背景:</strong> 由开发者 Adrian Raudaschl 于2023年提出，是 Multi-Query + RRF 的工程化整合方案，在社区获得了广泛关注。</li>
+<li><strong>原理:</strong> 与 Multi-Query 类似，核心区别在于对 RRF 融合步骤的更强调和规范化——同一文档在多个子查询结果中排名越靠前，最终加权得分越高，从而让真正相关的文档浮出水面。</li>
+<li><strong>适用场景:</strong> 知识库庞大、单次检索召回率不足、需要综合多个角度信息的场景。</li>
+</ul>
+<h3 id="HyDE-Hypothetical-Document-Embeddings-假设性文档嵌入"><a href="#HyDE-Hypothetical-Document-Embeddings-假设性文档嵌入" class="headerlink" title="HyDE (Hypothetical Document Embeddings - 假设性文档嵌入)"></a>HyDE (Hypothetical Document Embeddings - 假设性文档嵌入)</h3><ul>
+<li><strong>出处:</strong> 2022年由<strong>卡内基梅隆大学（CMU）</strong> 等机构提出，论文为《Precise Zero-Shot Dense Retrieval without Relevance Labels》。</li>
+<li><strong>原理:</strong> 非常巧妙的逆向思维。遇到用户提问时，<strong>先让大模型（”盲猜”）生成一篇假设性的答案（文档）</strong>。虽然这个答案可能包含幻觉或事实错误，但它的<strong>句式结构和词汇分布</strong>与真实的参考文档非常相似。然后，用这篇”假文档”的向量去检索数据库里的”真文档”。</li>
+<li><strong>为什么有效:</strong> 因为”文档到文档”的向量匹配，通常比”简短提问到长文档”的匹配效果更好。用户的提问往往只有十几个字，而语料库里的文档动辄数百字，两者的向量天然存在分布差异；HyDE 将提问侧的向量”升维”到与文档相近的长度和风格。</li>
+<li><strong>LlamaIndex支持:</strong> <code>HyDEQueryTransform</code> 原生支持。</li>
+</ul>
+<h3 id="退一步提示-Step-back-Prompting"><a href="#退一步提示-Step-back-Prompting" class="headerlink" title="退一步提示 (Step-back Prompting)"></a>退一步提示 (Step-back Prompting)</h3><ul>
+<li><strong>出处:</strong> 谷歌DeepMind提出的技术（2023年）。</li>
+<li><strong>原理:</strong> 当遇到非常具体的细节问题时，让大模型后退一步，生成一个更宽泛、更高维度的背景问题，先检索出底层原理文档，再用该背景知识辅助回答具体问题。</li>
+<li><strong>例子:</strong><ul>
+<li>原问题：”为什么我的Python代码里 <code>x = [1,2]; y = x; y.append(3)</code> 会导致 <code>x</code> 也变成 <code>[1,2,3]</code>？”</li>
+<li>退一步重写：”Python中的变量引用机制和可变对象（Mutable Objects）是如何工作的？”</li>
+<li><strong>效果:</strong> 先检索到 Python 内存模型&#x2F;引用机制的通用原理文档，模型以此为背景，再回答具体的代码问题，准确率显著提升。</li>
+</ul>
+</li>
+<li><strong>适用场景:</strong> 技术支持、故障排查、学习问答等场景，用户的具体问题往往指向某个更基础的原理性知识盲区。</li>
+</ul>
+<h3 id="FLARE-Forward-Looking-Active-REtrieval"><a href="#FLARE-Forward-Looking-Active-REtrieval" class="headerlink" title="FLARE (Forward-Looking Active REtrieval)"></a>FLARE (Forward-Looking Active REtrieval)</h3><ul>
+<li><strong>背景:</strong> 2023年由 UCBerkeley 等机构提出，适合需要生成长文本的场景。</li>
+<li><strong>原理:</strong> 与上述静态重写不同，FLARE 是<strong>迭代式</strong>的动态重写策略。模型在生成回答的过程中，一旦遇到低置信度的预测（即模型”不确定”该写什么），就自动暂停，以当前预测内容为 Query 主动触发一次新的检索，补充上下文后继续生成。</li>
+<li><strong>适用场景:</strong> 报告生成、长文摘要等长文本输出场景，不适合低延迟的实时问答。</li>
+</ul>
+<hr>
+<h2 id="技术方案横向对比"><a href="#技术方案横向对比" class="headerlink" title="技术方案横向对比"></a>技术方案横向对比</h2><table>
+<thead>
+<tr>
+<th>技术方案</th>
+<th>解决的核心问题</th>
+<th>额外延迟</th>
+<th>额外成本</th>
+<th>实现复杂度</th>
+<th>典型适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>上下文重写</td>
+<td>多轮指代消解、上下文缺失</td>
+<td>低</td>
+<td>低</td>
+<td>⭐</td>
+<td>所有多轮对话场景（必选）</td>
+</tr>
+<tr>
+<td>Query Expansion &#x2F; Multi-Query</td>
+<td>召回率不足、单角度覆盖窄</td>
+<td>中</td>
+<td>中</td>
+<td>⭐⭐</td>
+<td>企业知识库、宽覆盖检索</td>
+</tr>
+<tr>
+<td>RAG-Fusion</td>
+<td>多路结果融合与排名质量</td>
+<td>中</td>
+<td>中</td>
+<td>⭐⭐</td>
+<td>知识库庞大、需综合多角度</td>
+</tr>
+<tr>
+<td>HyDE</td>
+<td>短查询-长文档向量匹配差</td>
+<td>中</td>
+<td>中</td>
+<td>⭐⭐</td>
+<td>学术&#x2F;技术文档、专业知识库</td>
+</tr>
+<tr>
+<td>Step-back Prompting</td>
+<td>细节问题缺乏背景原理支撑</td>
+<td>低</td>
+<td>低</td>
+<td>⭐</td>
+<td>技术支持、故障排查、学习问答</td>
+</tr>
+<tr>
+<td>FLARE</td>
+<td>长文本生成中的知识不完整</td>
+<td>高</td>
+<td>高</td>
+<td>⭐⭐⭐</td>
+<td>长报告生成、深度摘要</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="选型决策框架"><a href="#选型决策框架" class="headerlink" title="选型决策框架"></a>选型决策框架</h2><p>不同场景对 Query 重写的需求差异很大。下图提供一个可直接落地的决策路径：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">你的系统是多轮对话吗？</span><br><span class="line">  └─ 是 → 【上下文重写】是必选基础项，其他技术在此之上叠加</span><br><span class="line">  └─ 否 → 直接评估以下场景</span><br><span class="line"></span><br><span class="line">用户提问简短，但文档都是长篇专业文档（学术、法律、医学）？</span><br><span class="line">  └─ 是 → 优先考虑【HyDE】</span><br><span class="line"></span><br><span class="line">用户提问涉及比较、综合多方信息或多跳推理？</span><br><span class="line">  └─ 是 → 优先考虑【Multi-Query / RAG-Fusion + 子查询拆解】</span><br><span class="line"></span><br><span class="line">用户的具体问题背后有更基础的原理知识需要检索？</span><br><span class="line">  └─ 是 → 优先考虑【Step-back Prompting】</span><br><span class="line"></span><br><span class="line">需要生成长篇报告/摘要，且生成过程中知识需求动态变化？</span><br><span class="line">  └─ 是 → 优先考虑【FLARE】</span><br><span class="line"></span><br><span class="line">单次检索召回率不理想，文档覆盖面广但密度低？</span><br><span class="line">  └─ 是 → 优先考虑【Multi-Query / RAG-Fusion】</span><br></pre></td></tr></table></figure>
+
+<p><strong>黄金组合推荐：</strong></p>
+<ul>
+<li><strong>多轮问答（标准）:</strong> 上下文重写 + Multi-Query</li>
+<li><strong>技术&#x2F;专业知识库:</strong> 上下文重写 + HyDE</li>
+<li><strong>企业级复杂问答:</strong> 上下文重写 + Multi-Query + Step-back Prompting（三层叠加）</li>
+<li><strong>长文本生成场景:</strong> 上下文重写 + FLARE</li>
+</ul>
+<hr>
+<h2 id="组合使用：实际工程中如何叠加"><a href="#组合使用：实际工程中如何叠加" class="headerlink" title="组合使用：实际工程中如何叠加"></a>组合使用：实际工程中如何叠加</h2><p>上述技术并非互斥，在生产环境中通常是<strong>流水线式叠加</strong>使用的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">用户输入</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">[第一层] 上下文重写（Contextual Rewrite）</span><br><span class="line">    │ 将多轮指代消解为独立问题</span><br><span class="line">    ▼</span><br><span class="line">[第二层] 问题分类路由</span><br><span class="line">    │ 简单直接问题 → 直接检索</span><br><span class="line">    │ 复杂/多跳问题 → Multi-Query 拆解</span><br><span class="line">    │ 过于细节问题 → Step-back 退一步</span><br><span class="line">    │ 专业文档场景 → HyDE 生成假设文档</span><br><span class="line">    ▼</span><br><span class="line">[第三层] 检索 + RRF 融合</span><br><span class="line">    │ 多路结果通过 RRF 合并</span><br><span class="line">    ▼</span><br><span class="line">[第四层] 语义重排序（Reranking，可选）</span><br><span class="line">    │ Cross-Encoder 对候选文档精排</span><br><span class="line">    ▼</span><br><span class="line">[最终] 送入 LLM 生成答案</span><br></pre></td></tr></table></figure>
+
+<p><strong>成本控制技巧：</strong> 第一、二层的 Query 重写可以使用<strong>体积小、速度快的轻量级模型</strong>（如 GPT-4o-mini、Qwen-7B 等），而非每次都调用 GPT-4 级别的大模型，在保持效果的同时将延迟和成本控制在合理范围内。</p>
+<hr>
+<h2 id="何时不引入Query重写"><a href="#何时不引入Query重写" class="headerlink" title="何时不引入Query重写"></a>何时不引入Query重写</h2><p>Query 重写并非所有场景的最优解。以下情况引入反而可能有害：</p>
+<ol>
+<li><strong>用户本身是专业人员，提问已经足够精准。</strong> 例如开发者在代码助手里粘贴完整报错信息，再次重写可能导致信息丢失（Semantic Drift）。</li>
+<li><strong>对延迟极度敏感的实时场景。</strong> 如语音助手、实时客服，额外的 LLM 调用会带来不可接受的响应延迟。</li>
+<li><strong>知识库规模极小（百条以内）。</strong> 检索本身不存在精度问题，引入重写只是增加了不必要的复杂度。</li>
+<li><strong>知识库内容高度结构化，用户查询意图明确。</strong> 如数据库查询、代码文档检索，传统关键词或精确匹配往往优于语义检索。</li>
+</ol>
+<hr>
+<h2 id="Query重写的代价与挑战"><a href="#Query重写的代价与挑战" class="headerlink" title="Query重写的代价与挑战"></a>Query重写的代价与挑战</h2><p>虽然Query重写能大幅提升RAG的准确率，但它并非完美无缺的银弹，引入它需要权衡以下成本：</p>
+<ol>
+<li><strong>延迟增加 (Latency):</strong> 引入重写意味着在检索前多了一次LLM的调用。这通常会增加几百毫秒到几秒的响应时间，对实时性要求极高的场景不友好。（<em>解决方案：使用体积更小、速度更快的专门做重写的小模型来替代庞大的GPT-4</em>）。</li>
+<li><strong>成本上升 (Cost):</strong> 额外的LLM调用意味着消耗更多的Token，增加了系统的运行成本。</li>
+<li><strong>重写偏移 (Semantic Drift):</strong> 有时候大模型”自作聪明”，错误理解了用户的真实意图，导致重写后的Query与用户想问的内容南辕北辙，反而降低了检索质量。</li>
+<li><strong>重写质量强依赖Prompt工程:</strong> 重写效果高度依赖 Prompt 设计质量，需要针对不同业务场景持续迭代 Prompt，存在一定的维护成本。</li>
+</ol>
+<hr>
+<h2 id="如何衡量Query重写的效果"><a href="#如何衡量Query重写的效果" class="headerlink" title="如何衡量Query重写的效果"></a>如何衡量Query重写的效果</h2><p>引入 Query 重写后，如何验证它真的有效？工程实践中常用以下指标：</p>
+<ul>
+<li><strong>Hit Rate（命中率）:</strong> 检索结果中包含正确答案的提问比例，是最直接的指标。</li>
+<li><strong>MRR（Mean Reciprocal Rank，平均倒数排名）:</strong> 衡量正确文档在检索结果列表中的平均排位，排名越靠前，MRR 越高。</li>
+<li><strong>Context Precision &#x2F; Context Recall:</strong> 来自 <strong>RAGAS 评测框架</strong>，分别衡量检索文档的精确度（有多少是相关的）和召回度（相关文档被检索到的比例）。</li>
+<li><strong>A&#x2F;B 对照实验:</strong> 在灰度流量中，对比开启&#x2F;关闭 Query 重写两组的最终答案质量（可通过 LLM-as-Judge 自动化评分）。</li>
+</ul>
+<p><strong>最小化验证路径:</strong> 从 Hit Rate 开始，构建一组包含多轮对话、词汇不匹配、复杂多跳三类问题的评测集（20-50条），在引入重写前后对比 Hit Rate 变化，即可快速判断投入是否值得。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在RAG系统中，<strong>向量检索天然依赖于文本特征的相似度，而用户提问往往是随性且充满信息缺失的。</strong></p>
+<p>Query重写扮演了 <strong>“提问翻译官”</strong> 的角色，它填补了用户意图与数据库索引之间的鸿沟。选型时的核心逻辑是：</p>
+<ul>
+<li><strong>上下文重写</strong> 是多轮对话场景的强制项，无论如何都应该引入；</li>
+<li><strong>Multi-Query &#x2F; RAG-Fusion</strong> 是提升召回率的通用解法，性价比高；</li>
+<li><strong>HyDE</strong> 在专业文档检索场景中效果最为突出；</li>
+<li><strong>Step-back Prompting</strong> 适合以原理性知识为核心的问答系统；</li>
+<li><strong>FLARE</strong> 是长文本生成场景的特化方案，不适合实时对话。</li>
+</ul>
+<p>没有一种技术是万能的，理解每种方案背后的问题假设，才能在具体场景中做出正确的取舍。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/03/12/%E8%B7%A8%E8%B6%8A%E2%80%9C%E8%AF%AD%E4%B9%89%E9%B8%BF%E6%B2%9F%E2%80%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88RAG%E7%B3%BB%E7%BB%9F%E7%A6%BB%E4%B8%8D%E5%BC%80Query%E9%87%8D%E5%86%99/" title="跨越&#34;语义鸿沟&#34;：为什么RAG系统离不开Query重写" target="_blank" rel="external">https://www.silenceboy.com/2026/03/12/跨越“语义鸿沟”：为什么RAG系统离不开Query重写/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2026/03/17/MMR%E5%9C%A8Agent%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8/" title="MMR在Agent系统中的应用"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2026/03/11/Agent%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E5%92%8CAgent%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9/" title="Agent编排平台和Agent开发框架应该如何选择"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

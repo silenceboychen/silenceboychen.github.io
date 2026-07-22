@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>Agent编排平台和Agent开发框架应该如何选择 | morty的个人博客</title>
+  <meta name="description" content="本文使用的代表性工具  Agent 编排平台（低代码）：n8n（工作流自动化）、Dify（LLM 应用平台） Agent 开发框架（Pro-code）：LangGraph、LangChain、CrewAI、AutoGen、OpenAI Agents SDK    这是当前 AI 应用落地中最频繁被讨论的选型问题之一。在深入对比之前，有一个重要的前提需要先厘清：本文中提到的几类工具，并非同一维度的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent编排平台和Agent开发框架应该如何选择">
+<meta property="og:url" content="https://www.silenceboy.com/2026/03/11/Agent%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E5%92%8CAgent%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="本文使用的代表性工具  Agent 编排平台（低代码）：n8n（工作流自动化）、Dify（LLM 应用平台） Agent 开发框架（Pro-code）：LangGraph、LangChain、CrewAI、AutoGen、OpenAI Agents SDK    这是当前 AI 应用落地中最频繁被讨论的选型问题之一。在深入对比之前，有一个重要的前提需要先厘清：本文中提到的几类工具，并非同一维度的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-11T15:23:14.000Z">
+<meta property="article:modified_time" content="2026-07-22T01:25:54.679Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="AI">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/03/11/Agent%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E5%92%8CAgent%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">27</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 14px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.8px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 13.9px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/07/">七月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/04/">四月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/03/">三月 2026</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" class="title">MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-07-22T01:40:42.000Z" itemprop="datePublished">2026-07-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/04/01/Harness-Engineering%E4%BB%8B%E7%BB%8D/" class="title">Harness Engineering介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-04-01T09:58:03.000Z" itemprop="datePublished">2026-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-LLM-%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E5%88%A9%E5%99%A8%EF%BC%9AKV-Cache-%E8%AF%A6%E8%A7%A3/" class="title">深入浅出 LLM 推理加速利器：KV Cache 详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T17:14:42.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" class="title">QMD记忆系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T16:57:22.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/20/AI%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD%E4%BB%8B%E7%BB%8D/" class="title">AI核心术语介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-20T15:06:50.000Z" itemprop="datePublished">2026-03-20</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%88%E5%8E%98%E6%B8%85%EF%BC%9A%E8%BF%99%E4%BA%9B%E5%B7%A5%E5%85%B7%E5%90%84%E8%87%AA%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.</span> <span class="toc-text">先厘清：这些工具各自是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%8E%E4%BB%A3%E7%A0%81%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E9%98%B5%E8%90%A5"><span class="toc-number">1.1.</span> <span class="toc-text">低代码编排平台阵营</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Pro-code-%E6%A1%86%E6%9E%B6%E9%98%B5%E8%90%A5"><span class="toc-number">1.2.</span> <span class="toc-text">Pro-code 框架阵营</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%BB%B4%E5%BA%A6%E6%B7%B1%E5%BA%A6%E5%AF%B9%E6%AF%94"><span class="toc-number">2.</span> <span class="toc-text">核心维度深度对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%89%E5%9E%8B%E5%86%B3%E7%AD%96%E6%A0%91"><span class="toc-number">3.</span> <span class="toc-text">选型决策树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%84%E5%9C%BA%E6%99%AF%E9%80%89%E5%9E%8B%E5%BB%BA%E8%AE%AE"><span class="toc-number">4.</span> <span class="toc-text">各场景选型建议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%89%E6%8B%A9%E4%BD%8E%E4%BB%A3%E7%A0%81%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="toc-number">4.1.</span> <span class="toc-text">选择低代码编排平台的场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%89%E6%8B%A9-Pro-code-%E6%A1%86%E6%9E%B6%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="toc-number">4.2.</span> <span class="toc-text">选择 Pro-code 框架的场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%95%E6%97%B6%E4%BB%8E%E4%BD%8E%E4%BB%A3%E7%A0%81%E5%B9%B3%E5%8F%B0%E8%BF%81%E7%A7%BB%E5%88%B0%E4%BB%A3%E7%A0%81%E6%A1%86%E6%9E%B6%EF%BC%9F"><span class="toc-number">4.3.</span> <span class="toc-text">何时从低代码平台迁移到代码框架？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Multi-Agent-%E7%B3%BB%E7%BB%9F%E5%BA%94%E8%AF%A5%E7%94%A8%E4%BB%80%E4%B9%88%E6%96%B9%E6%A1%88%EF%BC%9F"><span class="toc-number">5.</span> <span class="toc-text">Multi-Agent 系统应该用什么方案？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E6%8E%A8%E8%8D%90%E7%94%A8-Dify-n8n-%E6%90%AD%E5%BB%BA%E5%A4%8D%E6%9D%82-Multi-Agent%EF%BC%9F"><span class="toc-number">5.1.</span> <span class="toc-text">为什么不推荐用 Dify&#x2F;n8n 搭建复杂 Multi-Agent？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E6%B5%81-Multi-Agent-%E6%A1%86%E6%9E%B6%E6%A8%AA%E5%90%91%E5%AF%B9%E6%AF%94"><span class="toc-number">5.2.</span> <span class="toc-text">主流 Multi-Agent 框架横向对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-LangGraph-%E6%9C%80%E9%80%82%E5%90%88%E7%94%9F%E4%BA%A7%E7%BA%A7-Multi-Agent%EF%BC%9F"><span class="toc-number">5.3.</span> <span class="toc-text">为什么 LangGraph 最适合生产级 Multi-Agent？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-Agent编排平台和Agent开发框架应该如何选择" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Agent编排平台和Agent开发框架应该如何选择
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/03/11/Agent%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E5%92%8CAgent%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9/" class="article-date">
+	  <time datetime="2026-03-11T15:23:14.000Z" itemprop="datePublished">2026-03-11</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/AI/">AI</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/AI/" rel="tag">AI</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/03/11/Agent%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E5%92%8CAgent%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 2.8k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 10(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <blockquote>
+<p><strong>本文使用的代表性工具</strong></p>
+<ul>
+<li>Agent 编排平台（低代码）：<strong>n8n</strong>（工作流自动化）、<strong>Dify</strong>（LLM 应用平台）</li>
+<li>Agent 开发框架（Pro-code）：<strong>LangGraph</strong>、<strong>LangChain</strong>、<strong>CrewAI</strong>、<strong>AutoGen</strong>、<strong>OpenAI Agents SDK</strong></li>
+</ul>
+</blockquote>
+<hr>
+<p>这是当前 AI 应用落地中最频繁被讨论的选型问题之一。在深入对比之前，有一个重要的前提需要先厘清：<strong>本文中提到的几类工具，并非同一维度的竞争关系，而是分属不同的技术层次</strong>，误解这一点是导致选型错误的最主要原因。</p>
+<hr>
+<h2 id="先厘清：这些工具各自是什么"><a href="#先厘清：这些工具各自是什么" class="headerlink" title="先厘清：这些工具各自是什么"></a>先厘清：这些工具各自是什么</h2><p>在做对比之前，必须先分别认识这几类工具，因为即便是同一阵营内部，它们的差异也很大。</p>
+<h3 id="低代码编排平台阵营"><a href="#低代码编排平台阵营" class="headerlink" title="低代码编排平台阵营"></a>低代码编排平台阵营</h3><p><strong>n8n</strong> 和 <strong>Dify</strong> 常被并列，但它们的出发点截然不同：</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left">n8n</th>
+<th align="left">Dify</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>定位</strong></td>
+<td align="left">通用<strong>工作流自动化</strong>平台，AI 是众多集成之一</td>
+<td align="left"><strong>LLM-native</strong> 的 AI 应用开发平台</td>
+</tr>
+<tr>
+<td align="left"><strong>核心强项</strong></td>
+<td align="left">数百个 SaaS 系统打通（飞书、Gmail、Jira、Webhook 等），授权极为方便</td>
+<td align="left">Prompt 管理、知识库（RAG）、Agent 推理循环，专为 AI 应用设计</td>
+</tr>
+<tr>
+<td align="left"><strong>适合场景</strong></td>
+<td align="left">“收到邮件 → AI提取摘要 → 写入Notion → 发送企微”此类业务流程自动化</td>
+<td align="left">“构建知识库问答机器人、多工具 Agent、RAG 应用”</td>
+</tr>
+<tr>
+<td align="left"><strong>AI 能力</strong></td>
+<td align="left">基础，依赖外部 LLM 节点</td>
+<td align="left">深度内置，支持复杂的 Agent 推理模式</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>一句话区分</strong>：如果你的需求是”让各个 SaaS 系统动起来，顺手接入 AI”，选 n8n；如果你的需求是”构建一个 AI 应用，顺手连接外部系统”，选 Dify。</p>
+</blockquote>
+<h3 id="Pro-code-框架阵营"><a href="#Pro-code-框架阵营" class="headerlink" title="Pro-code 框架阵营"></a>Pro-code 框架阵营</h3><p><strong>LangChain</strong> 和 <strong>LangGraph</strong> 同属一个生态，但定位完全不同，不应混为一谈：</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left">LangChain（含 LCEL）</th>
+<th align="left">LangGraph</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>定位</strong></td>
+<td align="left">LLM 应用的<strong>组件工具箱</strong>，以链式调用（Chain）为核心</td>
+<td align="left">独立库，基于<strong>有向图状态机</strong>，专为有状态、循环的 Agent 系统设计</td>
+</tr>
+<tr>
+<td align="left"><strong>适合场景</strong></td>
+<td align="left">线性工作流、标准 RAG Pipeline、工具调用</td>
+<td align="left">复杂 Agent、Multi-Agent 协作、需要循环与回溯的推理系统</td>
+</tr>
+<tr>
+<td align="left"><strong>控制粒度</strong></td>
+<td align="left">中等，链式调用较为固定</td>
+<td align="left">极细，完全控制每个节点的状态读写与路由逻辑</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>关键结论</strong>：当你想用代码构建 Multi-Agent 系统时，正确的选择是 <strong>LangGraph</strong>，而非 LangChain（LangChain 本身并不特别适合 Multi-Agent）。</p>
+</blockquote>
+<hr>
+<h2 id="核心维度深度对比"><a href="#核心维度深度对比" class="headerlink" title="核心维度深度对比"></a>核心维度深度对比</h2><table>
+<thead>
+<tr>
+<th align="left">对比维度</th>
+<th align="left">n8n &#x2F; Dify（低代码编排平台）</th>
+<th align="left">LangChain &#x2F; LangGraph（代码级框架）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>开发门槛</strong></td>
+<td align="left"><strong>低</strong>。可视化拖拽，非研发人员（产品、运营）也能快速上手</td>
+<td align="left"><strong>高</strong>。需要熟练掌握 Python，理解异步编程、面向对象等概念</td>
+</tr>
+<tr>
+<td align="left"><strong>迭代速度</strong></td>
+<td align="left"><strong>极快</strong>。标准 RAG 或带几个工具的 Agent，几十分钟内跑通</td>
+<td align="left"><strong>较慢</strong>。初期需搭建基础架构、处理依赖、接口封装、测试等</td>
+</tr>
+<tr>
+<td align="left"><strong>灵活性</strong></td>
+<td align="left"><strong>受限</strong>。控制流和 Agent 推理循环被封装，底层逻辑难以修改</td>
+<td align="left"><strong>无限</strong>。完全控制每次 LLM 调用、自定义解析器、循环机制、算法</td>
+</tr>
+<tr>
+<td align="left"><strong>状态管理</strong></td>
+<td align="left"><strong>黑盒或简单管理</strong>。复杂多分支状态、临时变量隔离时力不从心</td>
+<td align="left"><strong>精确控制</strong>。LangGraph 本质是状态机，可精确定义全局 State 和节点间状态传递</td>
+</tr>
+<tr>
+<td align="left"><strong>可观测性</strong></td>
+<td align="left"><strong>内置，体验极佳</strong>。自带运行日志、可视化 Trace，每步的输入输出、Token 消耗一目了然</td>
+<td align="left"><strong>需自行集成</strong>。通常引入 LangSmith、Phoenix 等第三方工具（注：LangGraph Platform 托管版已内置）</td>
+</tr>
+<tr>
+<td align="left"><strong>SaaS 系统集成</strong></td>
+<td align="left"><strong>n8n 天生优势</strong>。数百个 SaaS 集成，OAuth 授权极为方便</td>
+<td align="left">需自己调用各 SaaS 的 API 文档，<strong>手写请求和鉴权代码</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>工程化能力</strong></td>
+<td align="left"><strong>较弱</strong>。难以融入 CI&#x2F;CD，无法进行标准单元测试</td>
+<td align="left"><strong>极强</strong>。代码直接进 Git，走 Code Review、自动化测试、CI&#x2F;CD 流水线</td>
+</tr>
+<tr>
+<td align="left"><strong>Vendor Lock-in</strong></td>
+<td align="left"><strong>高风险</strong>。工作流配置（JSON）与平台强绑定，难以迁移到其他平台</td>
+<td align="left"><strong>无风险</strong>。开源代码完全自主，可随时迁移、替换任何组件</td>
+</tr>
+<tr>
+<td align="left"><strong>部署与成本</strong></td>
+<td align="left">社区版开源可自托管；云服务按使用量收费</td>
+<td align="left">完全开源免费；LangGraph Platform 托管版按节点执行次数收费</td>
+</tr>
+<tr>
+<td align="left"><strong>高并发与性能</strong></td>
+<td align="left">受平台架构限制，高并发场景下扩展性有天花板</td>
+<td align="left">完全自主控制并发、资源分配，可深度融入微服务架构</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="选型决策树"><a href="#选型决策树" class="headerlink" title="选型决策树"></a>选型决策树</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">你的团队是否有 Python 研发能力？</span><br><span class="line">│</span><br><span class="line">├── 否 ──────────────────────────────────────►  Dify 或 n8n</span><br><span class="line">│                                                  │</span><br><span class="line">│                                        需要打通大量 SaaS？</span><br><span class="line">│                                        ├── 是 → n8n</span><br><span class="line">│                                        └── 否 → Dify</span><br><span class="line">│</span><br><span class="line">└── 是 → 当前处于 MVP / 快速验证阶段？</span><br><span class="line">          │</span><br><span class="line">          ├── 是 → 先用 Dify/n8n 跑通，待业务稳定后再重构</span><br><span class="line">          │</span><br><span class="line">          └── 否 → 逻辑是否复杂（循环、多分支、状态机）？</span><br><span class="line">                    │</span><br><span class="line">                    ├── 否（线性流程、标准 RAG）→ LangChain LCEL</span><br><span class="line">                    │</span><br><span class="line">                    └── 是 → 是否需要多个 Agent 协作？</span><br><span class="line">                              │</span><br><span class="line">                              ├── 否（单 Agent 复杂逻辑）→ LangGraph</span><br><span class="line">                              │</span><br><span class="line">                              └── 是（Multi-Agent）→</span><br><span class="line">                                    ├── 已深度使用 OpenAI → OpenAI Agents SDK</span><br><span class="line">                                    ├── 快速原型 / 角色驱动 → CrewAI</span><br><span class="line">                                    └── 生产级、需精确控制 → LangGraph</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="各场景选型建议"><a href="#各场景选型建议" class="headerlink" title="各场景选型建议"></a>各场景选型建议</h2><h3 id="选择低代码编排平台的场景"><a href="#选择低代码编排平台的场景" class="headerlink" title="选择低代码编排平台的场景"></a>选择低代码编排平台的场景</h3><ol>
+<li><strong>MVP 快速验证</strong>：想法刚成型，需要在几天内跑通一个 Demo。此时用 Dify&#x2F;n8n 省去大量基础架构工作。</li>
+<li><strong>业务流程自动化</strong>：核心诉求是打通各个 SaaS 系统，AI 只是其中一个处理节点。<strong>n8n 是这个场景的王者</strong>，Dify 并不适合。</li>
+<li><strong>团队以产品&#x2F;运营为主</strong>：缺乏资深 AI 后端研发能力，需要非技术人员也能维护。</li>
+<li><strong>标准化 AI 应用</strong>：客服问答、知识库检索（RAG）、简单”单 Agent + 几项工具”调用，<strong>Dify 完全够用</strong>且极其稳定。</li>
+<li><strong>低预算启动阶段</strong>：无法负担专职 AI 工程师的初创团队。</li>
+</ol>
+<h3 id="选择-Pro-code-框架的场景"><a href="#选择-Pro-code-框架的场景" class="headerlink" title="选择 Pro-code 框架的场景"></a>选择 Pro-code 框架的场景</h3><ol>
+<li><strong>核心产品 &#x2F; 高并发系统</strong>：Agent 是公司核心产品，对响应延迟、并发处理、数据安全要求极高，必须深度融入现有微服务架构。</li>
+<li><strong>复杂非标逻辑</strong>：需要 Human-in-the-loop（人工干预）、复杂条件循环、自定义 LLM 输出解析、特殊异常重试机制。</li>
+<li><strong>严格的工程规范</strong>：需要 Code Review、单测、符合企业 CI&#x2F;CD 发布规范，有明确的版本管理需求。</li>
+<li><strong>打造核心壁垒</strong>：平台封装无法满足需要针对垂类行业优化底层 Agent 推理算法的需求。</li>
+<li><strong>规避供应商风险</strong>：对平台稳定性、数据主权有严格要求，不能接受 Vendor Lock-in。</li>
+</ol>
+<h3 id="何时从低代码平台迁移到代码框架？"><a href="#何时从低代码平台迁移到代码框架？" class="headerlink" title="何时从低代码平台迁移到代码框架？"></a>何时从低代码平台迁移到代码框架？</h3><p>以下任一触发点出现时，应考虑迁移：</p>
+<ul>
+<li>可视化画布的节点数量超过 <strong>20 个</strong>，维护成本开始超过收益</li>
+<li>需要<strong>灰度发布</strong>或对 Agent 逻辑进行 A&#x2F;B 测试</li>
+<li>需要接入企业内部<strong>权限系统</strong>（RBAC、SSO）做精细化控制</li>
+<li>业务<strong>并发量</strong>达到平台瓶颈，出现稳定性问题</li>
+<li>有多个团队需要在同一个 Agent 系统上<strong>并行开发</strong></li>
+</ul>
+<blockquote>
+<p><strong>💡 混合方案（实战中最常见）</strong><br>初期用 Dify&#x2F;n8n 快速跑通业务逻辑和 Prompt，验证商业价值。当上述迁移触发点出现时，由研发团队用 LangGraph 将其重构成代码，并将原低代码平台保留用于非核心的辅助流程自动化（如通知推送、报表生成等）。</p>
+</blockquote>
+<hr>
+<h2 id="Multi-Agent-系统应该用什么方案？"><a href="#Multi-Agent-系统应该用什么方案？" class="headerlink" title="Multi-Agent 系统应该用什么方案？"></a>Multi-Agent 系统应该用什么方案？</h2><p><strong>结论：Multi-Agent 是软件工程级别的挑战，必须使用 Pro-code 框架。</strong></p>
+<h3 id="为什么不推荐用-Dify-n8n-搭建复杂-Multi-Agent？"><a href="#为什么不推荐用-Dify-n8n-搭建复杂-Multi-Agent？" class="headerlink" title="为什么不推荐用 Dify&#x2F;n8n 搭建复杂 Multi-Agent？"></a>为什么不推荐用 Dify&#x2F;n8n 搭建复杂 Multi-Agent？</h3><ol>
+<li><strong>“面条危机”（Spaghetti Nodes）</strong>：Multi-Agent 的核心在于协作与循环流转。写手 Agent 写完 → 审查 Agent 打回 → 写手重写，这种多重循环在可视化画布上会让连线瞬间变得无法阅读和维护。</li>
+<li><strong>状态共享困难</strong>：多个 Agent 协作需要”全局黑板（Shared State）”。在低代码平台中，把庞大的状态在各节点之间来回传递并进行局部修改，在架构上非常别扭。</li>
+<li><strong>无法动态实例化 Agent</strong>：高级场景中，主管 Agent 需要根据任务拆分，动态召唤 N 个并发子 Agent 执行。可视化连线是<strong>静态</strong>的，无法做到运行时动态生成节点。</li>
+</ol>
+<h3 id="主流-Multi-Agent-框架横向对比"><a href="#主流-Multi-Agent-框架横向对比" class="headerlink" title="主流 Multi-Agent 框架横向对比"></a>主流 Multi-Agent 框架横向对比</h3><table>
+<thead>
+<tr>
+<th align="left">框架</th>
+<th align="left">定位</th>
+<th align="left">控制力</th>
+<th align="left">上手难度</th>
+<th align="left">适合场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>LangGraph</strong></td>
+<td align="left">有向图状态机，底层构建工具</td>
+<td align="left">⭐⭐⭐⭐⭐</td>
+<td align="left">较高</td>
+<td align="left">生产级复杂 Multi-Agent，需精确控制路由、状态、断点恢复</td>
+</tr>
+<tr>
+<td align="left"><strong>OpenAI Agents SDK</strong></td>
+<td align="left">OpenAI 官方 Agent 编排库（2025 正式发布）</td>
+<td align="left">⭐⭐⭐⭐</td>
+<td align="left">低</td>
+<td align="left">已深度使用 OpenAI 模型的团队，内置 Handoff、Guardrails、Tracing</td>
+</tr>
+<tr>
+<td align="left"><strong>CrewAI</strong></td>
+<td align="left">角色驱动（Role-based）的高层框架</td>
+<td align="left">⭐⭐⭐</td>
+<td align="left">低</td>
+<td align="left">快速原型，”给 Agent 分配角色和目标，让他们协作”</td>
+</tr>
+<tr>
+<td align="left"><strong>AutoGen（v0.4+）</strong></td>
+<td align="left">基于 Actor 模型重构，事件驱动架构</td>
+<td align="left">⭐⭐⭐⭐</td>
+<td align="left">中等</td>
+<td align="left">异步、分布式的 Multi-Agent 系统；v0.4 已大幅提升可控性</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>⚠️ <strong>AutoGen 重要说明</strong>：AutoGen v0.4（现名 <code>AutoGen-Core</code> + <code>AutoGen-AgentChat</code>）已进行完全重写，引入了 Actor 模型和事件驱动架构，可扩展性和可控性大幅提升，与早期版本”容易脱离控制”的印象已有显著差距。选型时请以最新版本为准。</p>
+</blockquote>
+<h3 id="为什么-LangGraph-最适合生产级-Multi-Agent？"><a href="#为什么-LangGraph-最适合生产级-Multi-Agent？" class="headerlink" title="为什么 LangGraph 最适合生产级 Multi-Agent？"></a>为什么 LangGraph 最适合生产级 Multi-Agent？</h3><ol>
+<li><p><strong>天生契合 Agent 的计算模型</strong>：Multi-Agent 本质是一个<strong>有向图</strong>，节点既可以是 DAG（有向无环），也可以有循环（Cyclic）。LangGraph 的底层设计完全基于图计算，完美支持”循环、路由、打回重试”。</p>
+</li>
+<li><p><strong>精确的全局状态管理</strong>：允许定义一个结构化的全局 <code>State</code>（如包含 <code>messages</code>、<code>current_assignee</code>、<code>errors</code> 等字段）。每个 Agent 节点只负责读取并更新 State，彻底解决多智能体间的数据同步问题。</p>
+</li>
+<li><p><strong>Human-in-the-loop 优雅实现</strong>：在关键节点（如发送邮件前、扣款前）设置<strong>代码级断点（Interrupt）</strong>，将当前 State 持久化到数据库，等待人类确认后从原点恢复执行。这在低代码平台中极难实现。</p>
+</li>
+<li><p><strong>层级化子图（Hierarchical Sub-graphs）</strong>：可以将一组 Agent 封装成子图，再嵌套进上层图中。例如”研发团队子图”与”市场团队子图”协作，在工程组织上极为清晰。</p>
+</li>
+<li><p><strong>LangGraph Platform 补足了工程化短板</strong>：官方托管版本提供内置的持久化、API 暴露、Tracing 和 Checkpoint 恢复，使 LangGraph 在便利性上已向低代码平台大幅靠近，而不再需要完全从零搭建基础设施。</p>
+</li>
+</ol>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><strong>单体 Agent 或线性工作流</strong>：用 Dify&#x2F;n8n，省去巨大麻烦；但注意 Dify 偏 AI 应用，n8n 偏流程自动化，按场景选择</li>
+<li><strong>生产级、需深度工程化的 Agent</strong>：LangGraph 是当前工业界最成熟的底层框架</li>
+<li><strong>已深度绑定 OpenAI</strong>：OpenAI Agents SDK 是低门槛但功能完备的官方选项，值得优先评估</li>
+<li><strong>快速验证 Multi-Agent 原型</strong>：CrewAI 代码量少、上手极快，但不建议用于生产环境核心链路</li>
+<li><strong>需要异步分布式 Multi-Agent</strong>：AutoGen v0.4+ 是值得重新评估的选项</li>
+<li><strong>无论如何，都警惕 Vendor Lock-in</strong>：低代码平台在早期阶段是加速器，但应在架构设计上预留迁移出口</li>
+</ul>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/03/11/Agent%E7%BC%96%E6%8E%92%E5%B9%B3%E5%8F%B0%E5%92%8CAgent%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9/" title="Agent编排平台和Agent开发框架应该如何选择" target="_blank" rel="external">https://www.silenceboy.com/2026/03/11/Agent编排平台和Agent开发框架应该如何选择/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    <li class="prev">
+      <a href="/2026/03/12/%E8%B7%A8%E8%B6%8A%E2%80%9C%E8%AF%AD%E4%B9%89%E9%B8%BF%E6%B2%9F%E2%80%9D%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88RAG%E7%B3%BB%E7%BB%9F%E7%A6%BB%E4%B8%8D%E5%BC%80Query%E9%87%8D%E5%86%99/" title="跨越&#34;语义鸿沟&#34;：为什么RAG系统离不开Query重写"><i class="icon icon-angle-left" aria-hidden="true"></i><span>&nbsp;&nbsp;上一篇</span></a>
+    </li>
+    
+    
+    <li class="next">
+      <a href="/2026/03/11/%E5%91%8A%E5%88%AB%E5%8D%95%E4%B8%80%E6%A3%80%E7%B4%A2%EF%BC%9ABM25%E4%B8%8E%E7%A8%80%E7%96%8F%E5%90%91%E9%87%8F%E6%B7%B1%E5%BA%A6%E5%AF%B9%E6%AF%94%EF%BC%8C%E5%8F%8ARAG%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E6%8C%87%E5%8D%97/" title="告别单一检索：BM25与稀疏向量深度对比，及RAG混合检索策略指南"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
