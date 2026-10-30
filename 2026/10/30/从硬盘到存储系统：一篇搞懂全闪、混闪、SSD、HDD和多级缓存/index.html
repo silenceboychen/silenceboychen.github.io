@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="Cache-Control" content="no-transform" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <!-- Color theme for statusbar -->
+  <meta name="theme-color" content="#000000" />
+  <!-- 强制页面在当前窗口以独立页面显示,防止别人在框架里调用页面 -->
+  <meta http-equiv="window-target" content="_top" />
+  
+  
+  <title>从硬盘到存储系统：一篇搞懂全闪、混闪、SSD、HDD和多级缓存 | morty的个人博客</title>
+  <meta name="description" content="看到一套存储设备的介绍，经常会遇到这样的描述： “全闪架构，采用NVMe SSD，配备多级缓存，支持冷热数据分层。” 这些词看起来都在说“存储很快”，实际上回答的是不同问题：  HDD、SSD：用什么设备存数据？ SATA、SAS、PCIe、NVMe：设备怎样连接、怎样通信？ 全闪、混闪：一套系统里怎样组合存储设备？ 缓存、分层：怎样让快设备和慢设备配合工作？  把这几个层次分清楚，存储领域的大部">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从硬盘到存储系统：一篇搞懂全闪、混闪、SSD、HDD和多级缓存">
+<meta property="og:url" content="https://www.silenceboy.com/2026/10/30/%E4%BB%8E%E7%A1%AC%E7%9B%98%E5%88%B0%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%B8%80%E7%AF%87%E6%90%9E%E6%87%82%E5%85%A8%E9%97%AA%E3%80%81%E6%B7%B7%E9%97%AA%E3%80%81SSD%E3%80%81HDD%E5%92%8C%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98/index.html">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="看到一套存储设备的介绍，经常会遇到这样的描述： “全闪架构，采用NVMe SSD，配备多级缓存，支持冷热数据分层。” 这些词看起来都在说“存储很快”，实际上回答的是不同问题：  HDD、SSD：用什么设备存数据？ SATA、SAS、PCIe、NVMe：设备怎样连接、怎样通信？ 全闪、混闪：一套系统里怎样组合存储设备？ 缓存、分层：怎样让快设备和慢设备配合工作？  把这几个层次分清楚，存储领域的大部">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-30T08:28:43.000Z">
+<meta property="article:modified_time" content="2026-10-30T08:39:42.116Z">
+<meta property="article:author" content="morty">
+<meta property="article:tag" content="存储">
+<meta name="twitter:card" content="summary">
+  <!-- Canonical links -->
+  <link rel="canonical" href="https://www.silenceboy.com/2026/10/30/%E4%BB%8E%E7%A1%AC%E7%9B%98%E5%88%B0%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%B8%80%E7%AF%87%E6%90%9E%E6%87%82%E5%85%A8%E9%97%AA%E3%80%81%E6%B7%B7%E9%97%AA%E3%80%81SSD%E3%80%81HDD%E5%92%8C%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98/index.html">
+  
+    <link rel="alternate" href="/atom.xml" title="blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+  
+  
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.4.0/dist/gitalk.min.css">
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body class="main-center theme-black" itemscope itemtype="http://schema.org/WebPage">
+  <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+  <div class="slimContent">
+    <div class="navbar-header">
+      
+      
+      <div class="profile-block text-center">
+        <a id="avatar" href="https://github.com/silenceboychen" target="_blank">
+          <img class="img-circle img-rotate" src="/images/avatar.jpeg" width="200" height="200">
+        </a>
+        <h2 id="name" class="hidden-xs hidden-sm">morty</h2>
+        <h3 id="title" class="hidden-xs hidden-sm hidden-md">AI Engineer</h3>
+        <small id="location" class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i> hangzhou, China</small>
+      </div>
+      
+      <div class="search" id="search-form-wrap">
+
+    <form class="search-form sidebar-form">
+        <div class="input-group">
+            <input type="text" class="search-form-input form-control" placeholder="搜索" />
+            <span class="input-group-btn">
+                <button type="submit" class="search-form-submit btn btn-flat" onclick="return false;"><i class="icon icon-search"></i></button>
+            </span>
+        </div>
+    </form>
+    <div class="ins-search">
+  <div class="ins-search-mask"></div>
+  <div class="ins-search-container">
+    <div class="ins-input-wrapper">
+      <input type="text" class="ins-search-input" placeholder="想要查找什么..." x-webkit-speech />
+      <button type="button" class="close ins-close ins-selectable" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+    </div>
+    <div class="ins-section-wrapper">
+      <div class="ins-section-container"></div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+      <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <nav id="main-navbar" class="collapse navbar-collapse" itemscope itemtype="http://schema.org/SiteNavigationElement" role="navigation">
+      <ul class="nav navbar-nav main-nav menu-highlight">
+        
+        
+        <li class="menu-item menu-item-home">
+          <a href="/.">
+            
+            <i class="icon icon-home-fill"></i>
+            
+            <span class="menu-title">首页</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives">
+            
+            <i class="icon icon-archives-fill"></i>
+            
+            <span class="menu-title">归档</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories">
+            
+            <i class="icon icon-folder"></i>
+            
+            <span class="menu-title">分类</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags">
+            
+            <i class="icon icon-tags"></i>
+            
+            <span class="menu-title">标签</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-repository">
+          <a href="/repository">
+            
+            <i class="icon icon-project"></i>
+            
+            <span class="menu-title">项目</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links">
+            
+            <i class="icon icon-friendship"></i>
+            
+            <span class="menu-title">友链</span>
+          </a>
+        </li>
+        
+        
+        <li class="menu-item menu-item-love">
+          <a href="/love">
+            
+            <i class="icon icon-eye-fill"></i>
+            
+            <span class="menu-title">Love</span>
+          </a>
+        </li>
+        
+      </ul>
+      
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    </nav>
+  </div>
+</header>
+
+  
+    <aside class="sidebar" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    
+      <div class="widget">
+    <h3 class="widget-title">公告</h3>
+    <div class="widget-body">
+        <div id="board">
+            <div class="content">
+                <p>欢迎交流与分享经验!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-body">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AI/">AI</a><span class="category-list-count">27</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ASIL/">ASIL</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/SoC/">SoC</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/autosar/">autosar</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/chrome/">chrome</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/docker/">docker</a><span class="category-list-count">9</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/git/">git</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go/">go</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/html5/">html5</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mac/">mac</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mcp/">mcp</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/mysql/">mysql</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/nodejs/">nodejs</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/npm/">npm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/php/">php</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shadowsock/">shadowsock</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/shell/">shell</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ssh/">ssh</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/vim/">vim</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/">代码扫描</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AD%98%E5%82%A8/">存储</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-body">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/AI/" rel="tag">AI</a><span class="tag-list-count">28</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ASIL/" rel="tag">ASIL</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Agent/" rel="tag">Agent</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/M1/" rel="tag">M1</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/RAG/" rel="tag">RAG</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SoC/" rel="tag">SoC</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arxml/" rel="tag">arxml</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/base64/" rel="tag">base64</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/buffer/" rel="tag">buffer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/chrome/" rel="tag">chrome</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/docker/" rel="tag">docker</a><span class="tag-list-count">10</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/dockerfile/" rel="tag">dockerfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/excel/" rel="tag">excel</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/express-js/" rel="tag">express.js</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/fidl/" rel="tag">fidl</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/" rel="tag">git</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab/" rel="tag">gitlab</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/gitlab-runner/" rel="tag">gitlab-runner</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/" rel="tag">go</a><span class="tag-list-count">8</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/" rel="tag">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html5/" rel="tag">html5</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3/" rel="tag">i3</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/i3wm/" rel="tag">i3wm</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/" rel="tag">java</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jdk/" rel="tag">jdk</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/jira/" rel="tag">jira</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/" rel="tag">linux</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/" rel="tag">mac</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mcp/" rel="tag">mcp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/middleware/" rel="tag">middleware</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a><span class="tag-list-count">17</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/npm/" rel="tag">npm</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/php/" rel="tag">php</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm2/" rel="tag">pm2</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/portainer/" rel="tag">portainer</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/python/" rel="tag">python</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scp/" rel="tag">scp</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shadowsock/" rel="tag">shadowsock</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/shell/" rel="tag">shell</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sms/" rel="tag">sms</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql-server/" rel="tag">sql server</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ssh/" rel="tag">ssh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tailf/" rel="tag">tailf</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/" rel="tag">ubuntu</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vi/" rel="tag">vi</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/vim/" rel="tag">vim</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/zsh/" rel="tag">zsh</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" rel="tag">代码扫描</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" rel="tag">天空卫士</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8/" rel="tag">存储</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BD%95%E9%9F%B3/" rel="tag">录音</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" rel="tag">方法论</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="tag">正则表达式</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%AE%97%E6%B3%95/" rel="tag">算法</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" rel="tag">语言识别</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget-body tagcloud">
+      <a href="/tags/AI/" style="font-size: 14px;">AI</a> <a href="/tags/ASIL/" style="font-size: 13px;">ASIL</a> <a href="/tags/Agent/" style="font-size: 13px;">Agent</a> <a href="/tags/M1/" style="font-size: 13px;">M1</a> <a href="/tags/RAG/" style="font-size: 13.1px;">RAG</a> <a href="/tags/SoC/" style="font-size: 13.1px;">SoC</a> <a href="/tags/arxml/" style="font-size: 13px;">arxml</a> <a href="/tags/base64/" style="font-size: 13.1px;">base64</a> <a href="/tags/buffer/" style="font-size: 13px;">buffer</a> <a href="/tags/chrome/" style="font-size: 13px;">chrome</a> <a href="/tags/docker/" style="font-size: 13.7px;">docker</a> <a href="/tags/dockerfile/" style="font-size: 13px;">dockerfile</a> <a href="/tags/excel/" style="font-size: 13px;">excel</a> <a href="/tags/express-js/" style="font-size: 13.1px;">express.js</a> <a href="/tags/fidl/" style="font-size: 13px;">fidl</a> <a href="/tags/git/" style="font-size: 13.2px;">git</a> <a href="/tags/gitlab/" style="font-size: 13px;">gitlab</a> <a href="/tags/gitlab-runner/" style="font-size: 13px;">gitlab-runner</a> <a href="/tags/go/" style="font-size: 13.6px;">go</a> <a href="/tags/hexo/" style="font-size: 13px;">hexo</a> <a href="/tags/html5/" style="font-size: 13.1px;">html5</a> <a href="/tags/i3/" style="font-size: 13px;">i3</a> <a href="/tags/i3wm/" style="font-size: 13px;">i3wm</a> <a href="/tags/java/" style="font-size: 13px;">java</a> <a href="/tags/javascript/" style="font-size: 13.8px;">javascript</a> <a href="/tags/jdk/" style="font-size: 13.1px;">jdk</a> <a href="/tags/jira/" style="font-size: 13px;">jira</a> <a href="/tags/linux/" style="font-size: 13.5px;">linux</a> <a href="/tags/mac/" style="font-size: 13.3px;">mac</a> <a href="/tags/mcp/" style="font-size: 13px;">mcp</a> <a href="/tags/middleware/" style="font-size: 13px;">middleware</a> <a href="/tags/mysql/" style="font-size: 13.4px;">mysql</a> <a href="/tags/nodejs/" style="font-size: 13.9px;">nodejs</a> <a href="/tags/npm/" style="font-size: 13.1px;">npm</a> <a href="/tags/php/" style="font-size: 13.3px;">php</a> <a href="/tags/pm2/" style="font-size: 13px;">pm2</a> <a href="/tags/portainer/" style="font-size: 13px;">portainer</a> <a href="/tags/python/" style="font-size: 13.4px;">python</a> <a href="/tags/redis/" style="font-size: 13px;">redis</a> <a href="/tags/scp/" style="font-size: 13px;">scp</a> <a href="/tags/shadowsock/" style="font-size: 13px;">shadowsock</a> <a href="/tags/shell/" style="font-size: 13.2px;">shell</a> <a href="/tags/sms/" style="font-size: 13px;">sms</a> <a href="/tags/sql-server/" style="font-size: 13px;">sql server</a> <a href="/tags/ssh/" style="font-size: 13px;">ssh</a> <a href="/tags/tailf/" style="font-size: 13px;">tailf</a> <a href="/tags/ubuntu/" style="font-size: 13.2px;">ubuntu</a> <a href="/tags/vi/" style="font-size: 13px;">vi</a> <a href="/tags/vim/" style="font-size: 13.1px;">vim</a> <a href="/tags/zsh/" style="font-size: 13px;">zsh</a> <a href="/tags/%E4%BB%A3%E7%A0%81%E6%89%AB%E6%8F%8F/" style="font-size: 13px;">代码扫描</a> <a href="/tags/%E5%A4%A9%E7%A9%BA%E5%8D%AB%E5%A3%AB/" style="font-size: 13px;">天空卫士</a> <a href="/tags/%E5%AD%98%E5%82%A8/" style="font-size: 13px;">存储</a> <a href="/tags/%E5%BD%95%E9%9F%B3/" style="font-size: 13px;">录音</a> <a href="/tags/%E6%96%B9%E6%B3%95%E8%AE%BA/" style="font-size: 13.1px;">方法论</a> <a href="/tags/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" style="font-size: 13px;">正则表达式</a> <a href="/tags/%E7%AE%97%E6%B3%95/" style="font-size: 13.2px;">算法</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E8%AF%86%E5%88%AB/" style="font-size: 13px;">语言识别</a>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget-body">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/10/">十月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/07/">七月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/04/">四月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/03/">三月 2026</a><span class="archive-list-count">11</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/02/">二月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/01/">一月 2026</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/12/">十二月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/10/">十月 2024</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/07/">七月 2023</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">一月 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">4</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget-body">
+      <ul class="recent-post-list list-unstyled no-thumbnail">
+        
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/%E5%AD%98%E5%82%A8/">存储</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/10/30/%E4%BB%8E%E7%A1%AC%E7%9B%98%E5%88%B0%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%B8%80%E7%AF%87%E6%90%9E%E6%87%82%E5%85%A8%E9%97%AA%E3%80%81%E6%B7%B7%E9%97%AA%E3%80%81SSD%E3%80%81HDD%E5%92%8C%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98/" class="title">从硬盘到存储系统：一篇搞懂全闪、混闪、SSD、HDD和多级缓存</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-10-30T08:28:43.000Z" itemprop="datePublished">2026-10-30</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" class="title">MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-07-22T01:40:42.000Z" itemprop="datePublished">2026-07-22</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/04/01/Harness-Engineering%E4%BB%8B%E7%BB%8D/" class="title">Harness Engineering介绍</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-04-01T09:58:03.000Z" itemprop="datePublished">2026-04-01</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/%E6%B7%B1%E5%85%A5%E6%B5%85%E5%87%BA-LLM-%E6%8E%A8%E7%90%86%E5%8A%A0%E9%80%9F%E5%88%A9%E5%99%A8%EF%BC%9AKV-Cache-%E8%AF%A6%E8%A7%A3/" class="title">深入浅出 LLM 推理加速利器：KV Cache 详解</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T17:14:42.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+          <li>
+            
+            <div class="item-inner">
+              <p class="item-category">
+                <a class="category-link" href="/categories/AI/">AI</a>
+              </p>
+              <p class="item-title">
+                <a href="/2026/03/24/QMD%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/" class="title">QMD记忆系统</a>
+              </p>
+              <p class="item-date">
+                <time datetime="2026-03-24T16:57:22.000Z" itemprop="datePublished">2026-03-24</time>
+              </p>
+            </div>
+          </li>
+          
+      </ul>
+    </div>
+  </div>
+  
+
+    
+  </div>
+</aside>
+
+  
+  
+  <aside class="sidebar sidebar-toc collapse   in  " id="collapseToc" itemscope itemtype="http://schema.org/WPSideBar">
+  <div class="slimContent">
+    <nav id="toc" class="article-toc">
+      <h3 class="toc-title">文章目录</h3>
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#HDD%E4%B8%8ESSD%EF%BC%9A%E5%AD%98%E6%95%B0%E6%8D%AE%E7%9A%84%E6%96%B9%E5%BC%8F%E4%B8%8D%E5%90%8C"><span class="toc-number">1.</span> <span class="toc-text">HDD与SSD：存数据的方式不同</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HDD%EF%BC%9A%E9%9D%A0%E6%9C%BA%E6%A2%B0%E8%BF%90%E5%8A%A8%E5%AF%BB%E6%89%BE%E6%95%B0%E6%8D%AE"><span class="toc-number">1.1.</span> <span class="toc-text">HDD：靠机械运动寻找数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSD%EF%BC%9A%E7%94%A8%E7%94%B5%E5%AD%90%E6%96%B9%E5%BC%8F%E8%AE%BF%E9%97%AE%E6%95%B0%E6%8D%AE"><span class="toc-number">1.2.</span> <span class="toc-text">SSD：用电子方式访问数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SATA%E3%80%81SAS%E3%80%81PCIe%E3%80%81NVMe%EF%BC%9A%E9%81%93%E8%B7%AF%E4%B8%8E%E9%80%9A%E4%BF%A1%E8%A7%84%E5%88%99"><span class="toc-number">2.</span> <span class="toc-text">SATA、SAS、PCIe、NVMe：道路与通信规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A8%E9%97%AA%E4%B8%8E%E6%B7%B7%E9%97%AA%EF%BC%9A%E8%AF%B4%E7%9A%84%E6%98%AF%E6%95%B4%E5%A5%97%E7%B3%BB%E7%BB%9F%E5%A6%82%E4%BD%95%E6%90%AD%E9%85%8D"><span class="toc-number">3.</span> <span class="toc-text">全闪与混闪：说的是整套系统如何搭配</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A8%E9%97%AA%EF%BC%9A%E6%8C%81%E4%B9%85%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8%E5%85%A8%E9%83%A8%E9%87%87%E7%94%A8%E9%97%AA%E5%AD%98"><span class="toc-number">3.1.</span> <span class="toc-text">全闪：持久数据存储全部采用闪存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%B7%E9%97%AA%EF%BC%9A%E9%97%AA%E5%AD%98%E4%B8%8E%E6%9C%BA%E6%A2%B0%E7%9B%98%E9%85%8D%E5%90%88"><span class="toc-number">3.2.</span> <span class="toc-text">混闪：闪存与机械盘配合</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E4%B8%8E%E5%88%86%E5%B1%82%EF%BC%9A%E7%9C%8B%E8%B5%B7%E6%9D%A5%E7%9B%B8%E4%BC%BC%EF%BC%8C%E5%B7%A5%E4%BD%9C%E6%96%B9%E5%BC%8F%E4%B8%8D%E5%90%8C"><span class="toc-number">4.</span> <span class="toc-text">缓存与分层：看起来相似，工作方式不同</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%EF%BC%9A%E5%9C%A8%E6%9B%B4%E5%BF%AB%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%87%86%E5%A4%87%E6%95%B0%E6%8D%AE%EF%BC%8C%E6%88%96%E6%9A%82%E6%97%B6%E6%8E%A5%E4%BD%8F%E5%86%99%E5%85%A5"><span class="toc-number">4.1.</span> <span class="toc-text">缓存：在更快的位置准备数据，或暂时接住写入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%B1%82%EF%BC%9A%E5%86%B3%E5%AE%9A%E6%95%B0%E6%8D%AE%E9%95%BF%E6%9C%9F%E6%94%BE%E5%9C%A8%E5%93%AA%E4%B8%80%E5%B1%82"><span class="toc-number">4.2.</span> <span class="toc-text">分层：决定数据长期放在哪一层</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98%EF%BC%9A%E4%B8%8D%E5%90%8C%E4%BD%8D%E7%BD%AE%EF%BC%8C%E5%90%84%E8%87%AA%E8%A7%A3%E5%86%B3%E4%B8%80%E9%83%A8%E5%88%86%E7%AD%89%E5%BE%85"><span class="toc-number">5.</span> <span class="toc-text">多级缓存：不同位置，各自解决一部分等待</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%89%E6%95%88%EF%BC%9F"><span class="toc-number">5.1.</span> <span class="toc-text">多级缓存为什么有效？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SSD%E9%87%8C%E7%9A%84DRAM%E7%BC%93%E5%AD%98%E5%92%8CSLC%E7%BC%93%E5%AD%98%EF%BC%8C%E5%8F%88%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="toc-number">6.</span> <span class="toc-text">SSD里的DRAM缓存和SLC缓存，又有什么区别？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#DRAM%EF%BC%9A%E5%BF%AB%E9%80%9F%E5%B7%A5%E4%BD%9C%E7%9A%84%E5%86%85%E5%AD%98"><span class="toc-number">6.1.</span> <span class="toc-text">DRAM：快速工作的内存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SLC%E7%BC%93%E5%AD%98%EF%BC%9A%E8%AE%A9%E4%B8%80%E9%83%A8%E5%88%86%E9%97%AA%E5%AD%98%E5%85%88%E6%8C%89%E6%9B%B4%E5%BF%AB%E7%9A%84%E6%96%B9%E5%BC%8F%E5%86%99%E5%85%A5"><span class="toc-number">6.2.</span> <span class="toc-text">SLC缓存：让一部分闪存先按更快的方式写入</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E6%9C%80%E5%85%B3%E9%94%AE%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9A%E4%BD%95%E6%97%B6%E5%91%8A%E8%AF%89%E4%BD%A0%E2%80%9C%E5%86%99%E5%A5%BD%E4%BA%86%E2%80%9D%EF%BC%9F"><span class="toc-number">7.</span> <span class="toc-text">缓存最关键的区别：何时告诉你“写好了”？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%BC%93%E5%AD%98%E5%BE%88%E5%A4%A7%EF%BC%8C%E6%8C%81%E7%BB%AD%E5%86%99%E5%85%A5%E8%BF%98%E6%98%AF%E4%BC%9A%E6%85%A2%EF%BC%9F"><span class="toc-number">8.</span> <span class="toc-text">为什么缓存很大，持续写入还是会慢？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%8A%E6%89%80%E6%9C%89%E6%A6%82%E5%BF%B5%E6%94%BE%E5%9B%9E%E4%B8%80%E5%BC%A0%E5%9B%BE%E9%87%8C"><span class="toc-number">9.</span> <span class="toc-text">把所有概念放回一张图里</span></a></li></ol>
+    </nav>
+  </div>
+</aside>
+
+<main class="main" role="main">
+  <div class="content">
+  <article id="post-从硬盘到存储系统：一篇搞懂全闪、混闪、SSD、HDD和多级缓存" class="article article-type-post" itemscope itemtype="http://schema.org/BlogPosting">
+    
+    <div class="article-header">
+      
+        
+  
+    <h1 class="article-title" itemprop="name">
+      从硬盘到存储系统：一篇搞懂全闪、混闪、SSD、HDD和多级缓存
+    </h1>
+  
+
+      
+      <div class="article-meta">
+        <span class="article-date">
+    <i class="icon icon-calendar-check"></i>
+	<a href="/2026/10/30/%E4%BB%8E%E7%A1%AC%E7%9B%98%E5%88%B0%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%B8%80%E7%AF%87%E6%90%9E%E6%87%82%E5%85%A8%E9%97%AA%E3%80%81%E6%B7%B7%E9%97%AA%E3%80%81SSD%E3%80%81HDD%E5%92%8C%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98/" class="article-date">
+	  <time datetime="2026-10-30T08:28:43.000Z" itemprop="datePublished">2026-10-30</time>
+	</a>
+</span>
+        
+  <span class="article-category">
+    <i class="icon icon-folder"></i>
+    <a class="article-category-link" href="/categories/%E5%AD%98%E5%82%A8/">存储</a>
+  </span>
+
+        
+  <span class="article-tag">
+    <i class="icon icon-tags"></i>
+	<a class="article-tag-link-link" href="/tags/%E5%AD%98%E5%82%A8/" rel="tag">存储</a>
+  </span>
+
+
+        
+	<span class="article-read hidden-xs">
+	    <i class="icon icon-eye-fill" aria-hidden="true"></i>
+	    <span id="busuanzi_container_page_pv">
+			<span id="busuanzi_value_page_pv">0</span>
+		</span>
+	</span>
+
+
+        <span class="post-comment"><i class="icon icon-comment"></i> <a href="/2026/10/30/%E4%BB%8E%E7%A1%AC%E7%9B%98%E5%88%B0%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%B8%80%E7%AF%87%E6%90%9E%E6%87%82%E5%85%A8%E9%97%AA%E3%80%81%E6%B7%B7%E9%97%AA%E3%80%81SSD%E3%80%81HDD%E5%92%8C%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98/#comments" class="article-comment-link">评论</a></span>
+        
+	
+		<span class="post-wordcount hidden-xs" itemprop="wordCount">字数统计: 3.9k(字)</span>
+	
+	
+		<span class="post-readcount hidden-xs" itemprop="timeRequired">阅读时长: 13(分)</span>
+	
+
+      </div>
+    </div>
+    <div class="article-entry marked-body" itemprop="articleBody">
+      
+        <p>看到一套存储设备的介绍，经常会遇到这样的描述：</p>
+<p>“全闪架构，采用NVMe SSD，配备多级缓存，支持冷热数据分层。”</p>
+<p>这些词看起来都在说“存储很快”，实际上回答的是不同问题：</p>
+<ul>
+<li><strong>HDD、SSD：用什么设备存数据？</strong></li>
+<li><strong>SATA、SAS、PCIe、NVMe：设备怎样连接、怎样通信？</strong></li>
+<li><strong>全闪、混闪：一套系统里怎样组合存储设备？</strong></li>
+<li><strong>缓存、分层：怎样让快设备和慢设备配合工作？</strong></li>
+</ul>
+<p>把这几个层次分清楚，存储领域的大部分名词就能串起来。</p>
+<h2 id="HDD与SSD：存数据的方式不同"><a href="#HDD与SSD：存数据的方式不同" class="headerlink" title="HDD与SSD：存数据的方式不同"></a>HDD与SSD：存数据的方式不同</h2><p>可以把存储系统想象成一座仓库。HDD和SSD首先决定了：货物究竟放在什么样的仓库里。</p>
+<h3 id="HDD：靠机械运动寻找数据"><a href="#HDD：靠机械运动寻找数据" class="headerlink" title="HDD：靠机械运动寻找数据"></a>HDD：靠机械运动寻找数据</h3><p>HDD是机械硬盘。它把数据记录在磁性盘片上，通过盘片旋转和磁头移动完成读写。</p>
+<p>它的特点是：<strong>适合用相对较低的单位容量成本保存大量数据，但访问分散数据时容易受到机械运动限制。</strong></p>
+<p>读一部连续存放的大电影，磁头可以顺着读取；读取散落在各处的大量小文件，磁头就要不断寻找位置。后者往往更慢。</p>
+<p>因此，机械硬盘的短板不只是“大文件传得不够快”，更是<strong>面对大量零碎请求时，等待时间比较长</strong>。</p>
+<h3 id="SSD：用电子方式访问数据"><a href="#SSD：用电子方式访问数据" class="headerlink" title="SSD：用电子方式访问数据"></a>SSD：用电子方式访问数据</h3><p>SSD是固态硬盘。如今主流SSD使用NAND闪存保存数据，没有机械硬盘那样的旋转盘片和移动磁头。</p>
+<p>省去机械寻址后，SSD通常能更快响应零碎读写，也更适合多个请求同时到来。因此，从机械硬盘换成SSD，开机、启动软件、加载大量小文件的改善，常常比单看连续传输速度更明显。<a href="https://www.ibm.com/think/topics/solid-state-drives">参考：IBM对SSD与HDD的说明</a></p>
+<p>但SSD也有自己的限制，例如闪存写入寿命、持续写入能力、温度以及主控和固件的管理效率。<strong>“是SSD”只说明大类，不能说明具体性能。</strong></p>
+<h2 id="SATA、SAS、PCIe、NVMe：道路与通信规则"><a href="#SATA、SAS、PCIe、NVMe：道路与通信规则" class="headerlink" title="SATA、SAS、PCIe、NVMe：道路与通信规则"></a>SATA、SAS、PCIe、NVMe：道路与通信规则</h2><p>如果HDD、SSD是仓库，那么这些名词涉及仓库与外界之间的道路，以及运货时使用的通信规则。</p>
+<p>这个比喻能帮助理解，但实际技术中，接口标准往往同时包含连接、电气和通信等多个方面。</p>
+<table>
+<thead>
+<tr>
+<th>名词</th>
+<th>主要描述什么</th>
+<th>常见关系</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SATA</td>
+<td>一套存储连接与通信接口标准</td>
+<td>常见于机械硬盘和SATA SSD</td>
+</tr>
+<tr>
+<td>SAS</td>
+<td>企业存储常用的串行接口体系</td>
+<td>既有SAS HDD，也有SAS SSD</td>
+</tr>
+<tr>
+<td>PCIe</td>
+<td>高速通用互连总线</td>
+<td>SSD、显卡、网卡等都可以使用</td>
+</tr>
+<tr>
+<td>NVMe</td>
+<td>主机访问非易失性存储的协议体系</td>
+<td>本地SSD通常通过PCIe使用NVMe</td>
+</tr>
+<tr>
+<td>M.2、2.5英寸、EDSFF</td>
+<td>外形、尺寸、连接器等规格</td>
+<td>仅凭外形不能确定协议和速度</td>
+</tr>
+</tbody></table>
+<p>这里有三个特别容易混淆的地方。</p>
+<p><strong>第一，SSD不等于NVMe。</strong></p>
+<p>SSD可以采用SATA、SAS，也可以采用PCIe与NVMe。NVMe针对非易失性存储的并行访问设计，能够减少传统访问路径的一些开销，但实际性能还取决于设备本身和整个系统。<a href="https://nvmexpress.org/faq_category/specifications/">参考：NVM Express官方说明</a></p>
+<p><strong>第二，M.2不等于NVMe。</strong></p>
+<p>M.2更多涉及模块形态和连接规格。常见M.2 SSD中，既有SATA产品，也有PCIe NVMe产品；主板插槽支持什么，还需要单独确认。</p>
+<p>同样是2.5英寸外形，也可能采用SATA、SAS或PCIe&#x2F;NVMe。<a href="https://www.snia.org/node/14267">参考：SNIA的SSD形态说明</a></p>
+<p><strong>第三，NVMe并不只用于本机内部连接。</strong></p>
+<p>NVMe还可以通过网络传输，这类技术称为NVMe over Fabrics，简称NVMe-oF，包括基于TCP、RDMA等方式的传输。因此，“采用NVMe”本身还不足以描述完整的数据路径。<a href="https://nvmexpress.org/specifications/">参考：NVMe官方规范概览</a></p>
+<p>一句“<strong>M.2 2280、PCIe 4.0 ×4、NVMe、TLC SSD</strong>”，其实分别交代了外形尺寸、总线代际与通道数、访问协议、闪存类型和设备类别。</p>
+<h2 id="全闪与混闪：说的是整套系统如何搭配"><a href="#全闪与混闪：说的是整套系统如何搭配" class="headerlink" title="全闪与混闪：说的是整套系统如何搭配"></a>全闪与混闪：说的是整套系统如何搭配</h2><h3 id="全闪：持久数据存储全部采用闪存"><a href="#全闪：持久数据存储全部采用闪存" class="headerlink" title="全闪：持久数据存储全部采用闪存"></a>全闪：持久数据存储全部采用闪存</h3><p>全闪存储，通常指系统的持久数据存储介质全部采用闪存，例如全部使用SSD或专用闪存模块。</p>
+<p>这里的“全”，不意味着系统内部只能有闪存。控制器依然可以配备DRAM内存、处理器和缓存。</p>
+<p><strong>全闪也不等于全NVMe。</strong> 采用SATA或SAS SSD的系统，同样可以是全闪系统。<a href="https://www.ibm.com/think/topics/all-flash-array">参考：IBM对全闪阵列的定义</a></p>
+<p>全闪的一个重要价值，是减少业务数据访问机械盘的机会，让更多请求获得较低延迟。不过，网络、控制器、软件和数据保护机制仍然会影响最终表现。</p>
+<h3 id="混闪：闪存与机械盘配合"><a href="#混闪：闪存与机械盘配合" class="headerlink" title="混闪：闪存与机械盘配合"></a>混闪：闪存与机械盘配合</h3><p>混闪通常指SSD与HDD共同组成存储系统：</p>
+<ul>
+<li>SSD承担需要快速访问的数据或写入缓冲。</li>
+<li>HDD承担更大规模的数据容量。</li>
+<li>软件决定哪些数据放在哪里，以及何时迁移。</li>
+</ul>
+<p>它追求的是性能、容量和成本之间的平衡。<a href="https://www.ibm.com/think/topics/data-storage">参考：IBM对混合存储的说明</a></p>
+<p>但“配了SSD”不代表所有数据都能获得SSD的速度。访问的数据如果仍在HDD上，又没有被缓存，就需要等待机械盘。</p>
+<p>此外，一台电脑同时装一块SSD和一块HDD，只能说明两种设备共存。它们是否组成一个自动协同的混合存储系统，要看具体配置和软件。</p>
+<h2 id="缓存与分层：看起来相似，工作方式不同"><a href="#缓存与分层：看起来相似，工作方式不同" class="headerlink" title="缓存与分层：看起来相似，工作方式不同"></a>缓存与分层：看起来相似，工作方式不同</h2><p>SSD和HDD配合时，常见两种方法：<strong>缓存</strong>和<strong>分层存储</strong>。</p>
+<h3 id="缓存：在更快的位置准备数据，或暂时接住写入"><a href="#缓存：在更快的位置准备数据，或暂时接住写入" class="headerlink" title="缓存：在更快的位置准备数据，或暂时接住写入"></a>缓存：在更快的位置准备数据，或暂时接住写入</h3><p>读缓存可以理解为“把常用资料放在手边”。</p>
+<p>第一次读取一份数据，系统可能需要去HDD获取，并把它放进SSD缓存；之后再次读取，如果缓存里还保留着，就可以直接返回。</p>
+<p>找到所需数据，叫<strong>缓存命中</strong>；没有找到，叫<strong>缓存未命中</strong>。</p>
+<p>写缓存则像仓库前面的收货区：先快速接住货物，再逐步整理到后方存储。此时缓存可能暂时持有尚未写到下层的最新数据，因此，<strong>写缓存不能一概理解为“丢了也没关系的副本”</strong>。</p>
+<h3 id="分层：决定数据长期放在哪一层"><a href="#分层：决定数据长期放在哪一层" class="headerlink" title="分层：决定数据长期放在哪一层"></a>分层：决定数据长期放在哪一层</h3><p>分层存储更像按使用频率安排货架：</p>
+<ul>
+<li>经常访问的热数据放在SSD层。</li>
+<li>较少访问的冷数据放在HDD层。</li>
+<li>访问规律变化后，再调整位置。</li>
+</ul>
+<p>两者的核心区别是：</p>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>缓存</th>
+<th>分层存储</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主要目的</td>
+<td>加速访问、吸收写入突发</td>
+<td>优化数据在不同介质上的放置</td>
+</tr>
+<tr>
+<td>典型动作</td>
+<td>命中、填充、淘汰、回写</td>
+<td>提升到快层、下沉到慢层</td>
+</tr>
+<tr>
+<td>容量怎样理解</td>
+<td>缓存盘通常不能直接当作新增业务容量</td>
+<td>各层可以承载业务数据，具体取决于系统</td>
+</tr>
+<tr>
+<td>能否同时存在</td>
+<td>可以</td>
+<td>可以</td>
+</tr>
+</tbody></table>
+<p>具体产品可能把缓存、日志和分层结合起来，判断时要看数据实际怎样流动。<a href="https://snia.org/sites/default/files/EmeraldMeasurementV2_0_2.pdf">参考：SNIA对缓存与自动分层的定义</a></p>
+<h2 id="多级缓存：不同位置，各自解决一部分等待"><a href="#多级缓存：不同位置，各自解决一部分等待" class="headerlink" title="多级缓存：不同位置，各自解决一部分等待"></a>多级缓存：不同位置，各自解决一部分等待</h2><p>“多级缓存”没有一个适用于所有存储产品的固定层数。</p>
+<p>它通常表示：在应用程序与最终存储介质之间，有多个位置可以保存常用数据、缓冲写入或整理请求。</p>
+<p>以一套可能的系统为例：</p>
+<table>
+<thead>
+<tr>
+<th>所在位置</th>
+<th>可能存在的缓存</th>
+<th>主要作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>应用程序中</td>
+<td>数据库缓冲池等</td>
+<td>复用应用经常访问的数据</td>
+</tr>
+<tr>
+<td>操作系统中</td>
+<td>文件页缓存</td>
+<td>利用主机内存减少实际读盘</td>
+</tr>
+<tr>
+<td>存储控制器中</td>
+<td>DRAM读写缓存</td>
+<td>缓冲请求、合并写入、加速读取</td>
+</tr>
+<tr>
+<td>存储池中</td>
+<td>SSD缓存</td>
+<td>为较慢的容量盘提供加速</td>
+</tr>
+<tr>
+<td>单块SSD内部</td>
+<td>DRAM、SRAM、SLC缓存</td>
+<td>管理映射、缓冲或加速写入</td>
+</tr>
+<tr>
+<td>单块HDD内部</td>
+<td>盘内缓存</td>
+<td>缓冲和优化磁盘读写</td>
+</tr>
+</tbody></table>
+<p>这是一张“可能出现的位置清单”。实际系统可能没有其中某些层，也可能绕过某些层，<strong>每次读写不一定依次经过全部缓存</strong>。</p>
+<p>CPU的L1、L2、L3缓存也属于多级缓存，但它们主要服务于处理器访问内存，和存储厂商所说的多级缓存属于不同语境。</p>
+<h3 id="多级缓存为什么有效？"><a href="#多级缓存为什么有效？" class="headerlink" title="多级缓存为什么有效？"></a>多级缓存为什么有效？</h3><p>因为数据访问通常有规律：</p>
+<p><strong>刚用过的数据，可能很快再次使用；正在访问的位置附近，也可能接着被访问。</strong></p>
+<p>系统利用这些规律，把更可能需要的数据放在更快的位置。</p>
+<p>但缓存效果取决于工作负载。反复读取一小批数据，容易命中；一次性扫描远大于缓存的数据集，收益就可能有限。</p>
+<p>而且，<strong>全闪系统一样可以使用缓存</strong>。微软的存储架构文档就列举了用更快的NVMe设备为其他SSD提供缓存的组合。缓存的作用对象不必是机械盘。<a href="https://learn.microsoft.com/en-us/windows-server/storage/storage-spaces/cache">参考：微软存储池缓存文档</a></p>
+<h2 id="SSD里的DRAM缓存和SLC缓存，又有什么区别？"><a href="#SSD里的DRAM缓存和SLC缓存，又有什么区别？" class="headerlink" title="SSD里的DRAM缓存和SLC缓存，又有什么区别？"></a>SSD里的DRAM缓存和SLC缓存，又有什么区别？</h2><p>这两个词经常一起出现，但不是同一种东西。</p>
+<h3 id="DRAM：快速工作的内存"><a href="#DRAM：快速工作的内存" class="headerlink" title="DRAM：快速工作的内存"></a>DRAM：快速工作的内存</h3><p>SSD内部的DRAM，常用于保存地址映射表等管理信息，有些设计也会用于缓冲用户数据。</p>
+<p>地址映射表可以理解为一份目录：电脑使用的是逻辑地址，SSD需要把它对应到闪存中的实际位置。</p>
+<p>所以，“SSD配备1GB DRAM”，不代表一定有1GB空间专门用来暂存正在复制的文件。它如何分配，取决于设计。<a href="https://www.kingston.com/en/ssd/data-protection">参考：Kingston对SSD内部缓存用途的说明</a></p>
+<h3 id="SLC缓存：让一部分闪存先按更快的方式写入"><a href="#SLC缓存：让一部分闪存先按更快的方式写入" class="headerlink" title="SLC缓存：让一部分闪存先按更快的方式写入"></a>SLC缓存：让一部分闪存先按更快的方式写入</h3><p>SLC、MLC、TLC、QLC，常见命名分别对应每个闪存单元保存1、2、3、4个比特。</p>
+<p>在其他条件相近时，一个单元存得越多，通常越有利于容量密度，但写入速度、耐久性和控制复杂度也面临更多取舍。具体SSD表现仍要看整体设计。</p>
+<p>许多TLC、QLC SSD会拿出部分闪存，以每单元保存一个比特的方式工作，形成常说的<strong>伪SLC缓存</strong>：</p>
+<ol>
+<li>新数据先写入较快的SLC区域。</li>
+<li>控制器随后将数据整理到TLC或QLC区域。</li>
+<li>腾出的SLC空间继续接收写入。</li>
+</ol>
+<p>这就解释了常见现象：<strong>复制文件一开始很快，写到一定量后明显降速。</strong></p>
+<p>原因之一可能是SLC缓存被用满，后续速度更多受到闪存本体写入能力和后台整理工作的限制。动态缓存还可能随着剩余空间变化而调整大小。<a href="https://download.semiconductor.samsung.com/resources/white-paper/Samsung_SSD_860_QVO_White_paper.pdf">参考：三星Intelligent TurboWrite技术白皮书</a></p>
+<p>因此，SSD内部可以同时存在DRAM缓存和SLC缓存；没有独立DRAM，也不等于没有任何缓存。</p>
+<h2 id="缓存最关键的区别：何时告诉你“写好了”？"><a href="#缓存最关键的区别：何时告诉你“写好了”？" class="headerlink" title="缓存最关键的区别：何时告诉你“写好了”？"></a>缓存最关键的区别：何时告诉你“写好了”？</h2><p>对于读缓存，未命中主要影响速度。对于写缓存，还要弄清楚：<strong>系统在什么阶段确认写入完成？</strong></p>
+<p>常见策略有两种：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>典型工作方式</th>
+<th>主要特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>直写，Write-through</td>
+<td>写入下层存储并达到要求后，再确认完成</td>
+<td>响应更受下层速度影响</td>
+</tr>
+<tr>
+<td>回写，Write-back</td>
+<td>数据先进入写缓存，满足确认条件后就返回，再写到下层</td>
+<td>可以降低突发写入的等待时间</td>
+</tr>
+</tbody></table>
+<p>企业存储采用回写，并不一定意味着最新数据只存在普通易失内存里。它可能先将缓存镜像到另一控制器，或使用电池、超级电容等保护机制。</p>
+<p>SSD的掉电保护也可能利用储能元件，在供电中断后，把尚在易失缓存中的数据和必要管理信息写入闪存。具体保护范围取决于产品。<a href="https://www.kingston.com/en/blog/servers-and-data-centers/ssd-power-loss-protection">参考：Kingston对SSD掉电保护的说明</a></p>
+<p>理解这部分，只需抓住一个问题：</p>
+<blockquote>
+<p><strong>设备回复“写成功”时，最新数据在哪里，那个位置能承受哪些故障？</strong></p>
+</blockquote>
+<p>这比只问“缓存有多大”更有意义。</p>
+<h2 id="为什么缓存很大，持续写入还是会慢？"><a href="#为什么缓存很大，持续写入还是会慢？" class="headerlink" title="为什么缓存很大，持续写入还是会慢？"></a>为什么缓存很大，持续写入还是会慢？</h2><p>缓存可以吸收短时间的突发流量，但长期写入仍需要后方存储消化。</p>
+<p>举一个简化例子，以下数字只用于说明原理：</p>
+<ul>
+<li>前端持续写入：每秒2GB。</li>
+<li>后方持续写出：每秒1GB。</li>
+<li>当前可用写缓存：100GB。</li>
+</ul>
+<p>缓存每秒净增加1GB，约100秒后就会用满。之后，系统通常需要限制前端写入速度，或者让请求等待。</p>
+<p>可以用一个简单关系理解：</p>
+<p><strong>缓存可撑时间 ≈ 可用缓存容量 ÷（持续写入速度－持续写出速度）</strong></p>
+<p>这个估算忽略了压缩、写入合并和后台任务等因素，但说明了核心问题：<strong>短时间跑得快，与长时间保持快，是两种能力。</strong></p>
+<p>读缓存也有类似限制。如果热点数据总量超过缓存容量，数据可能不断被淘汰、重新读取，命中率就会下降。</p>
+<h2 id="把所有概念放回一张图里"><a href="#把所有概念放回一张图里" class="headerlink" title="把所有概念放回一张图里"></a>把所有概念放回一张图里</h2><p>理解一套存储系统，可以按下面的顺序提问：</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>要回答的问题</th>
+<th>对应名词</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存储介质与设备</td>
+<td>数据靠什么保存？</td>
+<td>磁性盘片、NAND闪存；HDD、SSD</td>
+</tr>
+<tr>
+<td>连接与通信</td>
+<td>设备怎样接入、怎样交换数据？</td>
+<td>SATA、SAS、PCIe、NVMe</td>
+</tr>
+<tr>
+<td>外形规格</td>
+<td>设备长什么样，怎样安装？</td>
+<td>2.5英寸、M.2、U.2、EDSFF等</td>
+</tr>
+<tr>
+<td>系统组合</td>
+<td>一套系统用了哪些设备？</td>
+<td>全闪、混闪、全机械盘</td>
+</tr>
+<tr>
+<td>数据管理</td>
+<td>数据放哪里，怎样加速？</td>
+<td>缓存、回写、自动分层</td>
+</tr>
+<tr>
+<td>实际表现</td>
+<td>面对具体业务能做多快？</td>
+<td>延迟、IOPS、吞吐量、持续性能</td>
+</tr>
+</tbody></table>
+<p>其中，<strong>延迟</strong>是一次请求要等多久；<strong>IOPS</strong>是每秒完成多少次读写；<strong>吞吐量</strong>是每秒传输多少数据。三者有关联，但不能相互替代。</p>
+<p>现在再读开头那句话：</p>
+<blockquote>
+<p>“全闪架构，采用NVMe SSD，配备多级缓存，支持冷热数据分层。”</p>
+</blockquote>
+<p>就能理解为：系统使用闪存承载持久数据，通过NVMe访问相关设备，在多个位置实施缓存，并把不同活跃程度的数据安排到不同存储层。这里的冷热分层，也可能发生在不同性能或成本的闪存设备之间。</p>
+<p>最终，<strong>HDD和SSD决定基础介质特性，接口与协议影响数据通路，全闪和混闪决定设备组合，缓存与分层决定如何利用这些设备。</strong> 实际体验则取决于这些部分面对具体业务时，能否一起高效工作。</p>
+
+      
+    </div>
+    <div class="article-footer">
+      <blockquote class="mt-2x">
+  <ul class="post-copyright list-unstyled">
+    
+    <li class="post-copyright-link hidden-xs">
+      <strong>本文链接：</strong>
+      <a href="https://www.silenceboy.com/2026/10/30/%E4%BB%8E%E7%A1%AC%E7%9B%98%E5%88%B0%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%EF%BC%9A%E4%B8%80%E7%AF%87%E6%90%9E%E6%87%82%E5%85%A8%E9%97%AA%E3%80%81%E6%B7%B7%E9%97%AA%E3%80%81SSD%E3%80%81HDD%E5%92%8C%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98/" title="从硬盘到存储系统：一篇搞懂全闪、混闪、SSD、HDD和多级缓存" target="_blank" rel="external">https://www.silenceboy.com/2026/10/30/从硬盘到存储系统：一篇搞懂全闪、混闪、SSD、HDD和多级缓存/</a>
+    </li>
+    
+    <li class="post-copyright-license">
+      <strong>版权声明： </strong> 本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by/4.0/deed.zh" target="_blank" rel="external">CC BY 4.0 CN协议</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+</blockquote>
+
+
+<div class="panel panel-default panel-badger">
+  <div class="panel-body">
+    <figure class="media">
+      <div class="media-left">
+        <a href="https://github.com/silenceboychen" target="_blank" class="img-burn thumb-sm visible-lg">
+          <img src="/images/avatar.jpeg" class="img-rounded w-full" alt="">
+        </a>
+      </div>
+      <div class="media-body">
+        <h3 class="media-heading"><a href="https://github.com/silenceboychen" target="_blank"><span class="text-dark">morty</span><small class="ml-1x">AI Engineer</small></a></h3>
+        <div>待我长发及腰，bug可否改好？</div>
+      </div>
+    </figure>
+  </div>
+</div>
+
+
+    </div>
+  </article>
+  
+    
+  <section id="comments">
+  	
+           
+    
+  </section>
+
+
+  
+</div>
+
+  <nav class="bar bar-footer clearfix" data-stick-bottom>
+  <div class="bar-inner">
+  
+  <ul class="pager pull-left">
+    
+    
+    <li class="next">
+      <a href="/2026/07/22/MHA%E3%80%81GQA%E3%80%81MQA%E3%80%81MLA%E8%AF%A6%E8%A7%A3-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6%E7%9A%84%E5%8F%91%E5%B1%95%E6%BC%94%E8%BF%9B/" title="MHA、GQA、MQA、MLA详解--大模型注意力机制的发展演进"><span>下一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden="true"></i></a>
+    </li>
+    
+    
+    <li class="toggle-toc">
+      <a class="toggle-btn " data-toggle="collapse" href="#collapseToc" aria-expanded="false" title="文章目录" role="button">    <span>[&nbsp;</span><span>文章目录</span>
+        <i class="text-collapsed icon icon-anchor"></i>
+        <i class="text-in icon icon-close"></i>
+        <span>]</span>
+      </a>
+    </li>
+    
+  </ul>
+  
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle="modal" data-target="#donateModal"><span>赏</span></button>
+  <!-- <div class="wave-icon wave-icon-danger btn-donate" data-toggle="modal" data-target="#donateModal">
+    <div class="wave-circle"><span class="icon"><i class="icon icon-bill"></i></span></div>
+  </div> -->
+  
+  
+  <div class="bar-right">
+    
+    <div class="share-component" data-sites="weibo,qq,wechat,facebook,twitter" data-mobile-sites="weibo,qq,qzone"></div>
+    
+  </div>
+  </div>
+</nav>
+  
+<!-- Modal -->
+<div class="modal modal-center modal-small modal-xs-full fade" id="donateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content donate">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <div class="modal-body">
+        <div class="donate-box">
+          <div class="donate-head">
+            <p>感谢您的支持，我会继续努力的!</p>
+          </div>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane fade active in" id="alipay">
+              <div class="donate-payimg">
+                <img src="/images/donate/alipayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开支付宝扫一扫，即可进行扫码打赏哦</p>
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="wechatpay">
+              <div class="donate-payimg">
+                <img src="/images/donate/wechatpayimg.jpeg" alt="扫码支持" title="扫一扫" />
+              </div>
+              <p class="text-muted mv">扫码打赏，你说多少就多少</p>
+              <p class="text-grey">打开微信扫一扫，即可进行扫码打赏哦</p>
+            </div>
+          </div>
+          <div class="donate-footer">
+            <ul class="nav nav-tabs nav-justified" role="tablist">
+              <li role="presentation" class="active">
+                <a href="#alipay" id="alipay-tab" role="tab" data-toggle="tab" aria-controls="alipay" aria-expanded="true"><i class="icon icon-alipay"></i> 支付宝</a>
+              </li>
+              <li role="presentation" class="">
+                <a href="#wechatpay" role="tab" id="wechatpay-tab" data-toggle="tab" aria-controls="wechatpay" aria-expanded="false"><i class="icon icon-wepay"></i> 微信支付</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</main>
+
+  <footer class="footer" itemscope itemtype="http://schema.org/WPFooter">
+	
+	
+    <ul class="social-links">
+    	
+        <li><a href="https://github.com/silenceboychen" target="_blank" title="Github" data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li>
+        
+        <li><a href="/atom.xml" target="_blank" title="Rss" data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li>
+        
+    </ul>
+
+    <div class="copyright">
+    	
+        &copy; 2026 morty
+        
+        <div class="publishby">
+        	Theme by <a> cofess </a>base on <a href="https://github.com/cofess/hexo-theme-pure" target="_blank">pure</a>.
+        </div>
+    </div>
+</footer>
+  <script src="//cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script>
+window.jQuery || document.write('<script src="js/jquery.min.js"><\/script>')
+</script>
+
+<script src="/js/plugin.min.js"></script>
+
+
+<script src="/js/application.js"></script>
+
+
+    <script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+
+
+
+
+   
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+   
+    
+  <!-- <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"> -->
+  <script src="//cdn.jsdelivr.net/npm/gitalk@1.6.2/dist/gitalk.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/blueimp-md5@2.10.0/js/md5.min.js"></script>
+  <script type="text/javascript">
+  var gitalk = new Gitalk({
+    clientID: '815c509d7ecae94fb6c5',
+    clientSecret: 'fee9e24b8a9cd9a7c17071a22451570532a2a00f',
+    repo: 'silenceboychen.github.io',
+    owner: 'silenceboychen',
+    admin: ['silenceboychen'],
+    id: md5(location.pathname),
+    distractionFreeMode: true,
+    proxy: 'https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token',
+    language: 'zh-CN',
+    enableHotKey: 'true'
+  })
+  gitalk.render('comments')
+  </script>
+      
+
+
+
+
+
+
+
+
+<!-- Mermaid 图表支持 -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
